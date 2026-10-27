@@ -1,0 +1,6 @@
+{
+  "summary":  "Rencana implementasi fitur Riwayat Transaksi Penjualan yang terhubung langsung dengan Google Spreadsheet untuk aplikasi Kasir Pet Shop. Rencana ini mencakup arsitektur integrasi data real-time, filter transaksi hari ini, pencarian instan (nama pembeli / nomor nota), kartu transaksi informatif dengan rincian item, dan modal detail transaksi tanpa cetak ulang sesuai preferensi pengguna.",
+  "updatedAt":  "2026-10-27T18:46:08.444118894Z",
+  "requestFeedback":  true,
+  "userFacing":  true
+}

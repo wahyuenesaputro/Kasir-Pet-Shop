@@ -1,0 +1,6 @@
+{
+  "name": "Kasir Pet Shop",
+  "description": "Aplikasi kasir (point of sale) ramah dan praktis untuk pet shop, terhubung langsung ke Google Spreadsheet via Apps Script.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
