@@ -81,16 +81,7 @@ fun ProductCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .testTag("product_card_${product.id}")
-            .clickable {
-                if (product.isSellable) {
-                    if (!isInCart) {
-                        onAddToCart(product, 1.0)
-                    }
-                } else {
-                    onEditSellingPrice(product)
-                }
-            },
+            .testTag("product_card_${product.id}"),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isInCart) {
@@ -299,22 +290,22 @@ fun ProductCard(
                             }
                         }
                     } else {
-                        // Tombol Tambah Pertama Kali
+                        // Tombol Tambah (+) Pertama Kali: Harus pencet tombol + untuk menambah produk
                         FilledTonalIconButton(
                             onClick = { onAddToCart(product, 1.0) },
                             modifier = Modifier
-                                .size(40.dp)
+                                .size(44.dp)
                                 .testTag("add_first_btn_${product.id}"),
                             shape = CircleShape,
                             colors = IconButtonDefaults.filledTonalIconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = MaterialTheme.colorScheme.primary
                             )
                         ) {
                             Icon(
                                 Icons.Default.Add,
                                 contentDescription = "Tambah ke keranjang",
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                modifier = Modifier.size(20.dp)
+                                modifier = Modifier.size(24.dp)
                             )
                         }
                     }

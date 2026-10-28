@@ -529,18 +529,24 @@ private fun KasirCatalogContent(
                 }
             }
         } else {
+            val cartMap = remember(uiState.cart) { uiState.cart.associateBy { it.product.id } }
+
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                item {
+                item(key = "top_spacer", contentType = "spacer") {
                     Spacer(modifier = Modifier.height(2.dp))
                 }
 
-                items(filtered, key = { it.id }) { product ->
-                    val cartItem = uiState.cart.find { it.product.id == product.id }
+                items(
+                    items = filtered,
+                    key = { it.id },
+                    contentType = { "product_card" }
+                ) { product ->
+                    val cartItem = cartMap[product.id]
                     ProductCard(
                         product = product,
                         cartItem = cartItem,
@@ -550,7 +556,7 @@ private fun KasirCatalogContent(
                     )
                 }
 
-                item {
+                item(key = "bottom_spacer", contentType = "spacer") {
                     Spacer(modifier = Modifier.height(80.dp)) // Padding agar tidak tertutup sticky bar
                 }
             }
