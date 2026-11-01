@@ -15,8 +15,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.HelpOutline
@@ -44,22 +46,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.example.model.formatRupiah
 
 @Composable
 fun SettingsDialog(
     currentUrl: String,
+    currentBalance: Double = 0.0,
     unpricedCount: Int = 0,
     onSaveUrl: (String) -> Unit,
     onSyncNow: () -> Unit,
     onOpenPriceManagement: () -> Unit,
+    onAdjustBalance: (newBalance: Double, reason: String) -> Unit = { _, _ -> },
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
     var inputUrl by remember { mutableStateOf(currentUrl) }
+    var balanceInput by remember { mutableStateOf(if (currentBalance > 0) currentBalance.toLong().toString() else "") }
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -100,10 +107,83 @@ fun SettingsDialog(
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                // Kelola Harga Produk
+                // 1. KELOLA SALDO KAS TOKO
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)),
+                    shape = RoundedCornerShape(14.dp)
+                ) {
+                    Column(modifier = Modifier.padding(14.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.AccountBalanceWallet, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Saldo Kas Toko",
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.titleSmall
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Saldo Saat Ini:",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = formatRupiah(currentBalance),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Black,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            OutlinedTextField(
+                                value = balanceInput,
+                                onValueChange = { balanceInput = it.filter { ch -> ch.isDigit() } },
+                                label = { Text("Atur Saldo Baru (Rp)") },
+                                placeholder = { Text("Contoh: 500000") },
+                                prefix = { Text("Rp ", fontWeight = FontWeight.Bold) },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .testTag("settings_cash_balance_input")
+                            )
+                            Button(
+                                onClick = {
+                                    val b = balanceInput.toDoubleOrNull()
+                                    if (b != null && b >= 0) {
+                                        onAdjustBalance(b, "Penyesuaian di Pengaturan")
+                                        Toast.makeText(context, "Saldo kas berhasil disinkronkan!", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        Toast.makeText(context, "Masukkan nominal angka yang valid", Toast.LENGTH_SHORT).show()
+                                    }
+                                },
+                                modifier = Modifier.height(54.dp),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text("Simpan", fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                // 2. KELOLA HARGA PRODUK
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f)),
                     shape = RoundedCornerShape(14.dp)
                 ) {
                     Column(modifier = Modifier.padding(14.dp)) {
@@ -142,7 +222,7 @@ fun SettingsDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Integrasi Google Spreadsheet
+                // 3. KONEKSI GOOGLE SPREADSHEET
                 Text(
                     text = "Koneksi Google Spreadsheet",
                     style = MaterialTheme.typography.titleSmall,
@@ -217,7 +297,7 @@ fun SettingsDialog(
 
                 Spacer(modifier = Modifier.height(18.dp))
 
-                // Panduan Apps Script
+                // 4. PANDUAN APPS SCRIPT
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)),

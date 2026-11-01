@@ -166,12 +166,52 @@ class PetShopRepository {
         }
     }
 
-    suspend fun fetchRecentSales(url: String): Result<Pair<TodaySalesSummary, List<RecentTransactionSummary>>> = withContext(Dispatchers.IO) {
+    suspend fun adjustBalance(url: String, newBalance: Double, reason: String = "Penyesuaian Manual"): Result<Double> = withContext(Dispatchers.IO) {
+        if (url.isBlank()) {
+            return@withContext Result.failure(IllegalStateException("URL Google Apps Script belum diisi"))
+        }
+
+        try {
+            val root = JSONObject()
+            root.put("action", "adjust_balance")
+            root.put("newBalance", newBalance)
+            root.put("reason", reason)
+
+            val requestBody = root.toString().toRequestBody(textPlainMediaType)
+            val fullUrl = if (url.contains("?")) "$url&action=adjust_balance" else "$url?action=adjust_balance"
+
+            val request = Request.Builder()
+                .url(fullUrl)
+                .post(requestBody)
+                .build()
+
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    return@withContext Result.failure(IOException("Server error HTTP ${response.code}"))
+                }
+
+                val bodyString = response.body?.string().orEmpty()
+                val json = JSONObject(bodyString)
+                if (!json.optBoolean("success", false)) {
+                    val msg = json.optString("message", "Gagal memperbarui saldo di Google Spreadsheet")
+                    return@withContext Result.failure(IOException(msg))
+                }
+
+                val returnedBalance = json.optDouble("balance", newBalance)
+                Result.success(returnedBalance)
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun fetchRecentSales(url: String): Result<Triple<TodaySalesSummary, List<RecentTransactionSummary>, Double>> = withContext(Dispatchers.IO) {
         if (url.isBlank()) {
             return@withContext Result.success(
-                Pair(
+                Triple(
                     TodaySalesSummary(todayTotal = 0.0, todayCount = 0),
-                    emptyList()
+                    emptyList(),
+                    0.0
                 )
             )
         }
@@ -196,6 +236,7 @@ class PetShopRepository {
 
                 val todayTotal = json.optDouble("todayTotal", 0.0)
                 val todayCount = json.optInt("todayCount", 0)
+                val currentBalance = json.optDouble("currentBalance", 0.0)
                 val todaySummary = TodaySalesSummary(todayTotal, todayCount)
 
                 val recentList = mutableListOf<RecentTransactionSummary>()
@@ -233,7 +274,7 @@ class PetShopRepository {
                     )
                 }
 
-                Result.success(Pair(todaySummary, recentList))
+                Result.success(Triple(todaySummary, recentList, currentBalance))
             }
         } catch (e: Exception) {
             Result.failure(e)

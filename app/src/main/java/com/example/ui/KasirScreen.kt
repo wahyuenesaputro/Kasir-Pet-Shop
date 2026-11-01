@@ -78,6 +78,7 @@ import com.example.model.formatQuantity
 import com.example.model.formatRupiah
 import androidx.compose.foundation.layout.navigationBarsPadding
 import com.example.ui.components.AddCustomItemDialog
+import com.example.ui.components.AdjustBalanceDialog
 import com.example.ui.components.CartSheet
 import com.example.ui.components.CatalogCrudScreen
 import com.example.ui.components.DashboardScreen
@@ -195,6 +196,7 @@ fun KasirScreen(
                                 todaySummary = uiState.displayTodaySummary,
                                 recentTransactions = uiState.recentTransactions,
                                 products = uiState.products,
+                                currentBalance = uiState.currentBalance,
                                 isSpreadsheetConnected = uiState.appsScriptUrl.isNotBlank(),
                                 isLoading = uiState.isLoadingRecent,
                                 onNavigateToKasir = { currentMainTab = 1 },
@@ -204,6 +206,7 @@ fun KasirScreen(
                                     viewModel.loadRecent()
                                 },
                                 onOpenAddProductDialog = { viewModel.openAddProductDialog() },
+                                onAdjustBalance = { viewModel.openAdjustBalanceDialog() },
                                 onRefresh = {
                                     viewModel.loadProducts()
                                     viewModel.loadRecent()
@@ -332,11 +335,26 @@ fun KasirScreen(
     if (uiState.isSettingsOpen) {
         SettingsDialog(
             currentUrl = uiState.appsScriptUrl,
+            currentBalance = uiState.currentBalance,
             unpricedCount = uiState.unpricedProductsCount,
             onSaveUrl = { newUrl -> viewModel.updateAppsScriptUrl(newUrl) },
             onSyncNow = { viewModel.loadProducts(); viewModel.loadRecent() },
             onOpenPriceManagement = { currentMainTab = 2 },
+            onAdjustBalance = { newBalance, reason ->
+                viewModel.adjustCashBalance(newBalance, reason)
+            },
             onDismiss = { viewModel.closeSettings() }
+        )
+    }
+
+    // Dialog Khusus Penyesuaian Saldo Kas Toko
+    if (uiState.isAdjustBalanceDialogOpen) {
+        AdjustBalanceDialog(
+            currentBalance = uiState.currentBalance,
+            onDismiss = { viewModel.closeAdjustBalanceDialog() },
+            onSaveBalance = { newBalance, reason ->
+                viewModel.adjustCashBalance(newBalance, reason)
+            }
         )
     }
 

@@ -8,7 +8,8 @@ let cart = {}; // productId -> { product, qty }
 let selectedCategory = "Semua";
 let currentPaymentMethod = "Tunai";
 let activeReceipt = null;
-let scriptUrl = localStorage.getItem("petshop_apps_script_url") || "";
+let currentBalance = Number(localStorage.getItem("petshop_current_balance")) || 0;
+let scriptUrl = localStorage.getItem("petshop_apps_script_url") || "https://script.google.com/macros/s/AKfycbzPytd-CUJliqYy72HPYRJJg2WD2ycT0r69SMvGQJD-7VLkfrh13idMn0Btah92Ot3c/exec";
 
 const defaultCatalog = [
   // Ayam
@@ -445,6 +446,10 @@ async function submitPayment() {
   btn.disabled = false;
   btn.innerText = "Simpan & Cetak Struk";
 
+  // Akumulasi total transaksi ke Saldo Kas Toko (Tunai & QRIS)
+  currentBalance += totalAmount;
+  localStorage.setItem("petshop_current_balance", currentBalance);
+
   // Reset keranjang
   cart = {};
   updateCartUI();
@@ -541,6 +546,9 @@ function updateDashboard() {
     }
   });
 
+  const balanceEl = document.getElementById("dash-total-balance");
+  if (balanceEl) balanceEl.innerText = formatRupiah(currentBalance);
+
   document.getElementById("dash-today-total").innerText = formatRupiah(todayTotal);
   document.getElementById("dash-today-count").innerText = todayCount;
   document.getElementById("dash-today-date").innerText = todayStr;
@@ -623,9 +631,12 @@ function saveNewProduct() {
   alert(`Produk '${name}' berhasil ditambahkan ke katalog!`);
 }
 
-// PENGATURAN SPREADSHEET
+// PENGATURAN SPREADSHEET & SALDO
 function openSettingsModal() {
+  const balInput = document.getElementById("setting-cash-balance");
+  if (balInput) balInput.value = currentBalance > 0 ? currentBalance : "";
   document.getElementById("settings-modal").classList.remove("hidden");
+  if (window.lucide) lucide.createIcons();
 }
 
 function closeSettingsModal() {
@@ -637,6 +648,57 @@ function saveSettings() {
   scriptUrl = url;
   localStorage.setItem("petshop_apps_script_url", url);
   alert("URL Google Spreadsheet berhasil disimpan!");
+}
+
+function openAdjustBalancePrompt() {
+  const input = prompt(
+    "Masukkan Total Saldo Kas Toko Baru (Rp):\n(Misal: 500000 untuk modal kasir awal / penyesuaian)",
+    currentBalance > 0 ? currentBalance : "0"
+  );
+  if (input === null) return;
+  const num = Number(input.replace(/[^0-9]/g, ""));
+  if (isNaN(num) || num < 0) {
+    alert("Nominal saldo tidak valid!");
+    return;
+  }
+  adjustCashBalance(num, "Penyesuaian Manual Dashboard Web");
+}
+
+function saveBalanceFromSettings() {
+  const val = Number(document.getElementById("setting-cash-balance").value) || 0;
+  if (val < 0) {
+    alert("Nominal saldo tidak boleh negatif!");
+    return;
+  }
+  adjustCashBalance(val, "Penyesuaian via Pengaturan Web");
+}
+
+async function adjustCashBalance(newBal, reason) {
+  currentBalance = newBal;
+  localStorage.setItem("petshop_current_balance", currentBalance);
+  updateDashboard();
+  const balInput = document.getElementById("setting-cash-balance");
+  if (balInput) balInput.value = currentBalance;
+
+  // Sinkronkan ke Google Apps Script Spreadsheet jika terhubung
+  if (scriptUrl) {
+    try {
+      await fetch(scriptUrl, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify({
+          action: "adjust_balance",
+          newBalance: newBal,
+          reason: reason || "Penyesuaian Saldo Kas Web"
+        })
+      });
+    } catch (e) {
+      console.warn("Gagal POST adjust_balance ke Spreadsheet:", e);
+    }
+  }
+
+  alert(`Saldo kas berhasil diperbarui menjadi ${formatRupiah(newBal)}!`);
 }
 
 async function syncData() {
@@ -653,9 +715,29 @@ async function syncData() {
       const custom = JSON.parse(localStorage.getItem("petshop_custom_products") || "[]");
       products = [...data.products, ...custom];
       renderProducts();
-      alert(`Berhasil menyinkronkan ${data.products.length} produk dari Google Spreadsheet!`);
     }
   } catch (err) {
-    console.warn("Gagal sync:", err);
+    console.warn("Gagal sync katalog:", err);
+  }
+
+  // Sinkronkan Saldo Kas & Transaksi Terakhir dari Cloud Spreadsheet
+  try {
+    const resSales = await fetch(`${scriptUrl}?action=recent_sales`);
+    const dataSales = await resSales.json();
+    if (dataSales && dataSales.currentBalance !== undefined && dataSales.currentBalance !== null) {
+      currentBalance = Number(dataSales.currentBalance) || 0;
+      localStorage.setItem("petshop_current_balance", currentBalance);
+      updateDashboard();
+    }
+    if (dataSales && Array.isArray(dataSales.sales) && dataSales.sales.length > 0) {
+      localStorage.setItem("petshop_local_sales", JSON.stringify(dataSales.sales));
+      updateDashboard();
+      if (document.getElementById("screen-riwayat") && !document.getElementById("screen-riwayat").classList.contains("hidden")) {
+        loadRecentSales();
+      }
+    }
+    alert(`Sinkronisasi berhasil! Saldo kas: ${formatRupiah(currentBalance)}`);
+  } catch (err) {
+    console.warn("Gagal sync saldo kas dari Google Sheets:", err);
   }
 }

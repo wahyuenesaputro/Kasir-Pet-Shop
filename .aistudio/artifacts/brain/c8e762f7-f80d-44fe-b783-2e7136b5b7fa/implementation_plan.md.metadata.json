@@ -1,6 +1,6 @@
 {
-  "summary":  "Rencana implementasi validasi input pada form produk:\n1. Validasi wajib diisi untuk Nama Produk, Satuan Jual, dan Harga Jual.\n2. Validasi nilai harga jual tidak boleh bernilai negatif atau nol (harus lebih besar dari Rp 0).\n3. Penampilan pesan error inline dengan teks merah di bawah masing-masing kolom input yang tidak valid.\n4. Pencegahan penyimpanan data jika masih terdapat kolom wajib yang kosong atau bernilai tidak valid.",
-  "updatedAt":  "2026-10-31T19:41:08.399006036Z",
+  "summary":  "Rencana komprehensif implementasi Saldo Kas Toko cross-platform (Android, Web Vercel/iOS, dan Google Spreadsheet):\n1. Penambahan kolom 'Saldo Kas' (Saldo Berjalan) pada sheet Penjualan di Google Spreadsheet, sehingga setiap transaksi kasir (baik Tunai maupun QRIS) otomatis menambah saldo secara akumulatif.\n2. Tampilan kartu Saldo Kas Toko di Dashboard (Android dan Web Vercel).\n3. Menu dan dialog pengaturan saldo di Pengaturan kasir untuk mengubah/mengoreksi saldo awal secara fleksibel.\n4. Sinkronisasi dua arah cross-platform via Google Apps Script (GET/POST) agar saldo selalu serasi di Android, iPhone/Web, dan Spreadsheet.",
+  "updatedAt":  "2026-11-01T15:26:53.043404683Z",
   "requestFeedback":  true,
   "userFacing":  true
 }

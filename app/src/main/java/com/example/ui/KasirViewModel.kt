@@ -33,6 +33,8 @@ data class KasirUiState(
     val errorMessage: String? = null,
     val successMessage: String? = null,
     val activeReceipt: SaleTransaction? = null,
+    val currentBalance: Double = 0.0,
+    val isAdjustBalanceDialogOpen: Boolean = false,
     val appsScriptUrl: String = "",
     val todaySummary: TodaySalesSummary = TodaySalesSummary(),
     val recentTransactions: List<RecentTransactionSummary> = emptyList(),
@@ -161,6 +163,7 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
         KasirUiState(
             products = applyPriceOverrides(SampleCatalog.defaultProducts),
             appsScriptUrl = prefs.appsScriptUrl,
+            currentBalance = prefs.currentBalance,
             qrisMerchantName = prefs.qrisMerchantName,
             qrisNmid = prefs.qrisNmid,
             qrisCity = prefs.qrisCity,
@@ -172,9 +175,7 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         loadProducts()
-        if (prefs.isConfigured) {
-            loadRecent()
-        }
+        loadRecent()
     }
 
     private fun applyPriceOverrides(rawList: List<Product>): List<Product> {
@@ -557,12 +558,15 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
             _uiState.update { it.copy(isLoadingRecent = true) }
             val result = repository.fetchRecentSales(currentUrl)
             result.fold(
-                onSuccess = { (summary, list) ->
+                onSuccess = { (summary, list, balance) ->
                     _uiState.update { current ->
                         val merged = (list + current.recentTransactions).distinctBy { tx -> tx.noStruk }
+                        val effectiveBalance = if (balance > 0) balance else current.currentBalance
+                        prefs.currentBalance = effectiveBalance
                         current.copy(
                             todaySummary = summary,
                             recentTransactions = merged,
+                            currentBalance = effectiveBalance,
                             isLoadingRecent = false
                         )
                     }
@@ -636,11 +640,14 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
                 val newRecent = toRecentSummary(sale)
                 _uiState.update { current ->
                     val updatedRecents = (listOf(newRecent) + current.recentTransactions).distinctBy { tx -> tx.noStruk }
+                    val updatedBalance = current.currentBalance + sale.totalAmount
+                    prefs.currentBalance = updatedBalance
                     current.copy(
                         isSavingSale = false,
                         activeReceipt = sale,
                         cart = emptyList(),
                         recentTransactions = updatedRecents,
+                        currentBalance = updatedBalance,
                         isPaymentDialogOpen = false,
                         errorMessage = "Transaksi dicatat secara lokal. Buka Pengaturan untuk menyambungkan Spreadsheet."
                     )
@@ -655,11 +662,14 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
                     val newRecent = toRecentSummary(finalSale)
                     _uiState.update { current ->
                         val updatedRecents = (listOf(newRecent) + current.recentTransactions).distinctBy { tx -> tx.noStruk }
+                        val updatedBalance = current.currentBalance + sale.totalAmount
+                        prefs.currentBalance = updatedBalance
                         current.copy(
                             isSavingSale = false,
                             activeReceipt = finalSale,
                             cart = emptyList(),
                             recentTransactions = updatedRecents,
+                            currentBalance = updatedBalance,
                             isPaymentDialogOpen = false,
                             successMessage = "Transaksi berhasil dicatat ke Google Spreadsheet!"
                         )
@@ -765,6 +775,44 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
                 qrisStaticBasePayload = prefs.qrisStaticBasePayload,
                 successMessage = "Pengaturan QRIS Toko berhasil disimpan!"
             )
+        }
+    }
+
+    // === MANAJEMEN SALDO KAS TOKO ===
+    fun openAdjustBalanceDialog() {
+        _uiState.update { it.copy(isAdjustBalanceDialogOpen = true) }
+    }
+
+    fun closeAdjustBalanceDialog() {
+        _uiState.update { it.copy(isAdjustBalanceDialogOpen = false) }
+    }
+
+    fun adjustCashBalance(newBalance: Double, reason: String = "Penyesuaian Manual") {
+        prefs.currentBalance = newBalance
+        _uiState.update { it.copy(currentBalance = newBalance, isAdjustBalanceDialogOpen = false) }
+
+        val currentUrl = _uiState.value.appsScriptUrl
+        if (currentUrl.isNotBlank()) {
+            viewModelScope.launch {
+                val res = repository.adjustBalance(currentUrl, newBalance, reason)
+                res.fold(
+                    onSuccess = { b ->
+                        prefs.currentBalance = b
+                        _uiState.update {
+                            it.copy(
+                                currentBalance = b,
+                                successMessage = "Saldo kas toko berhasil disinkronkan ke Google Spreadsheet!"
+                            )
+                        }
+                        loadRecent()
+                    },
+                    onFailure = { err ->
+                        _uiState.update {
+                            it.copy(errorMessage = "Gagal kirim pembaruan saldo ke Spreadsheet: ${err.localizedMessage}")
+                        }
+                    }
+                )
+            }
         }
     }
 }

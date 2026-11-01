@@ -5,7 +5,7 @@ object AppsScriptCodeSnippet {
 function doGet(e) {
   var action = (e && e.parameter && e.parameter.action) ? e.parameter.action : "products";
   if (action === "products") return getProductsJson();
-  if (action === "recent") return getRecentSalesJson();
+  if (action === "recent" || action === "balance") return getRecentSalesJson();
   return jsonResponse({ success: false, message: "Action tidak dikenal" });
 }
 
@@ -18,13 +18,29 @@ function doPost(e) {
     var salesSheet = ss.getSheetByName("Penjualan");
     if (!salesSheet) {
       salesSheet = ss.insertSheet("Penjualan");
-      var headers = ["Tanggal", "Jam", "Nama Produk Yang Dibeli", "Total Barang", "Total Harga", "Metode Pembayaran"];
+      var headers = ["Tanggal", "Jam", "Nama Produk Yang Dibeli", "Total Barang", "Total Harga", "Metode Pembayaran", "Saldo Kas"];
       salesSheet.appendRow(headers);
     }
+
     var now = new Date();
     var tz = Session.getScriptTimeZone() || "GMT+7";
     var tanggal = Utilities.formatDate(now, tz, "yyyy-MM-dd");
     var jam = Utilities.formatDate(now, tz, "HH:mm:ss");
+
+    // Dapatkan saldo kas terakhir dari baris paling akhir
+    var currentBalance = getLastCashBalance(salesSheet);
+
+    // 1. Aksi Penyesuaian Saldo Kas Manual
+    if (requestData.action === "adjust_balance" || requestData.action === "set_balance") {
+      var targetBalance = Number(requestData.newBalance) || 0;
+      var reason = String(requestData.reason || "Penyesuaian Manual").trim();
+      salesSheet.appendRow([
+        tanggal, jam, "Penyesuaian Saldo Kas (" + reason + ")", 0, 0, "Koreksi Saldo", targetBalance
+      ]);
+      return jsonResponse({ success: true, balance: targetBalance, message: "Saldo kas berhasil diperbarui" });
+    }
+
+    // 2. Aksi Penjualan Kasir (Tunai / QRIS Menambah Saldo Kas Berjalan)
     var receiptNumber = requestData.receiptNumber || ("PS-" + Utilities.formatDate(now, tz, "yyyyMMdd-HHmmss"));
     var items = requestData.items || [];
 
@@ -45,17 +61,35 @@ function doPost(e) {
     var totalPrice = Number(requestData.totalAmount) || 0;
     var paymentMethod = String(requestData.paymentMethod || "Tunai");
 
-    // Catat 1 baris transaksi per penjualan (6 Kolom Sederhana)
+    // Akumulasi saldo berjalan kas toko
+    var newBalance = currentBalance + totalPrice;
+
+    // Catat 1 baris transaksi penjualan (7 Kolom Lengkap dengan Saldo Kas)
     salesSheet.appendRow([
-      tanggal, jam, productSummary, totalQty, totalPrice, paymentMethod
+      tanggal, jam, productSummary, totalQty, totalPrice, paymentMethod, newBalance
     ]);
 
-    return jsonResponse({ success: true, receiptNumber: receiptNumber, date: tanggal, time: jam });
+    return jsonResponse({
+      success: true,
+      receiptNumber: receiptNumber,
+      date: tanggal,
+      time: jam,
+      balance: newBalance
+    });
   } catch (err) {
     return jsonResponse({ success: false, message: err.toString() });
   } finally {
     lock.releaseLock();
   }
+}
+
+function getLastCashBalance(sh) {
+  var lastRow = sh.getLastRow();
+  if (lastRow < 2) return 0;
+  // Kolom 7 adalah Saldo Kas
+  var val = sh.getRange(lastRow, 7).getValue();
+  var parsed = Number(val);
+  return isNaN(parsed) ? 0 : parsed;
 }
 
 function getProductsJson() {
@@ -104,9 +138,9 @@ function getRecentSalesJson() {
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var sh = ss.getSheetByName("Penjualan");
-    if (!sh) return jsonResponse({ success: true, todayTotal: 0, todayCount: 0, recentTransactions: [] });
+    if (!sh) return jsonResponse({ success: true, currentBalance: 0, todayTotal: 0, todayCount: 0, recentTransactions: [] });
     var data = sh.getDataRange().getValues();
-    if (!data || data.length < 2) return jsonResponse({ success: true, todayTotal: 0, todayCount: 0, recentTransactions: [] });
+    if (!data || data.length < 2) return jsonResponse({ success: true, currentBalance: 0, todayTotal: 0, todayCount: 0, recentTransactions: [] });
     var now = new Date();
     var tz = Session.getScriptTimeZone() || "GMT+7";
     var todayStr = Utilities.formatDate(now, tz, "yyyy-MM-dd");
@@ -115,9 +149,10 @@ function getRecentSalesJson() {
     var todayTotal = 0;
     var todayCount = 0;
     var recent = [];
+    var currentBalance = 0;
 
     if (isSimpleFormat) {
-      // FORMAT BARU 6 KOLOM: [Tanggal, Jam, Nama Produk Yang Dibeli, Total Barang, Total Harga, Metode Pembayaran]
+      // FORMAT RINGKAS: [Tanggal, Jam, Nama Produk Yang Dibeli, Total Barang, Total Harga, Metode Pembayaran, Saldo Kas]
       for (var r = 1; r < data.length; r++) {
         var row = data[r];
         var rawT = row[0];
@@ -133,9 +168,16 @@ function getRecentSalesJson() {
         var totalQty = Number(row[3]) || 1;
         var totalHarga = Number(row[4]) || 0;
         var metodeBayar = String(row[5] || "Tunai");
+        var rowBalance = Number(row[6]);
+        if (!isNaN(rowBalance)) {
+          currentBalance = rowBalance;
+        } else {
+          currentBalance += totalHarga;
+        }
+
         var noStruk = "PS-" + (tgl ? tgl.replace(/-/g, "") : "TRX") + "-" + (r < 10 ? "00" + r : (r < 100 ? "0" + r : r));
 
-        if (tgl === todayStr) {
+        if (tgl === todayStr && !namaProduk.toLowerCase().includes("penyesuaian saldo")) {
           todayTotal += totalHarga;
           todayCount++;
         }
@@ -149,6 +191,7 @@ function getRecentSalesJson() {
           total: totalHarga,
           bayar: totalHarga,
           kembalian: 0,
+          saldoBerjalan: currentBalance,
           items: [{
             kategori: "Penjualan",
             namaProduk: namaProduk,
@@ -160,7 +203,7 @@ function getRecentSalesJson() {
         });
       }
       recent.reverse();
-      if (recent.length > 25) recent = recent.slice(0, 25);
+      if (recent.length > 30) recent = recent.slice(0, 30);
     } else {
       // FORMAT LAMA (15 Kolom) - Backward Compatibility
       var map = {}, order = [];
@@ -173,6 +216,8 @@ function getRecentSalesJson() {
         var rawJ = row[1];
         var jam = (rawJ instanceof Date) ? Utilities.formatDate(rawJ, tz, "HH:mm:ss") : String(rawJ || "");
         var totalItem = Number(row[9]) || (Number(row[7]) * Number(row[8])) || 0;
+        currentBalance += totalItem;
+
         if (!map[noStruk]) {
           map[noStruk] = {
             noStruk: noStruk, tanggal: tgl, jam: jam,
@@ -191,13 +236,14 @@ function getRecentSalesJson() {
           todayCount++;
         }
       }
-      for (var i = order.length - 1; i >= 0 && recent.length < 25; i--) {
+      for (var i = order.length - 1; i >= 0 && recent.length < 30; i--) {
         recent.push(map[order[i]]);
       }
     }
 
     return jsonResponse({
       success: true,
+      currentBalance: currentBalance,
       todayTotal: todayTotal,
       todayCount: todayCount,
       recentTransactions: recent

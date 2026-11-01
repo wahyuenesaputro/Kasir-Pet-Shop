@@ -1,6 +1,6 @@
-# Rencana Validasi Input Form Tambah Produk
+# Rencana Implementasi Fitur Saldo Kas Toko Cross-Platform
 
-Implementasi validasi menyeluruh pada form tambah/edit produk katalog untuk memastikan kualitas data produk. Form akan memvalidasi kolom wajib (Nama Produk, Satuan, dan Harga Jual) serta memastikan harga jual tidak boleh bernilai negatif atau nol (harus > 0), dengan pesan error berwarna merah langsung di bawah kolom input terkait.
+Rencana komprehensif untuk mengimplementasikan fitur **Saldo Kas Toko** yang terakumulasi otomatis pada setiap transaksi (Tunai maupun QRIS), tersimpan secara permanen pada sheet Riwayat Penjualan di Google Spreadsheet (sebagai Saldo Berjalan / *Running Balance*), tampil di Dashboard kasir, serta dapat diubah/disesuaikan nilainya melalui menu Pengaturan secara serasi (*cross-platform* antara Android, Web Vercel/iOS, dan Spreadsheet).
 
 ---
 
@@ -8,76 +8,86 @@ Implementasi validasi menyeluruh pada form tambah/edit produk katalog untuk mema
 
 > [!IMPORTANT]
 > Ringkasan keputusan berdasarkan jawaban klarifikasi Anda:
-> - **Gaya Tampilan Pesan Error**: Teks berwarna merah langsung di bawah kolom input (`supportingText`) disertai garis tepi merah pada kolom (`isError = true`).
-> - **Kolom Wajib Diisi**:
->   1. **Nama Produk** (tidak boleh kosong atau hanya spasi).
->   2. **Satuan Jual** (tidak boleh kosong, contoh: `pcs`, `kg`, `zak`).
->   3. **Harga Jual** (wajib diisi angka, dan harus lebih besar dari Rp 0).
-> - **Validasi Harga**: Harga tidak boleh negatif (`< 0`) dan tidak boleh nol (`== 0`). Nilai minimal yang diizinkan adalah Rp 1 (misal: Rp 1.000, Rp 15.000, dst).
+> - **Lokasi Penyimpanan di Spreadsheet**: Dicatat langsung pada sheet **`Penjualan`** (Riwayat Penjualan) dengan menambahkan kolom ke-7: **`Saldo Kas`**. Dengan demikian, setiap baris transaksi akan memperlihatkan pertambahan saldo kas secara transparan dan historis.
+> - **Akumulasi Otomatis Transaksi**: Semua pembayaran baik **Tunai** maupun **QRIS** akan otomatis menambahkan nilai saldo kas berjalan (contoh: saldo Rp 100.000 + belanja Rp 36.000 = saldo baru Rp 136.000).
+> - **Sinkronisasi Cross-Platform**: Berlaku dua arah untuk **Android** dan **Website Vercel (iOS)** melalui URL Google Apps Script yang sama, sehingga saldo di HP Android, iPhone/Web, dan Spreadsheet selalu sinkron dan sama persis.
+> - **Pengaturan Saldo Fleksibel**: Disediakan menu di bagian **Pengaturan** (serta shortcut di Dashboard) untuk mengubah/menyesuaikan nominal saldo kas kapan saja (misal untuk setoran awal kasir, penarikan uang, atau koreksi modal).
 
 ---
 
-### 1. Overview & Core Concept
+### 1. Struktur Data Spreadsheet Baru (7 Kolom)
 
-- **Apa yang Dihadirkan**: Form pendaftaran dan pembaruan produk katalog yang aman dan bebas kesalahan input.
-- **Masalah yang Diselesaikan**: Mencegah kasir atau admin memasukkan produk tanpa nama, tanpa satuan, atau produk dengan harga Rp 0 / minus yang berisiko merugikan toko atau mengacaukan pembukuan.
-- **Responsivitas Validasi**: Pesan error merah akan langsung dihilangkan begitu pengguna mulai mengetikkan input yang benar, memberikan pengalaman pengguna yang mulus (*responsive feedback*).
-
----
-
-### 2. User Experience & Visual Design
-
-#### A. Tampilan Kolom Input Form (`ProductFormDialog`)
-1. **Nama Produk**:
-   - Label: `Nama Produk *`
-   - Jika kosong saat disimpan / dikosongkan: Garis tepi merah dan teks merah di bawahnya: *"Nama produk wajib diisi"*.
-2. **Satuan Jual**:
-   - Label: `Satuan Jual *`
-   - Pilihan cepat chip tetap tersedia (`pcs`, `kg`, `zak`, `bungkus`, dll).
-   - Jika dikosongkan: Garis tepi merah dan teks merah: *"Satuan produk wajib diisi (contoh: pcs, kg, zak)"*.
-3. **Harga Jual (Rp)**:
-   - Label: `Harga Jual (Rp) *`
-   - Prefix: `Rp `
-   - Jika kosong: *"Harga jual wajib diisi"*.
-   - Jika bernilai 0: *"Harga jual tidak boleh Rp 0 (harus lebih dari 0)"*.
-   - Jika bernilai negatif: *"Harga jual tidak boleh bernilai negatif"*.
-   - Jika format angka tidak valid: *"Masukkan nominal angka harga yang valid"*.
-
-#### B. Logika Tombol Simpan
-- Saat tombol **`Tambah ke Katalog`** atau **`Simpan Perubahan`** ditekan:
-  - Form melakukan pemeriksaan serentak untuk ketiga kolom wajib.
-  - Jika ada satu atau lebih kolom yang tidak memenuhi syarat, proses simpan dibatalkan dan semua pesan error yang sesuai ditampilkan serentak.
-  - Pengguna langsung dapat melihat kolom mana yang perlu diperbaiki.
-
----
-
-### 3. Detail Teknis & Perubahan File
+Sheet **`Penjualan`** di Google Spreadsheet akan memiliki format sebagai berikut:
 
 ```
-┌────────────────────────────────────────────────────────┐
-│               ProductFormDialog (Compose)              │
-├────────────────────────────────────────────────────────┤
-│ [ Nama Produk *                                      ] │
-│ ⚠ Nama produk wajib diisi                              │
-│                                                        │
-│ [ Kategori Produk: (Ayam) (Burung) (Kucing) (Ikan)   ] │
-│                                                        │
-│ [ Satuan Jual *                                      ] │
-│ ⚠ Satuan produk wajib diisi (contoh: pcs, kg)          │
-│                                                        │
-│ [ Harga Jual (Rp) *                                  ] │
-│ ⚠ Harga jual harus lebih besar dari Rp 0               │
-│                                                        │
-│                           [ Batal ]  [ Simpan Produk ] │
-└────────────────────────────────────────────────────────┘
+┌────────────┬──────────┬─────────────────────────────┬──────────────┬─────────────┬─────────────┬─────────────┐
+│  Tanggal   │   Jam    │   Nama Produk Yang Dibeli   │ Total Barang │ Total Harga │ Metode Bayar│  Saldo Kas  │
+├────────────┼──────────┼─────────────────────────────┼──────────────┼─────────────┼─────────────┼─────────────┤
+│ 2026-11-01 │ 08:00:00 │ Modal Awal Kasir            │      0       │           0 │ Saldo Awal  │   100.000   │
+│ 2026-11-01 │ 08:15:30 │ 511 Bravo (1), Topsong (1)  │      2       │      26.000 │ Tunai       │   126.000   │
+│ 2026-11-01 │ 08:30:10 │ Whiskas Tuna 1.2kg (1)      │      1       │      68.000 │ QRIS        │   194.000   │
+│ 2026-11-01 │ 09:00:00 │ Penyesuaian Saldo Kas       │      0       │      50.000 │ Koreksi     │   244.000   │
+└────────────┴──────────┴─────────────────────────────┴──────────────┴─────────────┴─────────────┴─────────────┘
 ```
 
-1. **`app/src/main/java/com/example/ui/components/ProductFormDialog.kt`**:
-   - Tambahkan state pesan error spesifik:
-     - `nameErrorMessage: String?`
-     - `unitErrorMessage: String?`
-     - `priceErrorMessage: String?`
-   - Terapkan `isError` dan `supportingText = { ... }` pada `OutlinedTextField` Nama Produk, Satuan Jual, dan Harga Jual.
-   - Pada handler `onClick` tombol simpan, validasi ketiga kolom secara ketat sebelum mengeksekusi `onSaveProduct`.
-2. **`app/src/main/java/com/example/ui/components/AddCustomItemDialog.kt`** (Konsistensi):
-   - Selaraskan validasi yang sama untuk dialog tambah barang manual di kasir agar harga barang bebas juga tidak boleh 0 atau negatif.
+- Saldo Kas terakhir selalu dibaca dari baris terbawah pada kolom ke-7 sheet `Penjualan`.
+- Jika pengguna mengubah saldo lewat menu Pengaturan, Apps Script akan mencatat 1 baris riwayat koreksi saldo sehingga pembukuan toko tetap akuntabel dan tidak ada riwayat yang hilang.
+
+---
+
+### 2. Alur Kerja Teknis & API Google Apps Script
+
+1. **`doGet(e)` (Query Saldo & Ringkasan)**:
+   - Endpoint `?action=recent` dan `?action=balance` akan mengembalikan objek:
+     `{ success: true, currentBalance: 194000, todayTotal: ..., todayCount: ..., recentTransactions: [...] }`
+2. **`doPost(e)` (Penjualan & Penyesuaian Saldo)**:
+   - **Saat Transaksi Penjualan (`action: "sale"`)**:
+     - Membaca saldo terakhir dari sheet.
+     - Menambahkan total belanja: `newBalance = lastBalance + totalAmount`.
+     - Menyimpan baris transaksi lengkap beserta `newBalance`.
+     - Mengembalikan `{ success: true, balance: newBalance }`.
+   - **Saat Pengaturan Saldo Diubah (`action: "adjust_balance"`)**:
+     - Menerima `targetBalance` dan `reason` dari kasir.
+     - Menyimpan baris pencatatan penyesuaian kas.
+     - Mengembalikan `{ success: true, balance: targetBalance }`.
+
+---
+
+### 3. Tampilan Antarmuka (UI/UX)
+
+#### A. Pada Layar Dashboard Kasir (Android & Web Vercel/iOS)
+- **Kartu Utama "SALDO KAS TOKO"**:
+  - Ditempatkan di bagian paling atas Dashboard dengan gradasi warna biru safir ke indigo yang elegan.
+  - Menampilkan angka saldo nominal besar: **Rp 194.000**.
+  - Dilengkapi tombol cepat **"Atur Saldo"** dengan ikon pensil/edit untuk membuka modal pengubahan saldo secara instan.
+  - Menampilkan informasi omset hari ini dan jumlah transaksi di bawah kartu saldo.
+
+#### B. Pada Menu Pengaturan (Settings)
+- **Bagian "Manajemen Saldo Kas Toko"**:
+  - Menampilkan saldo aktif saat ini.
+  - Input teks untuk memasukkan nominal saldo baru.
+  - Tombol **"Simpan & Perbarui Saldo ke Spreadsheet"**.
+  - Disertai indikator loading saat sinkronisasi berlangsung ke Google Spreadsheet.
+
+---
+
+### 4. Rincian Modifikasi File Proyek
+
+1. **`app/src/main/java/com/example/ui/components/AppsScriptCodeSnippet.kt`**:
+   - Perbarui kode Apps Script template ke versi 7 kolom dengan logika kalkulasi saldo berjalan (*running balance*) dan handler `adjust_balance`.
+2. **`app/src/main/java/com/example/data/PetShopPrefs.kt` & `PetShopRepository.kt`**:
+   - Tambahkan penyimpanan lokal `currentBalance` sebagai cache offline.
+   - Tambahkan fungsi jaringan `fetchBalance()` dan `adjustBalance(newBalance, reason)`.
+3. **`app/src/main/java/com/example/ui/KasirViewModel.kt` & `KasirUiState`**:
+   - Tambahkan state `currentBalance: Double` pada `KasirUiState`.
+   - Saat penjualan berhasil disimpan, perbarui `currentBalance` secara otomatis (`+ totalAmount`).
+   - Buat fungsi `updateCashBalance(newBalance: Double)` yang mengirim pembaruan ke Google Spreadsheet.
+4. **`app/src/main/java/com/example/ui/KasirScreen.kt` & `SettingsDialog.kt`**:
+   - Perbarui kartu Dashboard dengan widget **Saldo Kas Toko** dan tombol ubah saldo.
+   - Tambahkan form input penyesuaian saldo di `SettingsDialog`.
+5. **`web/index.html` & `web/app.js` (Web Vercel / iOS)**:
+   - Terapkan kartu saldo kas toko di Dashboard web.
+   - Tambahkan form atur saldo di modal Pengaturan web.
+   - Sambungkan ke endpoint Apps Script yang sama untuk sinkronisasi *real-time*.
+6. **Kompilasi & Pembaruan APK**:
+   - Jalankan `compile_applet` dan `assembleDebug` untuk memperbarui file instalasi `KasirPetShop.apk`.
