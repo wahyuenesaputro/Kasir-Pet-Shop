@@ -96,6 +96,7 @@ dependencies {
   implementation(libs.kotlinx.coroutines.core)
   implementation(libs.okhttp)
   implementation(libs.logging.interceptor)
+  implementation(libs.zxing.core)
 
   testImplementation(libs.androidx.compose.ui.test.junit4)
   testImplementation(libs.androidx.core)

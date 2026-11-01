@@ -1,128 +1,83 @@
-# Fitur Riwayat Transaksi Google Spreadsheet
+# Rencana Validasi Input Form Tambah Produk
 
-Rencana pengembangan modul Riwayat Transaksi pada aplikasi Kasir Pet Shop untuk menampilkan seluruh penjualan yang tersimpan di Google Spreadsheet, dilengkapi filter transaksi hari ini, pencarian instan nomor nota dan nama pembeli, serta tampilan rincian item yang rapi dan mudah dibaca kasir.
+Implementasi validasi menyeluruh pada form tambah/edit produk katalog untuk memastikan kualitas data produk. Form akan memvalidasi kolom wajib (Nama Produk, Satuan, dan Harga Jual) serta memastikan harga jual tidak boleh bernilai negatif atau nol (harus > 0), dengan pesan error berwarna merah langsung di bawah kolom input terkait.
+
+---
 
 ### User Review & Critical Decisions
 
 > [!IMPORTANT]
-> Berdasarkan tanya-jawab di fase klarifikasi, berikut adalah keputusan utama yang telah disepakati bersama pengguna:
-
-- **Keputusan 1 (Informasi Transaksi)**: Setiap kartu transaksi pada daftar riwayat akan menampilkan Nomor Nota, Tanggal & Jam, Nama Pembeli, Total Penjualan, serta Rincian Item (nama barang, jumlah, satuan, dan subtotal).
-- **Keputusan 2 (Filter & Pencarian)**: Dilengkapi filter cepat "Hari Ini" vs "Semua Transaksi", ditambah kolom pencarian instan untuk mencari berdasarkan Nomor Nota (`PS-...`) maupun Nama Pembeli.
-- **Keputusan 3 (Aksi Transaksi)**: Sesuai instruksi pengguna, menekan kartu transaksi hanya akan membuka lembar/dialog Detail Rincian Transaksi informatif (tanpa memicu cetak ulang struk).
-- **Keputusan 4 (Performa & Sinkronisasi)**: Riwayat dibaca langsung dari endpoint Apps Script (`action=recent`) dengan indikator pemuatan halus (*pull-to-refresh* / tombol refresh) dan penanganan offline/gagal koneksi yang jelas.
+> Ringkasan keputusan berdasarkan jawaban klarifikasi Anda:
+> - **Gaya Tampilan Pesan Error**: Teks berwarna merah langsung di bawah kolom input (`supportingText`) disertai garis tepi merah pada kolom (`isError = true`).
+> - **Kolom Wajib Diisi**:
+>   1. **Nama Produk** (tidak boleh kosong atau hanya spasi).
+>   2. **Satuan Jual** (tidak boleh kosong, contoh: `pcs`, `kg`, `zak`).
+>   3. **Harga Jual** (wajib diisi angka, dan harus lebih besar dari Rp 0).
+> - **Validasi Harga**: Harga tidak boleh negatif (`< 0`) dan tidak boleh nol (`== 0`). Nilai minimal yang diizinkan adalah Rp 1 (misal: Rp 1.000, Rp 15.000, dst).
 
 ---
 
 ### 1. Overview & Core Concept
 
-- **What It Does**: Membuka tab "Riwayat Penjualan" yang menyajikan ringkasan total omset dan jumlah transaksi hari ini, filter tanggal, pencarian instan, dan daftar kartu penjualan dari Google Spreadsheet (tab "Penjualan") dengan rincian lengkap tiap barang yang terjual.
-- **Target Audience / Persona**: Kasir dan pemilik toko pakan ternak / pet shop yang ingin memverifikasi transaksi sebelumnya, mengecek riwayat belanja pelanggan tertentu, atau memantau omset harian secara langsung di genggaman.
-- **Key Value**: Transparansi dan akurasi pencatatan kasir tanpa perlu membuka laptop atau membuka sheet Google Drive secara manual.
+- **Apa yang Dihadirkan**: Form pendaftaran dan pembaruan produk katalog yang aman dan bebas kesalahan input.
+- **Masalah yang Diselesaikan**: Mencegah kasir atau admin memasukkan produk tanpa nama, tanpa satuan, atau produk dengan harga Rp 0 / minus yang berisiko merugikan toko atau mengacaukan pembukuan.
+- **Responsivitas Validasi**: Pesan error merah akan langsung dihilangkan begitu pengguna mulai mengetikkan input yang benar, memberikan pengalaman pengguna yang mulus (*responsive feedback*).
 
 ---
 
 ### 2. User Experience & Visual Design
 
-#### Key User Flows
-1. **Navigasi ke Riwayat**:
-   - Kasir mengetuk tab "Riwayat Penjualan" di bagian atas layar.
-   - Aplikasi otomatis menyegarkan data dari Google Apps Script jika URL sudah terkonfigurasi.
-2. **Memantau Omset Hari Ini**:
-   - Bagian atas menampilkan kartu metrik ringkasan: Total Penjualan Hari Ini (format Rupiah tebal) dan Total Transaksi Hari Ini.
-3. **Penyaringan & Pencarian**:
-   - Kasir dapat mengetuk chip filter "Hari Ini" atau "Semua".
-   - Kolom pencarian responsif untuk mengetik nama pelanggan (contoh: "Pak Budi") atau nomor nota.
-4. **Melihat Rincian Item**:
-   - Kartu menampilkan badge metode pembayaran (Tunai, Transfer, QRIS), tanggal, nomor struk, nama pembeli, jumlah item, dan total rupiah.
-   - Mengetuk kartu membuka modal "Detail Transaksi" yang memperlihatkan rincian setiap pakan/barang yang dibeli beserta subtotalnya.
+#### A. Tampilan Kolom Input Form (`ProductFormDialog`)
+1. **Nama Produk**:
+   - Label: `Nama Produk *`
+   - Jika kosong saat disimpan / dikosongkan: Garis tepi merah dan teks merah di bawahnya: *"Nama produk wajib diisi"*.
+2. **Satuan Jual**:
+   - Label: `Satuan Jual *`
+   - Pilihan cepat chip tetap tersedia (`pcs`, `kg`, `zak`, `bungkus`, dll).
+   - Jika dikosongkan: Garis tepi merah dan teks merah: *"Satuan produk wajib diisi (contoh: pcs, kg, zak)"*.
+3. **Harga Jual (Rp)**:
+   - Label: `Harga Jual (Rp) *`
+   - Prefix: `Rp `
+   - Jika kosong: *"Harga jual wajib diisi"*.
+   - Jika bernilai 0: *"Harga jual tidak boleh Rp 0 (harus lebih dari 0)"*.
+   - Jika bernilai negatif: *"Harga jual tidak boleh bernilai negatif"*.
+   - Jika format angka tidak valid: *"Masukkan nominal angka harga yang valid"*.
 
-#### Visual Identity & Theme
-- **Aesthetic Direction**: Bersih, fungsional, dan bernuansa kasir modern berstandar Material 3.
-- **Color Palette & Mood**: 
-  - *Primary*: Hijau botani pet shop yang ramah dan profesional.
-  - *Surface/Card*: Kontras lembut dengan border tipis dan rounded corner 16dp.
-  - *Badge Status*: Aksen pill chip untuk metode bayar (Hijau untuk Tunai, Biru untuk QRIS, Ungu untuk Transfer).
-- **Typography & Hierarchy**: Angka monospaced/semi-bold untuk nominal Rupiah dan nomor nota, tipografi hierarkis tebal untuk nama produk dan pembeli.
-- **Interactive Feedback**:
-  - State kosong (*Empty State*) yang komunikatif jika belum ada transaksi di Spreadsheet.
-  - State memuat (*Loading Skeleton / Spinner*) saat sinkronisasi API berlangsung.
-  - Tombol segarkan data (*Refresh*) instan di pojok kanan atas.
+#### B. Logika Tombol Simpan
+- Saat tombol **`Tambah ke Katalog`** atau **`Simpan Perubahan`** ditekan:
+  - Form melakukan pemeriksaan serentak untuk ketiga kolom wajib.
+  - Jika ada satu atau lebih kolom yang tidak memenuhi syarat, proses simpan dibatalkan dan semua pesan error yang sesuai ditampilkan serentak.
+  - Pengguna langsung dapat melihat kolom mana yang perlu diperbaiki.
 
 ---
 
-### 3. Key Product Decisions & Trade-Offs
-
-- **Decision 1: Penyajian Rincian Item Langsung vs Modal Detail**
-  - *Chosen Approach*: Kartu transaksi di daftar riwayat menampilkan cuplikan 2 item pertama + jumlah item lainnya ("+2 item lainnya"), dan jika kartu diketuk akan membuka dialog rincian lengkap.
-  - *Why*: Menghindari daftar transaksi menjadi terlalu panjang/memanjang tak berujung saat pelanggan membeli puluhan jenis pakan, sekaligus memberikan kenyamanan kasir saat scrolling cepat.
-  - *Alternatives Considered*: Menampilkan semua item di dalam kartu secara langsung (membuat kartu terlalu tinggi dan sulit di-scroll).
-
-- **Decision 2: Filter Hari Ini vs Semua Transaksi di Sisi Klien**
-  - *Chosen Approach*: Mengunduh batch transaksi dari Google Apps Script dan menerapkan filter "Hari Ini / Semua" serta pencarian teks secara instan di perangkat (*client-side filtering*).
-  - *Why*: Respon pencarian dan filter menjadi seketika (0 milidetik latency) tanpa perlu membebani Google Spreadsheet dengan request baru setiap ketikan huruf.
-
-- **Decision 3: Akses Cepat URL Pengaturan**
-  - *Chosen Approach*: Jika kasir belum memasang URL Apps Script, tampilkan kartu peringatan ramah dengan tombol 1-ketuk langsung menuju dialog Pengaturan Spreadsheet.
-
----
-
-### 4. Technical Architecture & Data Strategy
+### 3. Detail Teknis & Perubahan File
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                       KasirScreen                           │
-│  ┌───────────────────────┐       ┌───────────────────────┐  │
-│  │     Tab 0: Kasir      │       │     Tab 1: Riwayat    │  │
-│  └───────────────────────┘       └───────────┬───────────┘  │
-└──────────────────────────────────────────────┼──────────────┘
-                                               │
-                                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│                        HistoryScreen                        │
-│  ┌───────────────────────────────────────────────────────┐  │
-│  │ Metric Card: Total Omset & Jumlah Transaksi Hari Ini  │  │
-│  ├───────────────────────────────────────────────────────┤  │
-│  │ Search Bar (No Struk / Nama) + Filter Chips (Hari Ini)│  │
-│  ├───────────────────────────────────────────────────────┤  │
-│  │ LazyColumn of TransactionHistoryCard                  │  │
-│  │  - No Struk, Tanggal & Jam, Nama Pembeli              │  │
-│  │  - Cuplikan Item Pakan & Badge Metode Bayar           │  │
-│  │  - Total Rupiah & Tombol "Lihat Rincian"              │  │
-│  └───────────────────────────┬───────────────────────────┘  │
-└──────────────────────────────┼──────────────────────────────┘
-                               │ (Ketuk kartu)
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│                 TransactionDetailDialog                     │
-│  - Info Lengkap: No Struk, Pembeli, Metode Bayar, Waktu     │
-│  - Tabel Rincian Semua Item (Nama, Qty, Satuan, Subtotal)   │
-│  - Total, Uang Diterima, Kembalian                          │
-│  - Tombol Tutup (Sesuai preferensi: Hanya Lihat Rincian)    │
-└─────────────────────────────────────────────────────────────┘
-                               ▲
-                               │
-┌──────────────────────────────┴──────────────────────────────┐
-│                       KasirViewModel                        │
-│  - State: recentTransactions, todaySummary, historyFilter   │
-│  - Actions: loadRecent(), filterByDate(), searchHistory()   │
-└──────────────────────────────┬──────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│                     PetShopRepository                       │
-│  - fetchRecentSales(url): GET ?action=recent                │
-│  - Parsing JSON: todayTotal, todayCount, recentTransactions │
-└─────────────────────────────────────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│                 Google Apps Script (Code.gs)                │
-│  - Membaca sheet 'Penjualan' Spreadsheet secara real-time   │
-└─────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────┐
+│               ProductFormDialog (Compose)              │
+├────────────────────────────────────────────────────────┤
+│ [ Nama Produk *                                      ] │
+│ ⚠ Nama produk wajib diisi                              │
+│                                                        │
+│ [ Kategori Produk: (Ayam) (Burung) (Kucing) (Ikan)   ] │
+│                                                        │
+│ [ Satuan Jual *                                      ] │
+│ ⚠ Satuan produk wajib diisi (contoh: pcs, kg)          │
+│                                                        │
+│ [ Harga Jual (Rp) *                                  ] │
+│ ⚠ Harga jual harus lebih besar dari Rp 0               │
+│                                                        │
+│                           [ Batal ]  [ Simpan Produk ] │
+└────────────────────────────────────────────────────────┘
 ```
 
-#### Data Model & State Mapping
-- `RecentTransactionSummary`: Menyimpan `noStruk`, `tanggal`, `jam`, `namaPembeli`, `metodeBayar`, `total`, `bayar`, `kembalian`, dan daftar `items` (`ReceiptItemSummary`).
-- `selectedHistoryTransaction`: State penampung transaksi yang sedang dibuka detailnya di dialog rincian.
-- `historySearchQuery` & `historyDateFilter`: State reaktif untuk menyaring daftar transaksi secara instan.
+1. **`app/src/main/java/com/example/ui/components/ProductFormDialog.kt`**:
+   - Tambahkan state pesan error spesifik:
+     - `nameErrorMessage: String?`
+     - `unitErrorMessage: String?`
+     - `priceErrorMessage: String?`
+   - Terapkan `isError` dan `supportingText = { ... }` pada `OutlinedTextField` Nama Produk, Satuan Jual, dan Harga Jual.
+   - Pada handler `onClick` tombol simpan, validasi ketiga kolom secara ketat sebelum mengeksekusi `onSaveProduct`.
+2. **`app/src/main/java/com/example/ui/components/AddCustomItemDialog.kt`** (Konsistensi):
+   - Selaraskan validasi yang sama untuk dialog tambah barang manual di kasir agar harga barang bebas juga tidak boleh 0 atau negatif.

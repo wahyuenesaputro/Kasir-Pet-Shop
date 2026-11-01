@@ -185,12 +185,21 @@ fun ReceiptDialog(
                             value = formatRupiah(transaction.paidAmount),
                             fontSize = 13
                         )
-                        ReceiptRow(
-                            label = "KEMBALIAN",
-                            value = formatRupiah(transaction.changeAmount),
-                            isBold = true,
-                            fontSize = 14
-                        )
+                        if (transaction.paymentMethod.contains("QRIS", ignoreCase = true)) {
+                            ReceiptRow(
+                                label = "STATUS",
+                                value = "LUNAS (QRIS)",
+                                isBold = true,
+                                fontSize = 13
+                            )
+                        } else {
+                            ReceiptRow(
+                                label = "KEMBALIAN",
+                                value = formatRupiah(transaction.changeAmount),
+                                isBold = true,
+                                fontSize = 14
+                            )
+                        }
 
                         Spacer(modifier = Modifier.height(12.dp))
                         DashedDivider()

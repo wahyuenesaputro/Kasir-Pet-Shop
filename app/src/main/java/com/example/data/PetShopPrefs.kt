@@ -2,6 +2,9 @@ package com.example.data
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.example.model.Product
+import org.json.JSONArray
+import org.json.JSONObject
 
 class PetShopPrefs(context: Context) {
     private val prefs: SharedPreferences = context.getSharedPreferences("petshop_pos_prefs", Context.MODE_PRIVATE)
@@ -9,6 +12,9 @@ class PetShopPrefs(context: Context) {
     companion object {
         private const val KEY_APPS_SCRIPT_URL = "apps_script_url"
         private const val PREFIX_CUSTOM_PRICE = "custom_price_"
+        private const val KEY_CUSTOM_PRODUCTS_JSON = "custom_created_products_json"
+        private const val KEY_DELETED_PRODUCT_IDS = "deleted_product_ids_set"
+        private const val KEY_PRODUCT_OVERRIDES_JSON = "product_overrides_json"
         const val DEFAULT_PLACEHOLDER_URL = "https://script.google.com/macros/s/AKfycbz_CONTOH_ID_APPS_SCRIPT/exec"
     }
 
@@ -42,4 +48,135 @@ class PetShopPrefs(context: Context) {
         }
         return result
     }
+
+    // === CRUD: Produk Baru Tambahan Kasir ===
+    fun getCustomCreatedProducts(): List<Product> {
+        val jsonStr = prefs.getString(KEY_CUSTOM_PRODUCTS_JSON, "") ?: ""
+        if (jsonStr.isBlank()) return emptyList()
+
+        return try {
+            val jsonArray = JSONArray(jsonStr)
+            val list = mutableListOf<Product>()
+            for (i in 0 until jsonArray.length()) {
+                val obj = jsonArray.getJSONObject(i)
+                list.add(
+                    Product(
+                        id = obj.getString("id"),
+                        kategori = obj.getString("kategori"),
+                        namaProduk = obj.getString("namaProduk"),
+                        satuan = obj.getString("satuan"),
+                        satuanAsli = obj.optString("satuanAsli", obj.getString("satuan")),
+                        hargaJual = obj.getDouble("hargaJual"),
+                        hargaBeli = obj.optDouble("hargaBeli", 0.0),
+                        hargaBelumDiisi = obj.optBoolean("hargaBelumDiisi", false),
+                        catatan = obj.optString("catatan", "")
+                    )
+                )
+            }
+            list
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    fun saveCustomCreatedProducts(products: List<Product>) {
+        val jsonArray = JSONArray()
+        products.forEach { prod ->
+            val obj = JSONObject()
+            obj.put("id", prod.id)
+            obj.put("kategori", prod.kategori)
+            obj.put("namaProduk", prod.namaProduk)
+            obj.put("satuan", prod.satuan)
+            obj.put("satuanAsli", prod.satuanAsli)
+            obj.put("hargaJual", prod.hargaJual)
+            obj.put("hargaBeli", prod.hargaBeli)
+            obj.put("hargaBelumDiisi", prod.hargaBelumDiisi)
+            obj.put("catatan", prod.catatan)
+            jsonArray.put(obj)
+        }
+        prefs.edit().putString(KEY_CUSTOM_PRODUCTS_JSON, jsonArray.toString()).apply()
+    }
+
+    // === CRUD: Daftar ID Produk yang Dihapus ===
+    fun getDeletedProductIds(): Set<String> {
+        return prefs.getStringSet(KEY_DELETED_PRODUCT_IDS, emptySet()) ?: emptySet()
+    }
+
+    fun addDeletedProductId(id: String) {
+        val current = getDeletedProductIds().toMutableSet()
+        current.add(id)
+        prefs.edit().putStringSet(KEY_DELETED_PRODUCT_IDS, current).apply()
+    }
+
+    // === CRUD: Modifikasi Produk Bawaan (Nama, Kategori, Satuan, Harga) ===
+    fun getProductOverrides(): Map<String, Product> {
+        val jsonStr = prefs.getString(KEY_PRODUCT_OVERRIDES_JSON, "") ?: ""
+        if (jsonStr.isBlank()) return emptyMap()
+
+        return try {
+            val jsonObj = JSONObject(jsonStr)
+            val map = mutableMapOf<String, Product>()
+            val keys = jsonObj.keys()
+            while (keys.hasNext()) {
+                val key = keys.next()
+                val obj = jsonObj.getJSONObject(key)
+                map[key] = Product(
+                    id = obj.getString("id"),
+                    kategori = obj.getString("kategori"),
+                    namaProduk = obj.getString("namaProduk"),
+                    satuan = obj.getString("satuan"),
+                    satuanAsli = obj.optString("satuanAsli", obj.getString("satuan")),
+                    hargaJual = obj.getDouble("hargaJual"),
+                    hargaBeli = obj.optDouble("hargaBeli", 0.0),
+                    hargaBelumDiisi = obj.optBoolean("hargaBelumDiisi", false),
+                    catatan = obj.optString("catatan", "")
+                )
+            }
+            map
+        } catch (e: Exception) {
+            emptyMap()
+        }
+    }
+
+    fun saveProductOverride(product: Product) {
+        val current = getProductOverrides().toMutableMap()
+        current[product.id] = product
+        val jsonObj = JSONObject()
+        current.forEach { (id, prod) ->
+            val obj = JSONObject()
+            obj.put("id", prod.id)
+            obj.put("kategori", prod.kategori)
+            obj.put("namaProduk", prod.namaProduk)
+            obj.put("satuan", prod.satuan)
+            obj.put("satuanAsli", prod.satuanAsli)
+            obj.put("hargaJual", prod.hargaJual)
+            obj.put("hargaBeli", prod.hargaBeli)
+            obj.put("hargaBelumDiisi", prod.hargaBelumDiisi)
+            obj.put("catatan", prod.catatan)
+            jsonObj.put(id, obj)
+        }
+        prefs.edit().putString(KEY_PRODUCT_OVERRIDES_JSON, jsonObj.toString()).apply()
+    }
+
+    // === Pengaturan QRIS Toko ===
+    var qrisMerchantName: String
+        get() = prefs.getString("qris_merchant_name", "PET SHOP SEJAHTERA") ?: "PET SHOP SEJAHTERA"
+        set(value) = prefs.edit().putString("qris_merchant_name", value.trim()).apply()
+
+    var qrisNmid: String
+        get() = prefs.getString("qris_nmid", "ID1020023456789") ?: "ID1020023456789"
+        set(value) = prefs.edit().putString("qris_nmid", value.trim()).apply()
+
+    var qrisCity: String
+        get() = prefs.getString("qris_city", "JAKARTA") ?: "JAKARTA"
+        set(value) = prefs.edit().putString("qris_city", value.trim()).apply()
+
+    var qrisPostalCode: String
+        get() = prefs.getString("qris_postal_code", "12340") ?: "12340"
+        set(value) = prefs.edit().putString("qris_postal_code", value.trim()).apply()
+
+    var qrisStaticBasePayload: String
+        get() = prefs.getString("qris_static_base_payload", "") ?: ""
+        set(value) = prefs.edit().putString("qris_static_base_payload", value.trim()).apply()
 }
+

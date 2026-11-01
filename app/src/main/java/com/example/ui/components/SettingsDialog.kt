@@ -20,7 +20,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.HelpOutline
-import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.PriceChange
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Sync
@@ -85,20 +84,11 @@ fun SettingsDialog(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Link,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Pengaturan",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                    Text(
+                        text = "Pengaturan",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
 
                     IconButton(
                         onClick = onDismiss,
@@ -110,7 +100,7 @@ fun SettingsDialog(
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                // Bagian 1: Input Manual Harga Jual Produk
+                // Kelola Harga Produk
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)),
@@ -150,9 +140,9 @@ fun SettingsDialog(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(18.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-                // Bagian 2: Koneksi Google Spreadsheet
+                // Integrasi Google Spreadsheet
                 Text(
                     text = "Koneksi Google Spreadsheet",
                     style = MaterialTheme.typography.titleSmall,
@@ -167,7 +157,6 @@ fun SettingsDialog(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                // Input URL
                 OutlinedTextField(
                     value = inputUrl,
                     onValueChange = { inputUrl = it.trim() },
@@ -188,7 +177,6 @@ fun SettingsDialog(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                // Tombol Simpan & Sinkron
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -229,7 +217,7 @@ fun SettingsDialog(
 
                 Spacer(modifier = Modifier.height(18.dp))
 
-                // Panduan Deploy Singkat
+                // Panduan Apps Script
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)),

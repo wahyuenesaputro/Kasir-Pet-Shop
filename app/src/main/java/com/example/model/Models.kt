@@ -35,7 +35,6 @@ data class CartItem(
 
 enum class PaymentMethod(val label: String) {
     TUNAI("Tunai"),
-    TRANSFER("Transfer"),
     QRIS("QRIS")
 }
 

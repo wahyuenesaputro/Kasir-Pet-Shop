@@ -16,43 +16,47 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = WarmOrangeDarkPrimary,
-    onPrimary = WarmOrangeDarkOnPrimary,
-    primaryContainer = WarmOrangeDarkPrimaryContainer,
-    onPrimaryContainer = WarmOrangeDarkOnPrimaryContainer,
-    secondary = WarmSecondaryContainer,
-    onSecondary = WarmOnSecondaryContainer,
-    background = WarmBackgroundDark,
-    onBackground = WarmOnBackgroundDark,
-    surface = WarmSurfaceDark,
-    onSurface = WarmOnSurfaceDark,
-    surfaceVariant = WarmSurfaceVariantDark,
-    onSurfaceVariant = WarmOnSurfaceVariantDark,
-    outline = WarmOutlineDark
+    primary = NeoSapphireDarkPrimary,
+    onPrimary = NeoSapphireDarkOnPrimary,
+    primaryContainer = NeoSapphireDarkPrimaryContainer,
+    onPrimaryContainer = NeoSapphireDarkOnPrimaryContainer,
+    secondary = NeoCobaltDarkSecondary,
+    onSecondary = NeoCobaltDarkOnSecondary,
+    tertiary = NeoSlateTertiary,
+    background = NeoBackgroundDark,
+    onBackground = NeoOnBackgroundDark,
+    surface = NeoSurfaceDark,
+    onSurface = NeoOnSurfaceDark,
+    surfaceVariant = NeoSurfaceVariantDark,
+    onSurfaceVariant = NeoOnSurfaceVariantDark,
+    outline = NeoOutlineDark
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = WarmOrangePrimary,
-    onPrimary = WarmOrangeOnPrimary,
-    primaryContainer = WarmOrangePrimaryContainer,
-    onPrimaryContainer = WarmOrangeOnPrimaryContainer,
-    secondary = WarmSecondary,
-    onSecondary = WarmOrangeOnPrimary,
-    secondaryContainer = WarmSecondaryContainer,
-    onSecondaryContainer = WarmOnSecondaryContainer,
-    background = WarmBackgroundLight,
-    onBackground = WarmOnBackgroundLight,
-    surface = WarmSurfaceLight,
-    onSurface = WarmOnSurfaceLight,
-    surfaceVariant = WarmSurfaceVariantLight,
-    onSurfaceVariant = WarmOnSurfaceVariantLight,
-    outline = WarmOutlineLight
+    primary = NeoSapphirePrimary,
+    onPrimary = NeoSapphireOnPrimary,
+    primaryContainer = NeoSapphirePrimaryContainer,
+    onPrimaryContainer = NeoSapphireOnPrimaryContainer,
+    secondary = NeoCobaltSecondary,
+    onSecondary = NeoCobaltOnSecondary,
+    secondaryContainer = NeoCobaltSecondaryContainer,
+    onSecondaryContainer = NeoCobaltOnSecondaryContainer,
+    tertiary = NeoSlateTertiary,
+    tertiaryContainer = NeoSlateTertiaryContainer,
+    onTertiaryContainer = NeoSlateOnTertiaryContainer,
+    background = NeoBackgroundLight,
+    onBackground = NeoOnBackgroundLight,
+    surface = NeoSurfaceLight,
+    onSurface = NeoOnSurfaceLight,
+    surfaceVariant = NeoSurfaceVariantLight,
+    onSurfaceVariant = NeoOnSurfaceVariantLight,
+    outline = NeoOutlineLight
 )
 
 @Composable
 fun KasirPetShopTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = false, // Keep warm petshop theme consistent
+    dynamicColor: Boolean = false, // Keep Clean Minimalist Neo-POS theme consistent
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

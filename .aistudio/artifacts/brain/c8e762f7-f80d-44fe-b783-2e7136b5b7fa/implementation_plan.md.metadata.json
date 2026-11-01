@@ -1,6 +1,6 @@
 {
-  "summary":  "Rencana implementasi fitur Riwayat Transaksi Penjualan yang terhubung langsung dengan Google Spreadsheet untuk aplikasi Kasir Pet Shop. Rencana ini mencakup arsitektur integrasi data real-time, filter transaksi hari ini, pencarian instan (nama pembeli / nomor nota), kartu transaksi informatif dengan rincian item, dan modal detail transaksi tanpa cetak ulang sesuai preferensi pengguna.",
-  "updatedAt":  "2026-10-27T18:46:08.444118894Z",
+  "summary":  "Rencana implementasi validasi input pada form produk:\n1. Validasi wajib diisi untuk Nama Produk, Satuan Jual, dan Harga Jual.\n2. Validasi nilai harga jual tidak boleh bernilai negatif atau nol (harus lebih besar dari Rp 0).\n3. Penampilan pesan error inline dengan teks merah di bawah masing-masing kolom input yang tidak valid.\n4. Pencegahan penyimpanan data jika masih terdapat kolom wajib yang kosong atau bernilai tidak valid.",
+  "updatedAt":  "2026-10-31T19:41:08.399006036Z",
   "requestFeedback":  true,
   "userFacing":  true
 }

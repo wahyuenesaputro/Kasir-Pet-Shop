@@ -65,13 +65,11 @@ fun CartSheet(
     totalAmount: Double,
     onDismiss: () -> Unit,
     onSetQuantity: (String, Double) -> Unit,
-    onSetPrice: (String, Double) -> Unit,
     onRemoveItem: (String) -> Unit,
     onClearCart: () -> Unit,
     onProceedToPayment: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var itemToEditPrice by remember { mutableStateOf<CartItem?>(null) }
     var showClearConfirmation by remember { mutableStateOf(false) }
 
     ModalBottomSheet(
@@ -133,7 +131,6 @@ fun CartSheet(
                         CartItemRow(
                             item = item,
                             onSetQuantity = { qty -> onSetQuantity(item.product.id, qty) },
-                            onOpenEditPrice = { itemToEditPrice = item },
                             onRemove = { onRemoveItem(item.product.id) }
                         )
                     }
@@ -192,69 +189,6 @@ fun CartSheet(
         }
     }
 
-    // Dialog Ubah Harga Satuan Manual (Nego)
-    itemToEditPrice?.let { item ->
-        var inputPrice by remember { mutableStateOf(item.customUnitPrice.toLong().toString()) }
-        var isPriceError by remember { mutableStateOf(false) }
-
-        AlertDialog(
-            onDismissRequest = { itemToEditPrice = null },
-            title = {
-                Text("Ubah Harga Satuan (Nego)", fontWeight = FontWeight.Bold)
-            },
-            text = {
-                Column {
-                    Text(
-                        text = item.product.namaProduk,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Text(
-                        text = "Harga default spreadsheet: ${formatRupiah(item.product.hargaJual)}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    OutlinedTextField(
-                        value = inputPrice,
-                        onValueChange = {
-                            inputPrice = it
-                            isPriceError = false
-                        },
-                        label = { Text("Harga Satuan Baru (Rp)") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true,
-                        isError = isPriceError,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag("custom_price_input")
-                    )
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        val parsed = inputPrice.toDoubleOrNull()
-                        if (parsed != null && parsed >= 0.0) {
-                            onSetPrice(item.product.id, parsed)
-                            itemToEditPrice = null
-                        } else {
-                            isPriceError = true
-                        }
-                    },
-                    modifier = Modifier.testTag("confirm_custom_price_button")
-                ) {
-                    Text("Terapkan", fontWeight = FontWeight.Bold)
-                }
-            },
-            dismissButton = {
-                OutlinedButton(onClick = { itemToEditPrice = null }) {
-                    Text("Batal")
-                }
-            }
-        )
-    }
-
     // Dialog Konfirmasi Kosongkan Keranjang
     if (showClearConfirmation) {
         AlertDialog(
@@ -285,7 +219,6 @@ fun CartSheet(
 private fun CartItemRow(
     item: CartItem,
     onSetQuantity: (Double) -> Unit,
-    onOpenEditPrice: () -> Unit,
     onRemove: () -> Unit
 ) {
     Card(
@@ -313,39 +246,14 @@ private fun CartItemRow(
                         style = MaterialTheme.typography.titleSmall
                     )
 
-                    // Tombol / label harga satuan yang bisa diedit (Nego)
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .padding(top = 2.dp)
-                            .clickable { onOpenEditPrice() }
-                    ) {
-                        Text(
-                            text = "@${formatRupiah(item.customUnitPrice)}/${item.product.satuan}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = if (item.customUnitPrice != item.product.hargaJual) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            },
-                            fontWeight = if (item.customUnitPrice != item.product.hargaJual) FontWeight.Bold else FontWeight.Normal
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "Edit harga nego",
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(13.dp)
-                        )
-                        if (item.customUnitPrice != item.product.hargaJual) {
-                            Text(
-                                text = " (Nego)",
-                                fontSize = 10.sp,
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
+                    // Label harga satuan (read-only, tidak bisa diedit di kasir)
+                    Text(
+                        text = "@${formatRupiah(item.customUnitPrice)}/${item.product.satuan}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(top = 2.dp)
+                    )
                 }
 
                 // Tombol Hapus item

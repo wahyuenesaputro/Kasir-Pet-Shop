@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Kasir Pet Shop POS</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1E40AF">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Kasir PetShop">
+  
+  <!-- Tailwind CSS & Lucide Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <style>
+    /* Styling cetak thermal 58mm/80mm untuk printer Bluetooth / AirPrint iOS */
+    @media print {
+      body * { visibility: hidden; }
+      #receipt-modal-content, #receipt-modal-content * { visibility: visible; }
+      #receipt-modal-content {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        background: white;
+      }
+      .no-print { display: none !important; }
+    }
+    .safe-top { padding-top: env(safe-area-inset-top); }
+    .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+    /* Hide scrollbars */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-blue-200">
+
+  <!-- TOP HEADER & NAVIGATION (IOS FRIENDLY) -->
+  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 safe-top shadow-sm">
+    <div class="max-w-md mx-auto px-4 py-2.5 flex items-center justify-between">
+      <div class="flex items-center space-x-2">
+        <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-sm">
+          <i data-lucide="store" class="w-4 h-4"></i>
+        </div>
+        <span class="font-extrabold text-slate-800 text-base tracking-tight">Kasir Pet Shop</span>
+      </div>
+      
+      <div class="flex items-center space-x-1">
+        <button onclick="openAddProductModal()" class="p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition" title="Tambah Produk">
+          <i data-lucide="plus-circle" class="w-5 h-5"></i>
+        </button>
+        <button onclick="openSettingsModal()" class="p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition" title="Pengaturan">
+          <i data-lucide="settings" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- TAB NAVIGATION BAR DI ATAS -->
+    <div class="max-w-md mx-auto px-4 pb-2 flex space-x-1">
+      <button onclick="switchTab('dashboard')" id="nav-dashboard" class="flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold flex items-center justify-center space-x-1.5 transition text-slate-500 hover:bg-slate-100">
+        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+        <span>Dashboard</span>
+      </button>
+      <button onclick="switchTab('kasir')" id="nav-kasir" class="flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold flex items-center justify-center space-x-1.5 transition bg-blue-600 text-white shadow-sm">
+        <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+        <span>Kasir</span>
+      </button>
+      <button onclick="switchTab('riwayat')" id="nav-riwayat" class="flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold flex items-center justify-center space-x-1.5 transition text-slate-500 hover:bg-slate-100">
+        <i data-lucide="history" class="w-4 h-4"></i>
+        <span>Riwayat</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER (MAX-W-MD UNTUK TAMPILAN MOBILE/TABLET RAPI) -->
+  <main class="max-w-md mx-auto px-4 pt-3 pb-32">
+
+    <!-- SCREEN 1: KASIR (UTAMA) -->
+    <section id="screen-kasir" class="space-y-3">
+      <!-- Search Bar -->
+      <div class="relative">
+        <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3 text-slate-400"></i>
+        <input type="text" id="search-input" oninput="renderProducts()" placeholder="Cari pakan, kandang, vitamin..." class="w-full pl-10 pr-4 py-2 bg-white rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent shadow-sm">
+      </div>
+
+      <!-- Kategori Filter Chips -->
+      <div class="flex space-x-2 overflow-x-auto no-scrollbar py-1" id="category-chips">
+        <!-- Rendered via JS -->
+      </div>
+
+      <!-- Grid Produk 2 Kolom -->
+      <div class="grid grid-cols-2 gap-2.5 pt-1" id="product-grid">
+        <!-- Rendered via JS -->
+      </div>
+    </section>
+
+    <!-- SCREEN 2: DASHBOARD -->
+    <section id="screen-dashboard" class="hidden space-y-4">
+      <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-5 text-white shadow-lg">
+        <p class="text-xs font-medium text-blue-100 uppercase tracking-wider">Omset Hari Ini</p>
+        <h2 class="text-3xl font-black mt-1" id="dash-today-total">Rp 0</h2>
+        <div class="mt-4 pt-3 border-t border-blue-400/30 flex justify-between text-xs text-blue-100">
+          <span>Jumlah Transaksi: <strong class="text-white" id="dash-today-count">0</strong></span>
+          <span id="dash-today-date">Hari Ini</span>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+        <h3 class="font-bold text-sm text-slate-800 mb-3 flex items-center space-x-1.5">
+          <i data-lucide="trending-up" class="w-4 h-4 text-blue-600"></i>
+          <span>Ringkasan Menu Kasir</span>
+        </h3>
+        <div class="grid grid-cols-2 gap-3 text-center">
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+            <span class="text-xs text-slate-500">Total Katalog</span>
+            <p class="text-xl font-bold text-slate-800 mt-1" id="dash-total-products">0</p>
+          </div>
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+            <span class="text-xs text-slate-500">Item Keranjang</span>
+            <p class="text-xl font-bold text-blue-600 mt-1" id="dash-cart-count">0</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+        <h3 class="font-bold text-sm text-slate-800 mb-3 flex items-center space-x-1.5">
+          <i data-lucide="database" class="w-4 h-4 text-emerald-600"></i>
+          <span>Status Google Spreadsheet</span>
+        </h3>
+        <p class="text-xs text-slate-500 leading-relaxed mb-3">Tersambung ke Spreadsheet via Google Apps Script Web App (6 Kolom Sederhana).</p>
+        <button onclick="syncData()" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center justify-center space-x-2">
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+          <span>Sinkronkan Data Sekarang</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- SCREEN 3: RIWAYAT PENJUALAN -->
+    <section id="screen-riwayat" class="hidden space-y-3">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold text-sm text-slate-800">Riwayat Penjualan Terakhir</h3>
+        <button onclick="loadRecentSales()" class="text-xs text-blue-600 font-semibold flex items-center space-x-1">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+          <span>Segarkan</span>
+        </button>
+      </div>
+      <div id="history-list" class="space-y-2.5">
+        <!-- Rendered via JS -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FLOATING CART BANNER (BILAH BAWAH KASIR) -->
+  <aside id="floating-cart-bar" class="fixed bottom-0 left-0 right-0 z-20 pointer-events-none safe-bottom pb-3 px-4 hidden">
+    <div class="max-w-md mx-auto pointer-events-auto bg-white/95 backdrop-blur-md rounded-2xl border border-blue-200 p-2.5 shadow-xl flex items-center justify-between">
+      <!-- Tombol Rincian Keranjang -->
+      <div onclick="openCartModal()" class="flex items-center space-x-3 cursor-pointer pl-1">
+        <div class="relative w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+          <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+          <span id="cart-badge" class="absolute -top-1 -right-1 bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ring-2 ring-white">0</span>
+        </div>
+        <div>
+          <span class="text-[11px] text-slate-500 font-medium block">Total Belanja</span>
+          <span id="cart-total-text" class="text-base font-extrabold text-blue-700 leading-tight">Rp 0</span>
+        </div>
+      </div>
+
+      <!-- Tombol Bayar Tunggal -->
+      <button onclick="openPaymentModal()" class="h-11 px-5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-sm rounded-xl shadow-md transition flex items-center space-x-2">
+        <span>Bayar</span>
+        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MODAL: RINCIAN KERANJANG (CART SHEET) -->
+  <div id="cart-modal" class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-0 sm:p-4 transition-opacity">
+    <div class="w-full max-w-md bg-white rounded-t-3xl sm:rounded-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-in slide-in-from-bottom">
+      <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="shopping-cart" class="w-5 h-5 text-blue-600"></i>
+          <h3 class="font-bold text-base text-slate-800">Keranjang Belanja</h3>
+        </div>
+        <button onclick="closeCartModal()" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-4 overflow-y-auto flex-1 space-y-2.5" id="cart-items-container">
+        <!-- Cart Items -->
+      </div>
+
+      <div class="p-4 bg-slate-50 border-t border-slate-100 space-y-3">
+        <div class="flex justify-between items-center text-sm">
+          <span class="text-slate-500 font-medium">Total Tagihan:</span>
+          <span class="text-lg font-black text-blue-700" id="cart-modal-total">Rp 0</span>
+        </div>
+        <div class="flex space-x-2">
+          <button onclick="clearCart()" class="py-2.5 px-3 border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-semibold rounded-xl transition">
+            Kosongkan
+          </button>
+          <button onclick="closeCartModal(); openPaymentModal();" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition flex items-center justify-center space-x-1.5">
+            <span>Lanjut Pembayaran</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: PEMBAYARAN (TUNAI & QRIS) -->
+  <div id="payment-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4 transition-opacity">
+    <div class="w-full max-w-md bg-white rounded-2xl max-h-[90vh] overflow-y-auto p-5 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold text-lg text-slate-800">Pembayaran</h3>
+        <button onclick="closePaymentModal()" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Total Tagihan Card -->
+      <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4 text-center">
+        <p class="text-xs font-bold text-blue-600 uppercase tracking-wider">TOTAL TAGIHAN</p>
+        <h2 class="text-3xl font-black text-blue-900 mt-1" id="pay-total-display">Rp 0</h2>
+      </div>
+
+      <!-- Metode Pembayaran: Tunai vs QRIS -->
+      <div>
+        <label class="text-xs font-bold text-slate-600 block mb-2">Pilih Metode Pembayaran:</label>
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="setPaymentMethod('Tunai')" id="btn-method-tunai" class="py-2.5 px-3 rounded-xl border-2 border-blue-600 bg-blue-600 text-white font-bold text-xs flex items-center justify-center space-x-2 transition">
+            <i data-lucide="banknote" class="w-4 h-4"></i>
+            <span>Tunai (Cash)</span>
+          </button>
+          <button onclick="setPaymentMethod('QRIS')" id="btn-method-qris" class="py-2.5 px-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 font-bold text-xs flex items-center justify-center space-x-2 transition">
+            <i data-lucide="qr-code" class="w-4 h-4"></i>
+            <span>QRIS Toko</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Panel Mode Tunai -->
+      <div id="panel-tunai" class="space-y-3">
+        <div>
+          <label class="text-xs font-semibold text-slate-600 block mb-1">Uang Diterima (Rp):</label>
+          <input type="number" id="cash-paid-input" oninput="calculateChange()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-base font-bold focus:outline-none focus:ring-2 focus:ring-blue-600">
+          <span id="cash-underpaid-warning" class="text-xs text-red-500 font-medium mt-1 block hidden">Uang pembayaran kurang</span>
+        </div>
+
+        <!-- Pilihan Uang Cepat -->
+        <div>
+          <span class="text-[11px] text-slate-400 font-medium block mb-1.5">Pilihan Uang Cepat:</span>
+          <div class="flex flex-wrap gap-1.5" id="quick-cash-chips">
+            <!-- Chips via JS -->
+          </div>
+        </div>
+
+        <!-- Kartu Kembalian -->
+        <div id="change-card" class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex justify-between items-center">
+          <span class="text-xs font-bold text-emerald-800">KEMBALIAN</span>
+          <span class="text-lg font-black text-emerald-700" id="change-amount-display">Rp 0</span>
+        </div>
+      </div>
+
+      <!-- Panel Mode QRIS -->
+      <div id="panel-qris" class="hidden bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-center space-y-2">
+        <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl mx-auto flex items-center justify-center">
+          <i data-lucide="qr-code" class="w-6 h-6"></i>
+        </div>
+        <h4 class="font-bold text-sm text-emerald-800">PEMBAYARAN QRIS TOKO</h4>
+        <p class="text-xs text-emerald-700 leading-relaxed">Arahkan pelanggan scan QRIS Toko (pada standee kasir) dengan nominal pas:</p>
+        <div class="inline-block px-4 py-2 bg-white border border-emerald-300 rounded-xl text-lg font-black text-emerald-800 shadow-sm" id="qris-exact-amount">
+          Rp 0
+        </div>
+        <p class="text-[11px] text-emerald-600 mt-2">✓ Nominal pas tanpa kembalian<br>✓ Pastikan notifikasi dana masuk diterima sebelum cetak</p>
+      </div>
+
+      <!-- Tombol Aksi Simpan & Cetak -->
+      <button onclick="submitPayment()" id="btn-submit-payment" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl shadow-md transition flex items-center justify-center space-x-2">
+        <i data-lucide="printer" class="w-4 h-4"></i>
+        <span id="btn-submit-text">Simpan & Cetak Struk</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL: STRUK PEMBAYARAN THERMAL -->
+  <div id="receipt-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-sm bg-white rounded-2xl shadow-2xl overflow-hidden p-5 space-y-4">
+      <div class="flex items-center justify-between no-print">
+        <h3 class="font-bold text-sm text-slate-800 flex items-center space-x-1.5">
+          <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600"></i>
+          <span>Transaksi Selesai</span>
+        </h3>
+        <button onclick="closeReceiptModal()" class="p-1 text-slate-400 hover:text-slate-600 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- KERTAS STRUK THERMAL -->
+      <div id="receipt-modal-content" class="bg-amber-50/50 border border-dashed border-slate-300 rounded-xl p-4 font-mono text-xs text-slate-700 space-y-2">
+        <div class="text-center pb-2 border-b border-dashed border-slate-300">
+          <h4 class="font-bold text-sm text-slate-900">KASIR PET SHOP</h4>
+          <p class="text-[10px] text-slate-500" id="rcpt-datetime">2026-11-01 12:00:00</p>
+          <p class="text-[10px] text-slate-500" id="rcpt-number">PS-20261101-120000</p>
+        </div>
+
+        <div class="space-y-1.5 py-2 border-b border-dashed border-slate-300" id="rcpt-items-list">
+          <!-- Item rows -->
+        </div>
+
+        <div class="space-y-1 pt-1 text-xs">
+          <div class="flex justify-between font-bold">
+            <span>Total:</span>
+            <span id="rcpt-total">Rp 0</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Metode:</span>
+            <span id="rcpt-method">Tunai</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Bayar:</span>
+            <span id="rcpt-paid">Rp 0</span>
+          </div>
+          <div class="flex justify-between font-bold text-emerald-700">
+            <span>Kembalian:</span>
+            <span id="rcpt-change">Rp 0</span>
+          </div>
+        </div>
+
+        <div class="text-center pt-3 border-t border-dashed border-slate-300 text-[10px] text-slate-400">
+          Terima kasih atas kunjungan Anda!<br>Semoga hewan peliharaan Anda sehat selalu.
+        </div>
+      </div>
+
+      <!-- Tombol Aksi Struk -->
+      <div class="flex space-x-2 no-print">
+        <button onclick="window.print()" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center space-x-1.5">
+          <i data-lucide="printer" class="w-4 h-4"></i>
+          <span>Cetak Thermal</span>
+        </button>
+        <button onclick="closeReceiptModal()" class="py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition">
+          Selesai
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: FORM TAMBAH PRODUK (DENGAN VALIDASI LENGKAP) -->
+  <div id="product-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-white rounded-2xl p-5 shadow-2xl space-y-3.5">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold text-base text-slate-800">Tambah Produk Baru</h3>
+        <button onclick="closeAddProductModal()" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Nama Produk -->
+      <div>
+        <label class="text-xs font-bold text-slate-700 block mb-1">Nama Produk *</label>
+        <input type="text" id="new-prod-name" placeholder="Contoh: 511 Bravo, Topsong..." class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600">
+        <span id="err-new-prod-name" class="text-xs text-red-500 font-medium mt-1 block hidden">Nama produk wajib diisi</span>
+      </div>
+
+      <!-- Kategori -->
+      <div>
+        <label class="text-xs font-bold text-slate-700 block mb-1">Kategori Produk</label>
+        <select id="new-prod-cat" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white">
+          <option value="Ayam">Ayam</option>
+          <option value="Burung">Burung</option>
+          <option value="Kucing">Kucing</option>
+          <option value="Ikan">Ikan</option>
+          <option value="Lainnya">Lainnya</option>
+        </select>
+      </div>
+
+      <!-- Satuan Jual -->
+      <div>
+        <label class="text-xs font-bold text-slate-700 block mb-1">Satuan Jual *</label>
+        <input type="text" id="new-prod-unit" placeholder="Contoh: pcs, kg, zak" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600">
+        <span id="err-new-prod-unit" class="text-xs text-red-500 font-medium mt-1 block hidden">Satuan produk wajib diisi</span>
+      </div>
+
+      <!-- Harga Jual -->
+      <div>
+        <label class="text-xs font-bold text-slate-700 block mb-1">Harga Jual (Rp) *</label>
+        <input type="number" id="new-prod-price" placeholder="Contoh: 15000" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600">
+        <span id="err-new-prod-price" class="text-xs text-red-500 font-medium mt-1 block hidden">Harga jual harus lebih dari Rp 0</span>
+      </div>
+
+      <div class="flex justify-end space-x-2 pt-2">
+        <button onclick="closeAddProductModal()" class="py-2 px-4 rounded-xl border border-slate-200 text-slate-600 text-xs font-semibold hover:bg-slate-50 transition">
+          Batal
+        </button>
+        <button onclick="saveNewProduct()" class="py-2 px-5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow transition">
+          Simpan ke Katalog
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: PENGATURAN SPREADSHEET -->
+  <div id="settings-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-white rounded-2xl p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold text-base text-slate-800">Pengaturan Google Spreadsheet</h3>
+        <button onclick="closeSettingsModal()" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-1.5">
+        <label class="text-xs font-bold text-slate-700 block">URL Web App (APPS_SCRIPT_URL):</label>
+        <input type="text" id="setting-script-url" placeholder="https://script.google.com/macros/s/.../exec" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-600 font-mono">
+        <p class="text-[11px] text-slate-400">URL ini didapat dari Deploy > Web App di Google Apps Script Spreadsheet Anda.</p>
+      </div>
+
+      <div class="flex space-x-2">
+        <button onclick="saveSettings()" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow transition">
+          Simpan URL
+        </button>
+        <button onclick="saveSettings(); syncData();" class="flex-1 py-2.5 border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold text-xs rounded-xl transition">
+          Simpan & Sinkron
+        </button>
+      </div>
+
+      <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2 text-xs text-slate-600">
+        <h5 class="font-bold text-slate-800">Petunjuk Akses di iPhone / iOS:</h5>
+        <ol class="list-decimal pl-4 space-y-1 leading-relaxed">
+          <li>Buka link website Vercel di <strong>Safari iPhone</strong>.</li>
+          <li>Tekan ikon <strong>Share</strong> (kotak panah ke atas di bawah layar).</li>
+          <li>Pilih <strong>"Add to Home Screen"</strong> (Tambah ke Layar Utama).</li>
+          <li>Aplikasi siap digunakan layaknya aplikasi bawaan iOS!</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script src="app.js"></script>
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

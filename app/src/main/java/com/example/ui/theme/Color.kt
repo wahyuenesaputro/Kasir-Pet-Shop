@@ -2,49 +2,59 @@ package com.example.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Warm Orange & Cream Palette for Pet Shop POS
-val WarmOrangePrimary = Color(0xFFE65100)
-val WarmOrangeOnPrimary = Color(0xFFFFFFFF)
-val WarmOrangePrimaryContainer = Color(0xFFFFDCC2)
-val WarmOrangeOnPrimaryContainer = Color(0xFF321200)
+// Clean Minimalist Neo-POS Palette (Sapphire Blue, Cobalt & Slate/Zinc)
+val NeoSapphirePrimary = Color(0xFF1E40AF)           // Deep Sapphire Blue
+val NeoSapphireOnPrimary = Color(0xFFFFFFFF)
+val NeoSapphirePrimaryContainer = Color(0xFFDBEAFE)  // Soft Blue Ice
+val NeoSapphireOnPrimaryContainer = Color(0xFF1E3A8A)
 
-val WarmSecondary = Color(0xFF8A5100)
-val WarmSecondaryContainer = Color(0xFFFFDCBE)
-val WarmOnSecondaryContainer = Color(0xFF2C1600)
+val NeoCobaltSecondary = Color(0xFF2563EB)           // Electric Cobalt Accent
+val NeoCobaltOnSecondary = Color(0xFFFFFFFF)
+val NeoCobaltSecondaryContainer = Color(0xFFEFF6FF)
+val NeoCobaltOnSecondaryContainer = Color(0xFF1D4ED8)
 
-val WarmTertiary = Color(0xFF5E6200)
-val WarmTertiaryContainer = Color(0xFFE3E87A)
-val WarmOnTertiaryContainer = Color(0xFF1B1D00)
+val NeoSlateTertiary = Color(0xFF0D9488)             // Modern Teal Accent
+val NeoSlateTertiaryContainer = Color(0xFFCCFBF1)
+val NeoSlateOnTertiaryContainer = Color(0xFF115E59)
 
-val WarmBackgroundLight = Color(0xFFFFFBF7)
-val WarmOnBackgroundLight = Color(0xFF201A17)
-val WarmSurfaceLight = Color(0xFFFFFFFF)
-val WarmOnSurfaceLight = Color(0xFF201A17)
-val WarmSurfaceVariantLight = Color(0xFFF4DFD4)
-val WarmOnSurfaceVariantLight = Color(0xFF52443C)
-val WarmOutlineLight = Color(0xFF85736B)
+val NeoBackgroundLight = Color(0xFFF8FAFC)          // Clean Slate 50
+val NeoOnBackgroundLight = Color(0xFF0F172A)         // Slate 900
+val NeoSurfaceLight = Color(0xFFFFFFFF)             // Pure Crisp White
+val NeoOnSurfaceLight = Color(0xFF0F172A)
+val NeoSurfaceVariantLight = Color(0xFFF1F5F9)      // Slate 100
+val NeoOnSurfaceVariantLight = Color(0xFF475569)     // Slate 600
+val NeoOutlineLight = Color(0xFFE2E8F0)              // Slate 200 border line
 
 // Dark Theme Colors
-val WarmOrangeDarkPrimary = Color(0xFFFFB68C)
-val WarmOrangeDarkOnPrimary = Color(0xFF532200)
-val WarmOrangeDarkPrimaryContainer = Color(0xFF763300)
-val WarmOrangeDarkOnPrimaryContainer = Color(0xFFFFDCC2)
+val NeoSapphireDarkPrimary = Color(0xFF93C5FD)
+val NeoSapphireDarkOnPrimary = Color(0xFF1E3A8A)
+val NeoSapphireDarkPrimaryContainer = Color(0xFF1E40AF)
+val NeoSapphireDarkOnPrimaryContainer = Color(0xFFDBEAFE)
 
-val WarmBackgroundDark = Color(0xFF181210)
-val WarmOnBackgroundDark = Color(0xFFECE0DA)
-val WarmSurfaceDark = Color(0xFF201A17)
-val WarmOnSurfaceDark = Color(0xFFECE0DA)
-val WarmSurfaceVariantDark = Color(0xFF52443C)
-val WarmOnSurfaceVariantDark = Color(0xFFD7C3B8)
-val WarmOutlineDark = Color(0xFFA08C82)
+val NeoCobaltDarkSecondary = Color(0xFF60A5FA)
+val NeoCobaltDarkOnSecondary = Color(0xFF1E3A8A)
 
-// Receipt Thermal paper styling
-val ReceiptPaperBackground = Color(0xFFFFFDF8)
-val ReceiptText = Color(0xFF212121)
-val ReceiptDashedLine = Color(0xFF9E9E9E)
+val NeoBackgroundDark = Color(0xFF0F172A)            // Slate 900
+val NeoOnBackgroundDark = Color(0xFFF8FAFC)
+val NeoSurfaceDark = Color(0xFF1E293B)               // Slate 800
+val NeoOnSurfaceDark = Color(0xFFF8FAFC)
+val NeoSurfaceVariantDark = Color(0xFF334155)        // Slate 700
+val NeoOnSurfaceVariantDark = Color(0xFFCBD5E1)      // Slate 300
+val NeoOutlineDark = Color(0xFF475569)
 
-// Category Accent Colors
-val BirdColor = Color(0xFF0288D1)
-val CatColor = Color(0xFFE65100)
-val ChickenColor = Color(0xFFD84315)
-val FishColor = Color(0xFF00897B)
+// Category Accent Colors & Soft Container Backgrounds
+val BirdColor = Color(0xFF0284C7)                    // Sky Blue
+val BirdColorContainer = Color(0xFFE0F2FE)
+val CatColor = Color(0xFFD97706)                     // Amber Orange
+val CatColorContainer = Color(0xFFFEF3C7)
+val ChickenColor = Color(0xFFEA580C)                 // Vibrant Rust/Orange
+val ChickenColorContainer = Color(0xFFFFEDD5)
+val FishColor = Color(0xFF0D9488)                    // Teal
+val FishColorContainer = Color(0xFFCCFBF1)
+val GeneralColor = Color(0xFF6366F1)                 // Indigo
+val GeneralColorContainer = Color(0xFFEEF2FF)
+
+// Receipt Thermal Paper Styling
+val ReceiptPaperBackground = Color(0xFFFAFAF9)
+val ReceiptText = Color(0xFF1C1917)
+val ReceiptDashedLine = Color(0xFFA8A29E)

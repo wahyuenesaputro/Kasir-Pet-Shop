@@ -1,36 +1,43 @@
 package com.example.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.PointOfSale
+import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
@@ -48,9 +55,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -70,14 +76,18 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.model.formatQuantity
 import com.example.model.formatRupiah
+import androidx.compose.foundation.layout.navigationBarsPadding
 import com.example.ui.components.AddCustomItemDialog
 import com.example.ui.components.CartSheet
-import com.example.ui.components.EditPriceDialog
+import com.example.ui.components.CatalogCrudScreen
+import com.example.ui.components.DashboardScreen
 import com.example.ui.components.HistoryScreen
 import com.example.ui.components.PaymentDialog
 import com.example.ui.components.ProductCard
+import com.example.ui.components.ProductFormDialog
 import com.example.ui.components.ReceiptDialog
 import com.example.ui.components.SettingsDialog
+import com.example.ui.components.TopNavigationBar
 import com.example.ui.components.TransactionDetailDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -88,7 +98,7 @@ fun KasirScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-    var currentMainTab by remember { mutableIntStateOf(0) } // 0: Kasir, 1: Riwayat Transaksi
+    var currentMainTab by remember { mutableIntStateOf(0) } // 0: Dashboard, 1: Kasir, 2: Katalog CRUD, 3: Riwayat Penjualan
 
     val categories = listOf(
         Pair("Semua", "🔍 Semua"),
@@ -109,197 +119,154 @@ fun KasirScreen(
         modifier = modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                title = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Surface(
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f),
-                            modifier = Modifier.size(36.dp)
+            TopNavigationBar(
+                selectedTab = currentMainTab,
+                catalogCount = uiState.products.size,
+                isLoading = uiState.isLoadingProducts || uiState.isLoadingRecent,
+                onTabSelected = { newTab ->
+                    currentMainTab = newTab
+                    if (newTab == 0 || newTab == 3) {
+                        viewModel.loadRecent()
+                    }
+                },
+                onRefresh = {
+                    viewModel.loadProducts()
+                    viewModel.loadRecent()
+                },
+                onOpenSettings = { viewModel.openSettings() }
+            )
+        }
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                // Banner Peringatan jika simpan transaksi gagal
+                AnimatedVisibility(visible = uiState.lastFailedSale != null) {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 6.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Text(text = "🐾", fontSize = 18.sp)
+                            Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    Icons.Default.Warning,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onErrorContainer,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Gagal kirim ke Spreadsheet. Keranjang Anda tetap aman.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onErrorContainer,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                            Button(
+                                onClick = { viewModel.retryFailedSale() },
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                                shape = RoundedCornerShape(8.dp),
+                                modifier = Modifier.testTag("retry_failed_sale_button")
+                            ) {
+                                Text("Coba Lagi", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                             }
                         }
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Column {
-                            Text(
-                                text = "Kasir Pet Shop",
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = MaterialTheme.colorScheme.onPrimary
-                            )
-                            Text(
-                                text = if (uiState.appsScriptUrl.isNotBlank()) "Tersambung ke Spreadsheet" else "Semua Barang Siap Jual",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.85f)
-                            )
-                        }
                     }
-                },
-                actions = {
-                    IconButton(
-                        onClick = { viewModel.loadProducts(); viewModel.loadRecent() },
-                        modifier = Modifier.testTag("refresh_all_button")
-                    ) {
-                        if (uiState.isLoadingProducts) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(20.dp),
-                                strokeWidth = 2.dp,
-                                color = MaterialTheme.colorScheme.onPrimary
-                            )
-                        } else {
-                            Icon(
-                                Icons.Default.Refresh,
-                                contentDescription = "Perbarui Data",
-                                tint = MaterialTheme.colorScheme.onPrimary
-                            )
-                        }
-                    }
+                }
 
-                    IconButton(
-                        onClick = { viewModel.openSettings() },
-                        modifier = Modifier.testTag("open_settings_button")
-                    ) {
-                        Icon(
-                            Icons.Default.Settings,
-                            contentDescription = "Pengaturan",
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
+                // Tampilan Konten Berdasarkan Tab yang Dipilih
+                Crossfade(targetState = currentMainTab, label = "main_screen_tab_crossfade") { tab ->
+                    when (tab) {
+                        0 -> {
+                            // Tab 0: Layar Dashboard Bisnis (Omset Hari Ini, Transaksi & Produk Terlaris)
+                            DashboardScreen(
+                                todaySummary = uiState.displayTodaySummary,
+                                recentTransactions = uiState.recentTransactions,
+                                products = uiState.products,
+                                isSpreadsheetConnected = uiState.appsScriptUrl.isNotBlank(),
+                                isLoading = uiState.isLoadingRecent,
+                                onNavigateToKasir = { currentMainTab = 1 },
+                                onNavigateToKatalog = { currentMainTab = 2 },
+                                onNavigateToRiwayat = {
+                                    currentMainTab = 3
+                                    viewModel.loadRecent()
+                                },
+                                onOpenAddProductDialog = { viewModel.openAddProductDialog() },
+                                onRefresh = {
+                                    viewModel.loadProducts()
+                                    viewModel.loadRecent()
+                                }
+                            )
+                        }
+                        1 -> {
+                            // Tab 1: Tampilan Kasir Grid 2 Kolom (Transaksi & Keranjang)
+                            KasirCatalogContent(
+                                uiState = uiState,
+                                categories = categories,
+                                onSelectCategory = { viewModel.selectCategory(it) },
+                                onSearchQueryChange = { viewModel.updateSearchQuery(it) },
+                                onAddToCart = { prod, qty -> viewModel.addToCart(prod, qty) },
+                                onSetQuantity = { id, qty -> viewModel.setItemQuantity(id, qty) },
+                                onOpenAddCustomItem = { viewModel.openAddCustomItemDialog() }
+                            )
+                        }
+                        2 -> {
+                            // Tab 2: Manajemen Master Katalog Produk (CRUD)
+                            CatalogCrudScreen(
+                                products = uiState.products,
+                                onOpenAddProductDialog = { viewModel.openAddProductDialog() },
+                                onOpenEditProductDialog = { prod -> viewModel.openEditProductCrudDialog(prod) },
+                                onOpenDeleteProductDialog = { prod -> viewModel.openDeleteProductDialog(prod) }
+                            )
+                        }
+                        3 -> {
+                            // Tab 3: Tampilan Riwayat Penjualan & Omset
+                            HistoryScreen(
+                                todaySummary = uiState.displayTodaySummary,
+                                transactions = uiState.filteredHistoryTransactions,
+                                searchQuery = uiState.historySearchQuery,
+                                isTodayOnly = uiState.historyFilterTodayOnly,
+                                isLoading = uiState.isLoadingRecent,
+                                onSearchQueryChange = { viewModel.updateHistorySearchQuery(it) },
+                                onFilterTodayToggle = { viewModel.setHistoryFilterTodayOnly(it) },
+                                onRefresh = { viewModel.loadRecent() },
+                                onSelectTransaction = { tx -> viewModel.openHistoryDetail(tx) },
+                                onOpenSettings = { viewModel.openSettings() }
+                            )
+                        }
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                )
-            )
-        },
-        bottomBar = {
-            // Sticky Bottom Bar untuk Kasir
-            if (currentMainTab == 0) {
-                StickyBottomBar(
+                }
+            }
+
+            // Banner Ringkasan Keranjang Melayang (Hanya tampil di Tab Kasir bila keranjang tidak kosong)
+            AnimatedVisibility(
+                visible = currentMainTab == 1 && uiState.cartItemCount > 0,
+                enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+            ) {
+                FloatingCartBanner(
                     cartItemCount = uiState.cartItemCount,
                     totalAmount = uiState.cartTotal,
                     onOpenCart = { viewModel.openCartSheet() },
                     onProceedPayment = { viewModel.openPaymentDialog() }
                 )
-            }
-        }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
-            // Tab Navigasi Utama: Kasir & Riwayat
-            TabRow(
-                selectedTabIndex = currentMainTab,
-                containerColor = MaterialTheme.colorScheme.surface,
-                contentColor = MaterialTheme.colorScheme.primary
-            ) {
-                // Tab 0: Kasir
-                Tab(
-                    selected = currentMainTab == 0,
-                    onClick = { currentMainTab = 0 },
-                    text = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.PointOfSale, contentDescription = null, modifier = Modifier.size(18.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text("Kasir / Katalog (${uiState.products.size} Barang)", fontWeight = FontWeight.Bold)
-                        }
-                    },
-                    modifier = Modifier.testTag("tab_kasir")
-                )
-
-                // Tab 1: Riwayat Transaksi
-                Tab(
-                    selected = currentMainTab == 1,
-                    onClick = {
-                        currentMainTab = 1
-                        viewModel.loadRecent()
-                    },
-                    text = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.History, contentDescription = null, modifier = Modifier.size(18.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text("Riwayat Penjualan", fontWeight = FontWeight.Bold)
-                        }
-                    },
-                    modifier = Modifier.testTag("tab_history")
-                )
-            }
-
-            // Banner Peringatan jika simpan transaksi gagal
-            AnimatedVisibility(visible = uiState.lastFailedSale != null) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 6.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                Icons.Default.Warning,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onErrorContainer,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "Gagal kirim ke Spreadsheet. Keranjang Anda tetap aman.",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onErrorContainer,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-                        Button(
-                            onClick = { viewModel.retryFailedSale() },
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-                            shape = RoundedCornerShape(8.dp),
-                            modifier = Modifier.testTag("retry_failed_sale_button")
-                        ) {
-                            Text("Coba Lagi", fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                        }
-                    }
-                }
-            }
-
-            when (currentMainTab) {
-                0 -> {
-                    // Tampilan Kasir Lengkap
-                    KasirCatalogContent(
-                        uiState = uiState,
-                        categories = categories,
-                        onSelectCategory = { viewModel.selectCategory(it) },
-                        onSearchQueryChange = { viewModel.updateSearchQuery(it) },
-                        onAddToCart = { prod, qty -> viewModel.addToCart(prod, qty) },
-                        onSetQuantity = { id, qty -> viewModel.setItemQuantity(id, qty) },
-                        onEditSellingPrice = { prod -> viewModel.openPriceEditDialog(prod) },
-                        onOpenAddCustomItem = { viewModel.openAddCustomItemDialog() }
-                    )
-                }
-                1 -> {
-                    // Tampilan Riwayat Penjualan
-                    HistoryScreen(
-                        todaySummary = uiState.todaySummary,
-                        transactions = uiState.filteredHistoryTransactions,
-                        searchQuery = uiState.historySearchQuery,
-                        isTodayOnly = uiState.historyFilterTodayOnly,
-                        isLoading = uiState.isLoadingRecent,
-                        onSearchQueryChange = { viewModel.updateHistorySearchQuery(it) },
-                        onFilterTodayToggle = { viewModel.setHistoryFilterTodayOnly(it) },
-                        onRefresh = { viewModel.loadRecent() },
-                        onSelectTransaction = { tx -> viewModel.openHistoryDetail(tx) },
-                        onOpenSettings = { viewModel.openSettings() }
-                    )
-                }
             }
         }
     }
@@ -311,21 +278,25 @@ fun KasirScreen(
             totalAmount = uiState.cartTotal,
             onDismiss = { viewModel.closeCartSheet() },
             onSetQuantity = { id, qty -> viewModel.setItemQuantity(id, qty) },
-            onSetPrice = { id, price -> viewModel.setItemPrice(id, price) },
             onRemoveItem = { id -> viewModel.removeFromCart(id) },
             onClearCart = { viewModel.clearCart() },
             onProceedToPayment = { viewModel.openPaymentDialog() }
         )
     }
 
-    // Dialog Pembayaran
+    // Dialog Pembayaran (Mendukung Tunai dan QRIS Toko)
     if (uiState.isPaymentDialogOpen) {
         PaymentDialog(
             totalAmount = uiState.cartTotal,
             isSaving = uiState.isSavingSale,
             errorMessage = uiState.errorMessage,
-            onDismiss = { viewModel.closePaymentDialog() },
+            initialMethod = if (uiState.isDynamicQrisModalOpen) com.example.model.PaymentMethod.QRIS else com.example.model.PaymentMethod.TUNAI,
+            onDismiss = {
+                viewModel.closePaymentDialog()
+                viewModel.closeDynamicQrisModal()
+            },
             onConfirmPayment = { customer, method, paid ->
+                viewModel.closeDynamicQrisModal()
                 viewModel.processSale(customer, method, paid)
             }
         )
@@ -339,20 +310,11 @@ fun KasirScreen(
         )
     }
 
-    // Dialog Rincian Riwayat Transaksi Lama (Hanya melihat rincian tanpa cetak ulang)
+    // Dialog Rincian Riwayat Transaksi Lama
     uiState.selectedHistoryDetail?.let { tx ->
         TransactionDetailDialog(
             transaction = tx,
             onDismiss = { viewModel.closeHistoryDetail() }
-        )
-    }
-
-    // Dialog Input / Ubah Harga Jual Produk
-    uiState.productToEditPrice?.let { prod ->
-        EditPriceDialog(
-            product = prod,
-            onDismiss = { viewModel.closePriceEditDialog() },
-            onSavePrice = { pId, price -> viewModel.updateProductSellingPrice(pId, price) }
         )
     }
 
@@ -366,19 +328,72 @@ fun KasirScreen(
         )
     }
 
-    // Dialog Pengaturan Spreadsheet
+    // Dialog Pengaturan Spreadsheet & Kelola Harga
     if (uiState.isSettingsOpen) {
         SettingsDialog(
             currentUrl = uiState.appsScriptUrl,
             unpricedCount = uiState.unpricedProductsCount,
             onSaveUrl = { newUrl -> viewModel.updateAppsScriptUrl(newUrl) },
             onSyncNow = { viewModel.loadProducts(); viewModel.loadRecent() },
-            onOpenPriceManagement = { currentMainTab = 0 },
+            onOpenPriceManagement = { currentMainTab = 2 },
             onDismiss = { viewModel.closeSettings() }
+        )
+    }
+
+    // Dialog CRUD: Tambah Produk Baru ke Katalog
+    if (uiState.isAddProductDialogOpen) {
+        ProductFormDialog(
+            initialProduct = null,
+            onDismiss = { viewModel.closeAddProductDialog() },
+            onSaveProduct = { _, name, cat, unit, price ->
+                viewModel.addNewProduct(name, cat, unit, price)
+            }
+        )
+    }
+
+    // Dialog CRUD: Edit Produk Lengkap (Nama, Kategori, Satuan, Harga Jual)
+    uiState.productToEditCrud?.let { prod ->
+        ProductFormDialog(
+            initialProduct = prod,
+            onDismiss = { viewModel.closeEditProductCrudDialog() },
+            onSaveProduct = { id, name, cat, unit, price ->
+                if (id != null) {
+                    viewModel.updateProductDetails(id, name, cat, unit, price)
+                }
+            }
+        )
+    }
+
+    // Dialog CRUD: Konfirmasi Hapus Produk dari Katalog
+    uiState.productToDelete?.let { prod ->
+        AlertDialog(
+            onDismissRequest = { viewModel.closeDeleteProductDialog() },
+            title = {
+                Text("Hapus Produk?", fontWeight = FontWeight.Bold)
+            },
+            text = {
+                Text("Apakah Anda yakin ingin menghapus '${prod.namaProduk}' (${prod.kategori}) dari katalog produk?")
+            },
+            confirmButton = {
+                Button(
+                    onClick = { viewModel.confirmDeleteProduct() },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Hapus", fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.closeDeleteProductDialog() }) {
+                    Text("Batal")
+                }
+            }
         )
     }
 }
 
+/**
+ * Tampilan Katalog Kasir dengan Tata Letak Grid 2 Kolom (Clean Minimalist Neo-POS)
+ */
 @Composable
 private fun KasirCatalogContent(
     uiState: KasirUiState,
@@ -387,17 +402,18 @@ private fun KasirCatalogContent(
     onSearchQueryChange: (String) -> Unit,
     onAddToCart: (com.example.model.Product, Double) -> Unit,
     onSetQuantity: (String, Double) -> Unit,
-    onEditSellingPrice: (com.example.model.Product) -> Unit,
     onOpenAddCustomItem: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
-        // Kolom Pencarian Nama Produk
+        // Kolom Pencarian Bersih & Modern
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            shape = RoundedCornerShape(14.dp),
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                .padding(horizontal = 16.dp, vertical = 6.dp),
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.surface,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
+            shadowElevation = 1.dp
         ) {
             OutlinedTextField(
                 value = uiState.searchQuery,
@@ -405,18 +421,25 @@ private fun KasirCatalogContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("search_product_input"),
-                placeholder = { Text("Cari produk: Leopard, Topsong, Milet, 521...") },
+                placeholder = {
+                    Text(
+                        "Cari produk pakan: Leopard, Topsong, Milet...",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    )
+                },
                 leadingIcon = {
                     Icon(
                         Icons.Default.Search,
                         contentDescription = "Cari",
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp)
                     )
                 },
                 trailingIcon = {
                     if (uiState.searchQuery.isNotEmpty()) {
                         IconButton(onClick = { onSearchQueryChange("") }) {
-                            Icon(Icons.Default.Clear, contentDescription = "Hapus pencarian")
+                            Icon(Icons.Default.Clear, contentDescription = "Hapus pencarian", modifier = Modifier.size(18.dp))
                         }
                     }
                 },
@@ -425,11 +448,11 @@ private fun KasirCatalogContent(
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
                     unfocusedBorderColor = Color.Transparent
                 ),
-                shape = RoundedCornerShape(14.dp)
+                shape = RoundedCornerShape(16.dp)
             )
         }
 
-        // Kategori Chips + Tombol "+ Item Bebas" Langsung di Kasir
+        // Kategori Filter Chips + Tombol "+ Item Bebas"
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -438,47 +461,47 @@ private fun KasirCatalogContent(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Tombol Tambah Item Bebas / Manual
+            // Tombol Tambah Item Bebas / Manual Langsung di Kasir
             Surface(
                 modifier = Modifier
                     .clickable { onOpenAddCustomItem() }
                     .testTag("btn_add_custom_item"),
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(20.dp),
                 color = MaterialTheme.colorScheme.primaryContainer,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
                         Icons.Default.Add,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(15.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = "+ Item Bebas",
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp
+                        fontSize = 12.sp
                     )
                 }
             }
 
-            // Kategori Chips
+            // Kategori Filter Chips Modern
             categories.forEach { (catKey, catLabel) ->
                 val isSelected = uiState.selectedCategory.equals(catKey, ignoreCase = true)
                 Surface(
                     modifier = Modifier
                         .clickable { onSelectCategory(catKey) }
                         .testTag("category_chip_$catKey"),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(20.dp),
                     color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
                     border = BorderStroke(
                         width = if (isSelected) 1.5.dp else 1.dp,
-                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.35f)
                     ),
                     shadowElevation = if (isSelected) 2.dp else 0.dp
                 ) {
@@ -486,8 +509,8 @@ private fun KasirCatalogContent(
                         text = catLabel,
                         color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                        fontSize = 14.sp,
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)
+                        fontSize = 13.sp,
+                        modifier = Modifier.padding(horizontal = 13.dp, vertical = 7.dp)
                     )
                 }
             }
@@ -495,7 +518,7 @@ private fun KasirCatalogContent(
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        // Daftar Produk dalam Kasir
+        // Daftar Produk: Grid 2 Kolom (Sesuai Pilihan Pengguna)
         val filtered = uiState.filteredProducts
 
         if (uiState.isLoadingProducts && filtered.isEmpty()) {
@@ -531,33 +554,27 @@ private fun KasirCatalogContent(
         } else {
             val cartMap = remember(uiState.cart) { uiState.cart.associateBy { it.product.id } }
 
-            LazyColumn(
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 16.dp),
+                contentPadding = PaddingValues(top = 4.dp, bottom = if (uiState.cartItemCount > 0) 80.dp else 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                item(key = "top_spacer", contentType = "spacer") {
-                    Spacer(modifier = Modifier.height(2.dp))
-                }
-
                 items(
                     items = filtered,
                     key = { it.id },
-                    contentType = { "product_card" }
+                    contentType = { "product_grid_card" }
                 ) { product ->
                     val cartItem = cartMap[product.id]
                     ProductCard(
                         product = product,
                         cartItem = cartItem,
                         onAddToCart = onAddToCart,
-                        onSetQuantity = onSetQuantity,
-                        onEditSellingPrice = onEditSellingPrice
+                        onSetQuantity = onSetQuantity
                     )
-                }
-
-                item(key = "bottom_spacer", contentType = "spacer") {
-                    Spacer(modifier = Modifier.height(80.dp)) // Padding agar tidak tertutup sticky bar
                 }
             }
         }
@@ -565,11 +582,10 @@ private fun KasirCatalogContent(
 }
 
 /**
- * Sticky Bottom Bar selalu terlihat di bagian bawah layar:
- * Menampilkan total belanja, jumlah item, dan tombol Bayar / Struk.
+ * Floating Cart Banner Melayang di atas Floating Navigation Bar
  */
 @Composable
-private fun StickyBottomBar(
+private fun FloatingCartBanner(
     cartItemCount: Double,
     totalAmount: Double,
     onOpenCart: () -> Unit,
@@ -578,95 +594,109 @@ private fun StickyBottomBar(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(elevation = 12.dp)
+            .padding(horizontal = 16.dp, vertical = 4.dp)
+            .shadow(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(20.dp),
+                ambientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+            )
             .testTag("sticky_bottom_bar"),
+        shape = RoundedCornerShape(20.dp),
         color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 6.dp
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)),
+        tonalElevation = 4.dp
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 10.dp),
+                .padding(horizontal = 12.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Tombol Keranjang Belanja dengan Badge
-            Surface(
+            // Tombol Rincian Keranjang
+            Row(
                 modifier = Modifier
                     .clickable { onOpenCart() }
-                    .testTag("open_cart_sheet_button"),
-                shape = RoundedCornerShape(12.dp),
-                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+                    .testTag("open_cart_sheet_button")
+                    .padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    BadgedBox(
-                        badge = {
-                            if (cartItemCount > 0) {
-                                Badge(
-                                    containerColor = MaterialTheme.colorScheme.primary,
-                                    contentColor = MaterialTheme.colorScheme.onPrimary
-                                ) {
-                                    Text(
-                                        text = formatQuantity(cartItemCount),
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 11.sp
-                                    )
-                                }
-                            }
+                BadgedBox(
+                    badge = {
+                        Badge(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        ) {
+                            Text(
+                                text = formatQuantity(cartItemCount),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 11.sp
+                            )
                         }
+                    }
+                ) {
+                    Surface(
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        modifier = Modifier.size(38.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.ShoppingCart,
-                            contentDescription = "Keranjang",
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(24.dp)
-                        )
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Default.ShoppingCart,
+                                contentDescription = "Keranjang",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
+                }
 
-                    Spacer(modifier = Modifier.width(10.dp))
+                Spacer(modifier = Modifier.width(10.dp))
 
-                    Column {
-                        Text(
-                            text = "Total Belanja",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = formatRupiah(totalAmount),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
+                Column {
+                    Text(
+                        text = "Total Belanja",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = formatRupiah(totalAmount),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontSize = 16.sp
+                    )
                 }
             }
 
             Spacer(modifier = Modifier.width(10.dp))
 
-            // Tombol Bayar / Simpan & Cetak Struk
+            // Tombol Bayar Tunggal
             Button(
                 onClick = onProceedPayment,
-                enabled = cartItemCount > 0,
                 modifier = Modifier
-                    .weight(1f)
-                    .height(48.dp)
+                    .height(46.dp)
                     .testTag("sticky_pay_button"),
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant
-                )
+                    containerColor = MaterialTheme.colorScheme.primary
+                ),
+                contentPadding = PaddingValues(horizontal = 18.dp)
             ) {
-                Text(
-                    text = "Bayar / Struk",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 15.sp
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "Bayar",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
             }
         }
     }

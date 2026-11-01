@@ -56,7 +56,8 @@ fun AddCustomItemDialog(
     var selectedUnit by remember { mutableStateOf("pcs") }
     var selectedCategory by remember { mutableStateOf("Burung") }
     var rawQty by remember { mutableStateOf("1") }
-    var isError by remember { mutableStateOf(false) }
+    var nameError by remember { mutableStateOf<String?>(null) }
+    var priceError by remember { mutableStateOf<String?>(null) }
 
     val commonUnits = listOf("pcs", "bungkus", "kg", "ons", "ekor", "botol", "sachet")
     val categories = listOf("Burung", "Ayam", "Kucing", "Ikan", "Lainnya")
@@ -122,11 +123,15 @@ fun AddCustomItemDialog(
                     value = name,
                     onValueChange = {
                         name = it
-                        isError = false
+                        if (it.isNotBlank()) nameError = null
                     },
-                    label = { Text("Nama Produk / Layanan") },
+                    label = { Text("Nama Produk / Layanan *") },
                     placeholder = { Text("Misal: Jangkrik, Ulat Hongkong, Sangkar...") },
                     singleLine = true,
+                    isError = nameError != null,
+                    supportingText = {
+                        nameError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                    },
                     modifier = Modifier.fillMaxWidth().testTag("custom_item_name_input")
                 )
 
@@ -137,12 +142,17 @@ fun AddCustomItemDialog(
                     value = rawPrice,
                     onValueChange = {
                         rawPrice = it.filter { ch -> ch.isDigit() }
-                        isError = false
+                        priceError = null
                     },
-                    label = { Text("Harga Jual (Rp)") },
+                    label = { Text("Harga Jual (Rp) *") },
                     placeholder = { Text("Contoh: 5000") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    prefix = { Text("Rp ", fontWeight = FontWeight.Bold) },
                     singleLine = true,
+                    isError = priceError != null,
+                    supportingText = {
+                        priceError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                    },
                     modifier = Modifier.fillMaxWidth().testTag("custom_item_price_input")
                 )
 
@@ -247,15 +257,6 @@ fun AddCustomItemDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                if (isError) {
-                    Text(
-                        text = "Mohon isi nama dan harga yang valid",
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                }
-
                 Spacer(modifier = Modifier.height(18.dp))
 
                 // Tombol Aksi
@@ -273,13 +274,26 @@ fun AddCustomItemDialog(
 
                     Button(
                         onClick = {
-                            val p = rawPrice.toDoubleOrNull()
-                            val q = rawQty.replace(",", ".").toDoubleOrNull() ?: 1.0
-                            if (name.isNotBlank() && p != null && p > 0) {
-                                onAddItem(name.trim(), p, selectedUnit, q, selectedCategory)
-                            } else {
-                                isError = true
+                            var hasErr = false
+                            if (name.isBlank()) {
+                                nameError = "Nama produk wajib diisi"
+                                hasErr = true
                             }
+                            val p = rawPrice.toDoubleOrNull()
+                            if (rawPrice.isBlank()) {
+                                priceError = "Harga jual wajib diisi"
+                                hasErr = true
+                            } else if (p == null || p <= 0.0) {
+                                priceError = "Harga jual tidak boleh Rp 0 atau negatif"
+                                hasErr = true
+                            }
+                            val q = rawQty.replace(",", ".").toDoubleOrNull() ?: 1.0
+
+                            if (hasErr || p == null || p <= 0.0) {
+                                return@Button
+                            }
+
+                            onAddItem(name.trim(), p, selectedUnit, q, selectedCategory)
                         },
                         modifier = Modifier
                             .weight(1.5f)

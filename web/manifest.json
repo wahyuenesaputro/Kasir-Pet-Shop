@@ -1,0 +1,21 @@
+{
+  "name": "Kasir Pet Shop POS",
+  "short_name": "Kasir PetShop",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#F8FAFC",
+  "theme_color": "#1E40AF",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://api.iconify.design/lucide:store.svg?color=%231E40AF",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "https://api.iconify.design/lucide:store.svg?color=%231E40AF",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

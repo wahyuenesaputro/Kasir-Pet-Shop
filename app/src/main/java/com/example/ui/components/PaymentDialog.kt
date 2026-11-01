@@ -3,6 +3,7 @@ package com.example.ui.components
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -18,7 +19,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.Print
@@ -46,6 +46,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -59,14 +60,14 @@ fun PaymentDialog(
     totalAmount: Double,
     isSaving: Boolean,
     errorMessage: String?,
+    initialMethod: PaymentMethod = PaymentMethod.TUNAI,
     onDismiss: () -> Unit,
     onConfirmPayment: (customerName: String, paymentMethod: String, paidAmount: Double) -> Unit
 ) {
-    var selectedMethod by remember { mutableStateOf(PaymentMethod.TUNAI) }
-    var customerName by remember { mutableStateOf("") }
+    var selectedMethod by remember { mutableStateOf(initialMethod) }
     var rawPaidInput by remember { mutableStateOf(totalAmount.toLong().toString()) }
 
-    // Jika metode non-tunai (Transfer / QRIS), nominal otomatis pas
+    // Jika metode QRIS, nominal otomatis pas
     LaunchedEffect(selectedMethod) {
         if (selectedMethod != PaymentMethod.TUNAI) {
             rawPaidInput = totalAmount.toLong().toString()
@@ -145,7 +146,7 @@ fun PaymentDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // 1. Pilih Metode Bayar (Tunai, Transfer, QRIS)
+                // 1. Pilih Metode Bayar (Tunai vs QRIS)
                 Text(
                     text = "Metode Pembayaran",
                     style = MaterialTheme.typography.titleSmall,
@@ -155,27 +156,34 @@ fun PaymentDialog(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     PaymentMethod.values().forEach { method ->
                         val isSelected = selectedMethod == method
                         val icon = when (method) {
                             PaymentMethod.TUNAI -> Icons.Default.Payments
-                            PaymentMethod.TRANSFER -> Icons.Default.AccountBalance
                             PaymentMethod.QRIS -> Icons.Default.QrCode
                         }
 
                         Surface(
                             modifier = Modifier
                                 .weight(1f)
-                                .height(56.dp)
+                                .height(54.dp)
                                 .clickable(enabled = !isSaving) { selectedMethod = method }
                                 .testTag("payment_method_${method.name.lowercase()}"),
                             shape = RoundedCornerShape(12.dp),
-                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                            color = if (isSelected) {
+                                if (method == PaymentMethod.QRIS) Color(0xFF16A34A) else MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                            },
                             border = BorderStroke(
                                 1.5.dp,
-                                if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                                if (isSelected) {
+                                    if (method == PaymentMethod.QRIS) Color(0xFF16A34A) else MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                                }
                             )
                         ) {
                             Row(
@@ -186,15 +194,15 @@ fun PaymentDialog(
                                 Icon(
                                     imageVector = icon,
                                     contentDescription = null,
-                                    tint = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+                                    tint = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface,
                                     modifier = Modifier.size(20.dp)
                                 )
-                                Spacer(modifier = Modifier.width(6.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = method.label,
-                                    color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+                                    color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface,
                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                    fontSize = 13.sp
+                                    fontSize = 14.sp
                                 )
                             }
                         }
@@ -203,7 +211,7 @@ fun PaymentDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // 2. Input Nominal Uang yang Dibayar & Kembalian
+                // 2. Input Sesuai Metode Terpilih
                 if (selectedMethod == PaymentMethod.TUNAI) {
                     Text(
                         text = "Uang Diterima (Tunai)",
@@ -252,37 +260,48 @@ fun PaymentDialog(
                         // Tombol Uang Pas
                         Surface(
                             shape = RoundedCornerShape(8.dp),
-                            color = MaterialTheme.colorScheme.secondaryContainer,
-                            modifier = Modifier.clickable(enabled = !isSaving) {
-                                rawPaidInput = totalAmount.toLong().toString()
-                            }
+                            color = MaterialTheme.colorScheme.surfaceVariant,
+                            modifier = Modifier
+                                .clickable(enabled = !isSaving) {
+                                    rawPaidInput = totalAmount.toLong().toString()
+                                }
+                                .testTag("exact_amount_chip")
                         ) {
                             Text(
                                 text = "Uang Pas",
-                                fontSize = 12.sp,
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
 
-                        // Nominal pecahan umum
-                        listOf(10000L, 20000L, 50000L, 100000L, 200000L, 500000L).forEach { denom ->
-                            if (denom >= totalAmount || denom == 100000L || denom == 50000L) {
-                                Surface(
-                                    shape = RoundedCornerShape(8.dp),
-                                    color = MaterialTheme.colorScheme.surfaceVariant,
-                                    modifier = Modifier.clickable(enabled = !isSaving) {
-                                        rawPaidInput = denom.toString()
+                        // Nominal pecahan umum: 5k, 10k, 20k, 50k, 100k (hanya yang >= totalAmount)
+                        val quickAmounts = listOf(5000L, 10000L, 20000L, 50000L, 100000L)
+                        val validAmounts = quickAmounts.filter { it >= totalAmount.toLong() }
+                        val displayAmounts = if (validAmounts.isNotEmpty()) validAmounts else listOf(
+                            ((totalAmount / 10000).toLong() + 1) * 10000,
+                            ((totalAmount / 50000).toLong() + 1) * 50000,
+                            ((totalAmount / 100000).toLong() + 1) * 100000
+                        ).distinct().filter { it > totalAmount.toLong() }
+
+                        displayAmounts.take(4).forEach { amount ->
+                            Surface(
+                                shape = RoundedCornerShape(8.dp),
+                                color = MaterialTheme.colorScheme.surfaceVariant,
+                                modifier = Modifier
+                                    .clickable(enabled = !isSaving) {
+                                        rawPaidInput = amount.toString()
                                     }
-                                ) {
-                                    Text(
-                                        text = formatRupiah(denom.toDouble()),
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.Medium,
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
-                                    )
-                                }
+                                    .testTag("quick_amount_chip_$amount")
+                            ) {
+                                Text(
+                                    text = formatRupiah(amount.toDouble()),
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
                         }
                     }
@@ -319,34 +338,75 @@ fun PaymentDialog(
                         }
                     }
                 } else {
-                    // Non-tunai
-                    Surface(
+                    // QRIS Standar Toko
+                    Card(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f)
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF0FDF4)),
+                        border = BorderStroke(1.2.dp, Color(0xFFBBF7D0)),
+                        shape = RoundedCornerShape(16.dp)
                     ) {
-                        Text(
-                            text = "Pembayaran via ${selectedMethod.label}: Nominal otomatis pas sebesar ${formatRupiah(totalAmount)}. Kembalian: Rp 0.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(14.dp)
-                        )
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = Color(0xFFDCFCE7),
+                                modifier = Modifier.size(52.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = Icons.Default.QrCode,
+                                        contentDescription = "QRIS Toko",
+                                        tint = Color(0xFF16A34A),
+                                        modifier = Modifier.size(28.dp)
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Text(
+                                text = "PEMBAYARAN QRIS TOKO",
+                                fontWeight = FontWeight.ExtraBold,
+                                color = Color(0xFF166534),
+                                fontSize = 15.sp
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "Arahkan pembeli untuk scan QRIS Toko (standee kasir) sebesar:",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color(0xFF15803D),
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Surface(
+                                shape = RoundedCornerShape(10.dp),
+                                color = Color.White,
+                                border = BorderStroke(1.dp, Color(0xFF86EFAC)),
+                                modifier = Modifier.padding(horizontal = 8.dp)
+                            ) {
+                                Text(
+                                    text = formatRupiah(totalAmount),
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Black,
+                                    color = Color(0xFF166534),
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "✓ Nominal pas tanpa kembalian\n✓ Pastikan notifikasi dana masuk diterima sebelum cetak struk",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color(0xFF166534).copy(alpha = 0.8f),
+                                textAlign = TextAlign.Center,
+                                lineHeight = 16.sp
+                            )
+                        }
                     }
                 }
 
                 Spacer(modifier = Modifier.height(14.dp))
-
-                // 3. Nama Pembeli (Opsional)
-                OutlinedTextField(
-                    value = customerName,
-                    onValueChange = { customerName = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("customer_name_input"),
-                    label = { Text("Nama Pembeli (Opsional)") },
-                    singleLine = true,
-                    placeholder = { Text("Misal: Pak Budi / -") },
-                    enabled = !isSaving
-                )
 
                 // Pesan error jika ada
                 if (errorMessage != null) {
@@ -364,7 +424,7 @@ fun PaymentDialog(
                 Button(
                     onClick = {
                         onConfirmPayment(
-                            customerName.ifBlank { "-" },
+                            "-",
                             selectedMethod.label,
                             paidAmount
                         )
@@ -375,7 +435,9 @@ fun PaymentDialog(
                         .height(54.dp)
                         .testTag("submit_payment_button"),
                     shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (selectedMethod == PaymentMethod.QRIS) Color(0xFF16A34A) else MaterialTheme.colorScheme.primary
+                    )
                 ) {
                     if (isSaving) {
                         CircularProgressIndicator(
@@ -388,7 +450,11 @@ fun PaymentDialog(
                     } else {
                         Icon(Icons.Default.Print, contentDescription = null, modifier = Modifier.size(20.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Simpan & Cetak Struk", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        Text(
+                            text = if (selectedMethod == PaymentMethod.QRIS) "Konfirmasi QRIS Lunas & Cetak Struk" else "Simpan & Cetak Struk",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 15.sp
+                        )
                     }
                 }
             }

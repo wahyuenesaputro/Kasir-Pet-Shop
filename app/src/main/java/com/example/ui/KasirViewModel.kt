@@ -8,6 +8,7 @@ import com.example.data.PetShopRepository
 import com.example.data.SampleCatalog
 import com.example.model.CartItem
 import com.example.model.Product
+import com.example.model.ReceiptItemSummary
 import com.example.model.RecentTransactionSummary
 import com.example.model.SaleTransaction
 import com.example.model.TodaySalesSummary
@@ -44,7 +45,16 @@ data class KasirUiState(
     val isAddCustomItemDialogOpen: Boolean = false,
     val historySearchQuery: String = "",
     val historyFilterTodayOnly: Boolean = false,
-    val selectedHistoryDetail: RecentTransactionSummary? = null
+    val selectedHistoryDetail: RecentTransactionSummary? = null,
+    val isAddProductDialogOpen: Boolean = false,
+    val productToEditCrud: Product? = null,
+    val productToDelete: Product? = null,
+    val qrisMerchantName: String = "PET SHOP SEJAHTERA",
+    val qrisNmid: String = "ID1020023456789",
+    val qrisCity: String = "JAKARTA",
+    val qrisPostalCode: String = "12340",
+    val qrisStaticBasePayload: String = "",
+    val isDynamicQrisModalOpen: Boolean = false
 ) {
     val cartTotal: Double
         get() = cart.sumOf { it.subtotal }
@@ -68,11 +78,27 @@ data class KasirUiState(
             }
         }
 
+    val displayTodaySummary: TodaySalesSummary
+        get() {
+            val todayList = recentTransactions.filter { isTodayTransaction(it.tanggal, it.noStruk) }
+            val calculatedTotal = todayList.sumOf { it.total }
+            val calculatedCount = todayList.size
+
+            return if (todaySummary.todayTotal > 0.0 || todaySummary.todayCount > 0) {
+                if (calculatedTotal > todaySummary.todayTotal) {
+                    TodaySalesSummary(calculatedTotal, calculatedCount)
+                } else {
+                    todaySummary
+                }
+            } else {
+                TodaySalesSummary(calculatedTotal, calculatedCount)
+            }
+        }
+
     val filteredHistoryTransactions: List<RecentTransactionSummary>
         get() {
-            val todayStr = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
             val list = if (historyFilterTodayOnly) {
-                recentTransactions.filter { it.tanggal == todayStr }
+                recentTransactions.filter { isTodayTransaction(it.tanggal, it.noStruk) }
             } else {
                 recentTransactions
             }
@@ -92,6 +118,40 @@ data class KasirUiState(
         get() = products.count { !it.isSellable }
 }
 
+fun isTodayTransaction(tanggalStr: String, noStruk: String): Boolean {
+    val now = Date()
+    val todayIso = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(now) // e.g. 2026-10-28
+    val todayCompact = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(now) // e.g. 20261028
+    val todaySlash1 = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(now) // 28/10/2026
+    val todaySlash2 = SimpleDateFormat("d/M/yyyy", Locale.getDefault()).format(now)
+
+    val tgl = tanggalStr.trim()
+
+    // 1. Cek kecocokan tanggal string langsung
+    if (tgl.startsWith(todayIso) || tgl == todaySlash1 || tgl == todaySlash2) {
+        return true
+    }
+
+    // 2. Cek apakah tanggal string mengandung YYYY-MM-DD
+    if (tgl.contains(todayIso)) {
+        return true
+    }
+
+    // 3. Cek format tanggal teks (contoh: "Oct 28" / "28 Oct")
+    val monthShort = SimpleDateFormat("MMM", Locale.US).format(now)
+    val dayStr = SimpleDateFormat("dd", Locale.US).format(now)
+    if (tgl.contains(monthShort, ignoreCase = true) && tgl.contains(dayStr)) {
+        return true
+    }
+
+    // 4. Cek Nomor Struk: PS-YYYYMMDD-HHMMSS (Sangat Akurat dan Pasti)
+    if (noStruk.isNotBlank() && noStruk.contains(todayCompact)) {
+        return true
+    }
+
+    return false
+}
+
 class KasirViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = PetShopRepository()
@@ -100,7 +160,12 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
     private val _uiState = MutableStateFlow(
         KasirUiState(
             products = applyPriceOverrides(SampleCatalog.defaultProducts),
-            appsScriptUrl = prefs.appsScriptUrl
+            appsScriptUrl = prefs.appsScriptUrl,
+            qrisMerchantName = prefs.qrisMerchantName,
+            qrisNmid = prefs.qrisNmid,
+            qrisCity = prefs.qrisCity,
+            qrisPostalCode = prefs.qrisPostalCode,
+            qrisStaticBasePayload = prefs.qrisStaticBasePayload
         )
     )
     val uiState: StateFlow<KasirUiState> = _uiState.asStateFlow()
@@ -113,19 +178,28 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun applyPriceOverrides(rawList: List<Product>): List<Product> {
-        val overrides = prefs.getAllCustomPrices()
-        if (overrides.isEmpty()) return rawList
+        val deletedIds = prefs.getDeletedProductIds()
+        val customCreated = prefs.getCustomCreatedProducts()
+        val overrides = prefs.getProductOverrides()
+        val customPrices = prefs.getAllCustomPrices()
 
-        return rawList.map { prod ->
-            val overridePrice = overrides[prod.id]
+        // 1. Gabungkan produk bawaan/spreadsheet dengan produk kustom buatan kasir
+        val combined = customCreated + rawList
+
+        // 2. Filter produk yang telah dihapus
+        val activeProducts = combined.filterNot { deletedIds.contains(it.id) }
+
+        // 3. Terapkan override nama/satuan/kategori/harga jika ada
+        return activeProducts.map { prod ->
+            var p = overrides[prod.id] ?: prod
+            val overridePrice = customPrices[p.id]
             if (overridePrice != null && overridePrice > 0.0) {
-                prod.copy(
+                p = p.copy(
                     hargaJual = overridePrice,
                     hargaBelumDiisi = false
                 )
-            } else {
-                prod
             }
+            p
         }
     }
 
@@ -255,6 +329,137 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
         _uiState.update { it.copy(productToEditPrice = null) }
     }
 
+    // === CRUD KATALOG: TAMBAH PRODUK BARU ===
+    fun openAddProductDialog() {
+        _uiState.update { it.copy(isAddProductDialogOpen = true) }
+    }
+
+    fun closeAddProductDialog() {
+        _uiState.update { it.copy(isAddProductDialogOpen = false) }
+    }
+
+    fun addNewProduct(name: String, category: String, unit: String, price: Double) {
+        if (name.isBlank()) return
+        val newId = "prod_${System.currentTimeMillis()}"
+        val newProduct = Product(
+            id = newId,
+            kategori = category.ifBlank { "Lainnya" },
+            namaProduk = name.trim(),
+            satuan = unit.ifBlank { "pcs" },
+            hargaJual = price.coerceAtLeast(0.0),
+            hargaBelumDiisi = price <= 0.0
+        )
+
+        // Simpan ke SharedPreferences
+        val currentCreated = prefs.getCustomCreatedProducts().toMutableList()
+        currentCreated.add(0, newProduct)
+        prefs.saveCustomCreatedProducts(currentCreated)
+
+        _uiState.update { state ->
+            val updatedProducts = listOf(newProduct) + state.products
+            state.copy(
+                products = updatedProducts,
+                isAddProductDialogOpen = false,
+                successMessage = "Produk '${newProduct.namaProduk}' berhasil ditambahkan ke katalog!"
+            )
+        }
+    }
+
+    // === CRUD KATALOG: EDIT PRODUK (Nama, Kategori, Satuan, Harga) ===
+    fun openEditProductCrudDialog(product: Product) {
+        _uiState.update { it.copy(productToEditCrud = product) }
+    }
+
+    fun closeEditProductCrudDialog() {
+        _uiState.update { it.copy(productToEditCrud = null) }
+    }
+
+    fun updateProductDetails(
+        productId: String,
+        newName: String,
+        newCategory: String,
+        newUnit: String,
+        newPrice: Double
+    ) {
+        if (newName.isBlank()) return
+
+        val existing = _uiState.value.products.find { it.id == productId } ?: return
+        val updated = existing.copy(
+            namaProduk = newName.trim(),
+            kategori = newCategory.ifBlank { existing.kategori },
+            satuan = newUnit.ifBlank { existing.satuan },
+            hargaJual = newPrice.coerceAtLeast(0.0),
+            hargaBelumDiisi = newPrice <= 0.0
+        )
+
+        // 1. Jika ini produk kustom buatan kasir, update di daftar custom_created
+        val customList = prefs.getCustomCreatedProducts().toMutableList()
+        val customIdx = customList.indexOfFirst { it.id == productId }
+        if (customIdx >= 0) {
+            customList[customIdx] = updated
+            prefs.saveCustomCreatedProducts(customList)
+        } else {
+            // Jika produk bawaan katalog/spreadsheet, simpan di override
+            prefs.saveProductOverride(updated)
+            if (newPrice > 0.0) {
+                prefs.setCustomPrice(productId, newPrice)
+            }
+        }
+
+        _uiState.update { state ->
+            val updatedList = state.products.map { if (it.id == productId) updated else it }
+            val updatedCart = state.cart.map { itm ->
+                if (itm.product.id == productId) {
+                    itm.copy(
+                        product = updated,
+                        customUnitPrice = if (newPrice > 0.0) newPrice else itm.customUnitPrice
+                    )
+                } else {
+                    itm
+                }
+            }
+            state.copy(
+                products = updatedList,
+                cart = updatedCart,
+                productToEditCrud = null,
+                successMessage = "Produk '${updated.namaProduk}' berhasil diperbarui!"
+            )
+        }
+    }
+
+    // === CRUD KATALOG: HAPUS PRODUK ===
+    fun openDeleteProductDialog(product: Product) {
+        _uiState.update { it.copy(productToDelete = product) }
+    }
+
+    fun closeDeleteProductDialog() {
+        _uiState.update { it.copy(productToDelete = null) }
+    }
+
+    fun confirmDeleteProduct() {
+        val target = _uiState.value.productToDelete ?: return
+        val pId = target.id
+
+        // Catat ID di deleted_product_ids_set
+        prefs.addDeletedProductId(pId)
+
+        // Hapus juga dari daftar kustom jika ada
+        val customList = prefs.getCustomCreatedProducts().toMutableList()
+        customList.removeAll { it.id == pId }
+        prefs.saveCustomCreatedProducts(customList)
+
+        _uiState.update { state ->
+            val updatedProducts = state.products.filterNot { it.id == pId }
+            val updatedCart = state.cart.filterNot { it.product.id == pId }
+            state.copy(
+                products = updatedProducts,
+                cart = updatedCart,
+                productToDelete = null,
+                successMessage = "Produk '${target.namaProduk}' telah dihapus dari katalog."
+            )
+        }
+    }
+
     fun removeFromCart(productId: String) {
         _uiState.update { state ->
             state.copy(cart = state.cart.filterNot { it.product.id == productId })
@@ -353,10 +558,11 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
             val result = repository.fetchRecentSales(currentUrl)
             result.fold(
                 onSuccess = { (summary, list) ->
-                    _uiState.update {
-                        it.copy(
+                    _uiState.update { current ->
+                        val merged = (list + current.recentTransactions).distinctBy { tx -> tx.noStruk }
+                        current.copy(
                             todaySummary = summary,
-                            recentTransactions = list,
+                            recentTransactions = merged,
                             isLoadingRecent = false
                         )
                     }
@@ -366,6 +572,29 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
                 }
             )
         }
+    }
+
+    private fun toRecentSummary(sale: SaleTransaction): RecentTransactionSummary {
+        return RecentTransactionSummary(
+            noStruk = sale.receiptNumber,
+            tanggal = sale.date,
+            jam = sale.time,
+            namaPembeli = sale.customerName,
+            metodeBayar = sale.paymentMethod,
+            total = sale.totalAmount,
+            bayar = sale.paidAmount,
+            kembalian = sale.changeAmount,
+            items = sale.items.map { itm ->
+                ReceiptItemSummary(
+                    kategori = itm.product.kategori,
+                    namaProduk = itm.product.namaProduk,
+                    satuan = itm.product.satuan,
+                    jumlah = itm.quantity,
+                    hargaJual = itm.customUnitPrice,
+                    subtotal = itm.subtotal
+                )
+            }
+        )
     }
 
     fun processSale(customerName: String, paymentMethod: String, paidAmount: Double) {
@@ -404,11 +633,14 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
 
             val currentUrl = _uiState.value.appsScriptUrl
             if (currentUrl.isBlank()) {
-                _uiState.update {
-                    it.copy(
+                val newRecent = toRecentSummary(sale)
+                _uiState.update { current ->
+                    val updatedRecents = (listOf(newRecent) + current.recentTransactions).distinctBy { tx -> tx.noStruk }
+                    current.copy(
                         isSavingSale = false,
                         activeReceipt = sale,
                         cart = emptyList(),
+                        recentTransactions = updatedRecents,
                         isPaymentDialogOpen = false,
                         errorMessage = "Transaksi dicatat secara lokal. Buka Pengaturan untuk menyambungkan Spreadsheet."
                     )
@@ -420,11 +652,14 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
             result.fold(
                 onSuccess = { confirmedReceiptNum ->
                     val finalSale = sale.copy(receiptNumber = confirmedReceiptNum)
-                    _uiState.update {
-                        it.copy(
+                    val newRecent = toRecentSummary(finalSale)
+                    _uiState.update { current ->
+                        val updatedRecents = (listOf(newRecent) + current.recentTransactions).distinctBy { tx -> tx.noStruk }
+                        current.copy(
                             isSavingSale = false,
                             activeReceipt = finalSale,
                             cart = emptyList(),
+                            recentTransactions = updatedRecents,
                             isPaymentDialogOpen = false,
                             successMessage = "Transaksi berhasil dicatat ke Google Spreadsheet!"
                         )
@@ -497,5 +732,39 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
 
     fun closeHistoryDetail() {
         _uiState.update { it.copy(selectedHistoryDetail = null) }
+    }
+
+    // === FITUR QRIS DINAMIS ===
+    fun openDynamicQrisModal() {
+        _uiState.update { it.copy(isDynamicQrisModalOpen = true) }
+    }
+
+    fun closeDynamicQrisModal() {
+        _uiState.update { it.copy(isDynamicQrisModalOpen = false) }
+    }
+
+    fun saveQrisSettings(
+        merchantName: String,
+        nmid: String,
+        city: String,
+        postalCode: String,
+        baseStaticPayload: String
+    ) {
+        prefs.qrisMerchantName = merchantName
+        prefs.qrisNmid = nmid
+        prefs.qrisCity = city
+        prefs.qrisPostalCode = postalCode
+        prefs.qrisStaticBasePayload = baseStaticPayload
+
+        _uiState.update {
+            it.copy(
+                qrisMerchantName = prefs.qrisMerchantName,
+                qrisNmid = prefs.qrisNmid,
+                qrisCity = prefs.qrisCity,
+                qrisPostalCode = prefs.qrisPostalCode,
+                qrisStaticBasePayload = prefs.qrisStaticBasePayload,
+                successMessage = "Pengaturan QRIS Toko berhasil disimpan!"
+            )
+        }
     }
 }

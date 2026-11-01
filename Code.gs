@@ -258,7 +258,9 @@ function getRecentSalesJson() {
     }
 
     var now = new Date();
-    var todayStr = Utilities.formatDate(now, Session.getScriptTimeZone() || "GMT+7", "yyyy-MM-dd");
+    var timeZone = Session.getScriptTimeZone() || "GMT+7";
+    var todayStr = Utilities.formatDate(now, timeZone, "yyyy-MM-dd");
+    var todayCompact = todayStr.replace(/-/g, ""); // e.g. "20261028"
 
     // Kelompokkan per No Struk
     var transactionsMap = {};
@@ -269,9 +271,9 @@ function getRecentSalesJson() {
     // Header baris 0, data mulai baris 1
     for (var r = 1; r < data.length; r++) {
       var row = data[r];
-      var tanggal = String(row[0] || "");
-      var jam = String(row[1] || "");
-      var noStruk = String(row[2] || "");
+      var rawTanggal = row[0];
+      var rawJam = row[1];
+      var noStruk = String(row[2] || "").trim();
       var namaPembeli = String(row[3] || "");
       var kategori = String(row[4] || "");
       var namaProduk = String(row[5] || "");
@@ -285,6 +287,46 @@ function getRecentSalesJson() {
       var kembalian = parseNumber(row[14]);
 
       if (!noStruk) continue;
+
+      // Parsing tanggal yang tahan terhadap berbagai format Date / String di Google Sheet
+      var tanggal = "";
+      if (rawTanggal instanceof Date) {
+        tanggal = Utilities.formatDate(rawTanggal, timeZone, "yyyy-MM-dd");
+      } else if (rawTanggal) {
+        var strT = String(rawTanggal).trim();
+        var matchIso = strT.match(/(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/);
+        if (matchIso) {
+          var y = matchIso[1];
+          var m = ("0" + matchIso[2]).slice(-2);
+          var d = ("0" + matchIso[3]).slice(-2);
+          tanggal = y + "-" + m + "-" + d;
+        } else {
+          var matchSlash = strT.match(/(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/);
+          if (matchSlash) {
+            var d = ("0" + matchSlash[1]).slice(-2);
+            var m = ("0" + matchSlash[2]).slice(-2);
+            var y = matchSlash[3];
+            tanggal = y + "-" + m + "-" + d;
+          } else {
+            tanggal = strT;
+          }
+        }
+      }
+
+      // Jika tanggal kosong atau format aneh, ekstrak dari noStruk (PS-YYYYMMDD-HHMMSS)
+      if (!tanggal || tanggal.length < 8) {
+        var matchStruk = noStruk.match(/PS-(\d{4})(\d{2})(\d{2})/);
+        if (matchStruk) {
+          tanggal = matchStruk[1] + "-" + matchStruk[2] + "-" + matchStruk[3];
+        }
+      }
+
+      var jam = "";
+      if (rawJam instanceof Date) {
+        jam = Utilities.formatDate(rawJam, timeZone, "HH:mm:ss");
+      } else if (rawJam) {
+        jam = String(rawJam).trim();
+      }
 
       if (!transactionsMap[noStruk]) {
         transactionsMap[noStruk] = {
@@ -311,8 +353,13 @@ function getRecentSalesJson() {
         subtotal: totalItem
       });
 
-      // Hitung total hari ini
-      if (tanggal === todayStr) {
+      // Hitung total hari ini dengan multi-check (format tanggal & prefix noStruk)
+      var isToday = (tanggal === todayStr);
+      if (!isToday && noStruk.indexOf(todayCompact) !== -1) {
+        isToday = true;
+      }
+
+      if (isToday) {
         todayTotalOmset += totalItem;
         todayReceiptsSet[noStruk] = true;
       }

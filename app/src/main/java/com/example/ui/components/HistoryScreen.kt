@@ -7,6 +7,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,7 +24,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.Refresh
@@ -45,6 +45,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
@@ -55,6 +56,8 @@ import com.example.model.RecentTransactionSummary
 import com.example.model.TodaySalesSummary
 import com.example.model.formatQuantity
 import com.example.model.formatRupiah
+import com.example.ui.theme.NeoCobaltSecondary
+import com.example.ui.theme.NeoSapphirePrimary
 
 @Composable
 fun HistoryScreen(
@@ -72,107 +75,130 @@ fun HistoryScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(horizontal = 16.dp, vertical = 6.dp)
     ) {
-        // Kartu Ringkasan Penjualan Hari Ini
-        Card(
+        // Kartu Ringkasan Penjualan Hari Ini (Neo-POS Sapphire Gradient)
+        Surface(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            shape = RoundedCornerShape(18.dp),
+            shadowElevation = 3.dp,
+            border = BorderStroke(1.dp, NeoSapphirePrimary.copy(alpha = 0.3f))
         ) {
-            Column(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .background(
+                        Brush.linearGradient(
+                            listOf(
+                                NeoSapphirePrimary,
+                                NeoCobaltSecondary
+                            )
+                        )
+                    )
                     .padding(16.dp)
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.TrendingUp,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "Penjualan Hari Ini",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
-
-                    IconButton(
-                        onClick = onRefresh,
-                        enabled = !isLoading,
-                        modifier = Modifier.testTag("refresh_history_button")
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        if (isLoading) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(20.dp),
-                                strokeWidth = 2.dp,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                        } else {
-                            Icon(
-                                imageVector = Icons.Default.Refresh,
-                                contentDescription = "Segarkan riwayat",
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Surface(
+                                shape = RoundedCornerShape(8.dp),
+                                color = Color.White.copy(alpha = 0.2f),
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = Icons.Default.TrendingUp,
+                                        contentDescription = null,
+                                        tint = Color.White,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Penjualan Hari Ini",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
                             )
                         }
+
+                        IconButton(
+                            onClick = onRefresh,
+                            enabled = !isLoading,
+                            modifier = Modifier
+                                .size(34.dp)
+                                .testTag("refresh_history_button")
+                        ) {
+                            if (isLoading) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(18.dp),
+                                    strokeWidth = 2.dp,
+                                    color = Color.White
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.Refresh,
+                                    contentDescription = "Segarkan riwayat",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
                     }
-                }
 
-                Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Bottom
-                ) {
-                    Column {
-                        Text(
-                            text = "Total Omset Hari Ini",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
-                        )
-                        Text(
-                            text = formatRupiah(todaySummary.todayTotal),
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
-
-                    Surface(
-                        shape = RoundedCornerShape(10.dp),
-                        color = MaterialTheme.colorScheme.primary,
-                        tonalElevation = 2.dp
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Bottom
                     ) {
-                        Text(
-                            text = "${todaySummary.todayCount} Transaksi",
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 12.sp
-                        )
+                        Column {
+                            Text(
+                                text = "Total Omset Hari Ini",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.White.copy(alpha = 0.85f)
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = formatRupiah(todaySummary.todayTotal),
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = Color.White,
+                                fontSize = 24.sp
+                            )
+                        }
+
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = Color.White.copy(alpha = 0.22f)
+                        ) {
+                            Text(
+                                text = "${todaySummary.todayCount} Transaksi",
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp
+                            )
+                        }
                     }
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         // Input Pencarian Nota / Nama Pembeli
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(14.dp),
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+            color = MaterialTheme.colorScheme.surface,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
         ) {
             OutlinedTextField(
                 value = searchQuery,
@@ -180,18 +206,25 @@ fun HistoryScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("search_history_input"),
-                placeholder = { Text("Cari nomor nota, pembeli, produk...", fontSize = 13.sp) },
+                placeholder = {
+                    Text(
+                        "Cari nomor nota, pembeli, produk...",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    )
+                },
                 leadingIcon = {
                     Icon(
                         Icons.Default.Search,
                         contentDescription = "Cari",
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(18.dp)
                     )
                 },
                 trailingIcon = {
                     if (searchQuery.isNotEmpty()) {
                         IconButton(onClick = { onSearchQueryChange("") }) {
-                            Icon(Icons.Default.Clear, contentDescription = "Hapus pencarian")
+                            Icon(Icons.Default.Clear, contentDescription = "Hapus pencarian", modifier = Modifier.size(16.dp))
                         }
                     }
                 },
@@ -219,6 +252,11 @@ fun HistoryScreen(
                 selected = !isTodayOnly,
                 onClick = { onFilterTodayToggle(false) },
                 label = { Text("Semua Transaksi", fontWeight = if (!isTodayOnly) FontWeight.Bold else FontWeight.Normal) },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = MaterialTheme.colorScheme.primary,
+                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                ),
+                shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.testTag("filter_all_history")
             )
 
@@ -231,9 +269,14 @@ fun HistoryScreen(
                     Icon(
                         imageVector = Icons.Default.CalendarToday,
                         contentDescription = null,
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(15.dp)
                     )
                 },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = MaterialTheme.colorScheme.primary,
+                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                ),
+                shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.testTag("filter_today_history")
             )
         }
@@ -291,6 +334,7 @@ fun HistoryScreen(
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 items(transactions, key = { it.noStruk }) { tx ->
@@ -314,9 +358,9 @@ private fun HistoryItemCard(
             .fillMaxWidth()
             .clickable { onClick() }
             .testTag("history_item_${tx.noStruk}"),
-        shape = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.35f)),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(
@@ -340,13 +384,14 @@ private fun HistoryItemCard(
 
                 val methodColor = when (tx.metodeBayar.uppercase()) {
                     "TUNAI" -> MaterialTheme.colorScheme.primary
-                    "QRIS" -> Color(0xFF0288D1)
-                    "TRANSFER" -> Color(0xFF7B1FA2)
+                    "QRIS" -> Color(0xFF0284C7)
+                    "TRANSFER" -> Color(0xFF7C3AED)
                     else -> MaterialTheme.colorScheme.secondary
                 }
                 Surface(
-                    shape = RoundedCornerShape(6.dp),
-                    color = methodColor.copy(alpha = 0.15f)
+                    shape = RoundedCornerShape(8.dp),
+                    color = methodColor.copy(alpha = 0.12f),
+                    border = BorderStroke(0.5.dp, methodColor.copy(alpha = 0.35f))
                 ) {
                     Text(
                         text = tx.metodeBayar,
@@ -395,12 +440,11 @@ private fun HistoryItemCard(
             // Baris 3: Cuplikan Rincian Item Barang
             if (tx.items.isNotEmpty()) {
                 Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
+                    shape = RoundedCornerShape(10.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)) {
-                        // Tampilkan 2 item pertama
                         val previewItems = tx.items.take(2)
                         previewItems.forEach { item ->
                             Row(
@@ -453,7 +497,8 @@ private fun HistoryItemCard(
                         text = formatRupiah(tx.total),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.ExtraBold,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primary,
+                        fontSize = 17.sp
                     )
                 }
 
@@ -462,9 +507,9 @@ private fun HistoryItemCard(
                     modifier = Modifier
                         .background(
                             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
-                            shape = RoundedCornerShape(8.dp)
+                            shape = RoundedCornerShape(10.dp)
                         )
-                        .padding(horizontal = 10.dp, vertical = 6.dp)
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
                 ) {
                     Text(
                         text = "Lihat Rincian",

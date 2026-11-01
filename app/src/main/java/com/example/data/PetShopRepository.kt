@@ -114,6 +114,16 @@ class PetShopRepository {
             root.put("paymentMethod", transaction.paymentMethod)
             root.put("paidAmount", transaction.paidAmount)
             root.put("changeAmount", transaction.changeAmount)
+            root.put("totalAmount", transaction.totalAmount)
+
+            // Ringkasan untuk format 6 kolom spreadsheet sederhana
+            val totalQuantity = transaction.items.sumOf { it.quantity }
+            val productSummary = transaction.items.joinToString(", ") { item ->
+                val formattedQty = if (item.quantity % 1.0 == 0.0) item.quantity.toInt().toString() else item.quantity.toString()
+                "${item.product.namaProduk} ($formattedQty ${item.product.satuan})"
+            }
+            root.put("productNamesSummary", productSummary)
+            root.put("totalItems", totalQuantity)
 
             val itemsArray = JSONArray()
             transaction.items.forEach { cartItem ->
