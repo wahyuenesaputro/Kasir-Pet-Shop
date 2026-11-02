@@ -787,14 +787,19 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
         _uiState.update { it.copy(isAdjustBalanceDialogOpen = false) }
     }
 
-    fun adjustCashBalance(newBalance: Double, reason: String = "Penyesuaian Manual") {
+    fun adjustCashBalance(
+        newBalance: Double,
+        mutationType: String = "set",
+        amount: Double = 0.0,
+        reason: String = "Penyesuaian Manual"
+    ) {
         prefs.currentBalance = newBalance
         _uiState.update { it.copy(currentBalance = newBalance, isAdjustBalanceDialogOpen = false) }
 
         val currentUrl = _uiState.value.appsScriptUrl
         if (currentUrl.isNotBlank()) {
             viewModelScope.launch {
-                val res = repository.adjustBalance(currentUrl, newBalance, reason)
+                val res = repository.adjustBalance(currentUrl, newBalance, mutationType, amount, reason)
                 res.fold(
                     onSuccess = { b ->
                         prefs.currentBalance = b

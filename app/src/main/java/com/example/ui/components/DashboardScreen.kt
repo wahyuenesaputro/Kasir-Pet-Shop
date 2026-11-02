@@ -142,18 +142,179 @@ fun DashboardScreen(
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // 0. Kartu Saldo Kas Toko (Cross-Platform Running Balance)
+        // 1. KARTU HERO: TOTAL SALDO KAS TOKO (Gradien Biru Besar Utama)
+        item {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("dashboard_cash_balance_hero_card"),
+                shape = RoundedCornerShape(22.dp),
+                shadowElevation = 6.dp,
+                border = BorderStroke(1.dp, NeoSapphirePrimary.copy(alpha = 0.35f))
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            Brush.linearGradient(
+                                listOf(
+                                    NeoSapphirePrimary,
+                                    NeoCobaltSecondary
+                                )
+                            )
+                        )
+                        .padding(22.dp)
+                ) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        // Header Baris Atas: Label & Tombol Atur Saldo + Status
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Surface(
+                                    shape = RoundedCornerShape(10.dp),
+                                    color = Color.White.copy(alpha = 0.2f),
+                                    modifier = Modifier.size(34.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Icon(
+                                            imageVector = Icons.Default.AccountBalanceWallet,
+                                            contentDescription = "Saldo Kas",
+                                            tint = Color.White,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
+                                }
+                                Column {
+                                    Text(
+                                        text = "TOTAL SALDO KAS TOKO",
+                                        color = Color.White.copy(alpha = 0.85f),
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        letterSpacing = 1.sp
+                                    )
+                                    Text(
+                                        text = "Realtime Cloud & Kasir",
+                                        color = Color.White.copy(alpha = 0.7f),
+                                        fontSize = 10.sp
+                                    )
+                                }
+                            }
+
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                // Status Cloud
+                                Surface(
+                                    shape = RoundedCornerShape(10.dp),
+                                    color = if (isSpreadsheetConnected) Color(0xFF10B981).copy(alpha = 0.3f) else Color.White.copy(alpha = 0.2f),
+                                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.35f))
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Rounded.CheckCircle,
+                                            contentDescription = null,
+                                            tint = if (isSpreadsheetConnected) Color(0xFF6EE7B7) else Color.White,
+                                            modifier = Modifier.size(13.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(
+                                            text = if (isSpreadsheetConnected) "Online" else "Lokal",
+                                            color = Color.White,
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
+
+                                // Tombol Segarkan Saldo
+                                Surface(
+                                    shape = RoundedCornerShape(10.dp),
+                                    color = Color.White.copy(alpha = 0.22f),
+                                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.4f)),
+                                    modifier = Modifier
+                                        .clickable { onRefresh() }
+                                        .testTag("btn_refresh_balance_dashboard")
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Refresh,
+                                            contentDescription = "Segarkan",
+                                            tint = Color.White,
+                                            modifier = Modifier.size(13.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(
+                                            text = "Segarkan",
+                                            color = Color.White,
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(18.dp))
+
+                        // Nominal Saldo Kas Besar
+                        Text(
+                            text = formatRupiah(currentBalance),
+                            color = Color.White,
+                            fontSize = 34.sp,
+                            fontWeight = FontWeight.Black,
+                            fontFamily = FontFamily.SansSerif,
+                            modifier = Modifier.testTag("dashboard_balance_amount_text")
+                        )
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        // Subtitle info
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Surface(
+                                shape = CircleShape,
+                                color = Color(0xFF6EE7B7),
+                                modifier = Modifier.size(7.dp)
+                            ) {}
+                            Text(
+                                text = "Bertambah otomatis dari transaksi Tunai & QRIS",
+                                color = Color.White.copy(alpha = 0.9f),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Normal
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        // 2. KARTU TERPISAH KHUSUS: OMSET HARI INI (Tepat di bawah Saldo)
         item {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .testTag("dashboard_cash_balance_card"),
-                shape = RoundedCornerShape(20.dp),
+                    .testTag("dashboard_today_omset_card"),
+                shape = RoundedCornerShape(18.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFF0F172A)
+                    containerColor = MaterialTheme.colorScheme.surface
                 ),
-                border = BorderStroke(1.dp, Color(0xFF334155)),
-                elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(
                     modifier = Modifier
@@ -171,213 +332,70 @@ fun DashboardScreen(
                         ) {
                             Surface(
                                 shape = RoundedCornerShape(12.dp),
-                                color = Color(0xFF10B981).copy(alpha = 0.2f),
+                                color = MaterialTheme.colorScheme.primaryContainer,
                                 modifier = Modifier.size(38.dp)
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(
-                                        imageVector = Icons.Default.AccountBalanceWallet,
-                                        contentDescription = "Saldo Kas",
-                                        tint = Color(0xFF34D399),
-                                        modifier = Modifier.size(22.dp)
+                                        imageVector = Icons.Default.TrendingUp,
+                                        contentDescription = "Omset Hari Ini",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(20.dp)
                                     )
                                 }
                             }
                             Column {
                                 Text(
-                                    text = "TOTAL SALDO KAS TOKO",
-                                    color = Color(0xFF94A3B8),
+                                    text = "OMSET HARI INI",
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
                                     letterSpacing = 1.sp
                                 )
                                 Text(
-                                    text = "Realtime Cloud & Kasir",
-                                    color = Color(0xFF64748B),
-                                    fontSize = 10.sp
+                                    text = currentDateStr,
+                                    color = MaterialTheme.colorScheme.outline,
+                                    fontSize = 11.sp
                                 )
                             }
                         }
 
-                        // Tombol Atur / Ubah Saldo
-                        FilledTonalButton(
-                            onClick = onAdjustBalance,
+                        // Badge Jumlah Transaksi Hari Ini
+                        Surface(
                             shape = RoundedCornerShape(10.dp),
-                            colors = ButtonDefaults.filledTonalButtonColors(
-                                containerColor = Color(0xFF1E293B),
-                                contentColor = Color(0xFF38BDF8)
-                            ),
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                            modifier = Modifier
-                                .height(34.dp)
-                                .testTag("btn_adjust_balance_dashboard")
+                            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Edit,
-                                contentDescription = null,
-                                modifier = Modifier.size(14.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = "Atur Saldo",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Receipt,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.secondary,
+                                    modifier = Modifier.size(13.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = "${todaySummary.todayCount} Transaksi",
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
                     }
 
                     Spacer(modifier = Modifier.height(14.dp))
 
                     Text(
-                        text = formatRupiah(currentBalance),
-                        color = Color(0xFF10B981),
-                        fontSize = 32.sp,
-                        fontWeight = FontWeight.ExtraBold,
+                        text = formatRupiah(todaySummary.todayTotal),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Black,
                         fontFamily = FontFamily.SansSerif,
-                        modifier = Modifier.testTag("dashboard_balance_amount_text")
+                        modifier = Modifier.testTag("dashboard_today_omset_text")
                     )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Surface(
-                            shape = CircleShape,
-                            color = Color(0xFF10B981).copy(alpha = 0.2f),
-                            modifier = Modifier.size(8.dp)
-                        ) {}
-                        Text(
-                            text = "Otomatis bertambah dari tiap penjualan Tunai & QRIS",
-                            color = Color(0xFF94A3B8),
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Normal
-                        )
-                    }
-                }
-            }
-        }
-
-        // 1. Header Banner & Status Hari Ini
-        item {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                shadowElevation = 4.dp,
-                border = BorderStroke(1.dp, NeoSapphirePrimary.copy(alpha = 0.25f))
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(
-                            Brush.linearGradient(
-                                listOf(
-                                    NeoSapphirePrimary,
-                                    NeoCobaltSecondary
-                                )
-                            )
-                        )
-                        .padding(20.dp)
-                ) {
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column {
-                                Text(
-                                    text = "Ringkasan Penjualan",
-                                    color = Color.White.copy(alpha = 0.85f),
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Medium
-                                )
-                                Text(
-                                    text = currentDateStr,
-                                    color = Color.White,
-                                    fontSize = 15.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-
-                            Surface(
-                                shape = RoundedCornerShape(12.dp),
-                                color = if (isSpreadsheetConnected) Color(0xFF10B981).copy(alpha = 0.25f) else Color.White.copy(alpha = 0.2f),
-                                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.4f))
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Rounded.CheckCircle,
-                                        contentDescription = null,
-                                        tint = if (isSpreadsheetConnected) Color(0xFF6EE7B7) else Color.White,
-                                        modifier = Modifier.size(14.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(
-                                        text = if (isSpreadsheetConnected) "Online" else "Lokal",
-                                        color = Color.White,
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        // Omset Hari Ini Utama
-                        Text(
-                            text = "OMSET HARI INI",
-                            color = Color.White.copy(alpha = 0.75f),
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            letterSpacing = 1.sp
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = formatRupiah(todaySummary.todayTotal),
-                            color = Color.White,
-                            fontSize = 28.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            fontFamily = FontFamily.SansSerif,
-                            modifier = Modifier.testTag("dashboard_today_omset_text")
-                        )
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Surface(
-                                    shape = CircleShape,
-                                    color = Color.White.copy(alpha = 0.2f),
-                                    modifier = Modifier.size(24.dp)
-                                ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Icon(
-                                            Icons.Default.Receipt,
-                                            contentDescription = null,
-                                            tint = Color.White,
-                                            modifier = Modifier.size(14.dp)
-                                        )
-                                    }
-                                }
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(
-                                    text = "${todaySummary.todayCount} transaksi hari ini",
-                                    color = Color.White.copy(alpha = 0.95f),
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Medium
-                                )
-                            }
-                        }
-                    }
                 }
             }
         }

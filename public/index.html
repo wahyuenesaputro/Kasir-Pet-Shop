@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Kasir Pet Shop POS</title>
+  <title>Kasir Pet Shop POS (Desktop & Mobile)</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1E40AF">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -15,7 +15,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   
   <style>
-    /* Styling cetak thermal 58mm/80mm untuk printer Bluetooth / AirPrint iOS */
+    /* Styling cetak thermal 58mm/80mm untuk printer Bluetooth / USB / AirPrint iOS */
     @media print {
       body * { visibility: hidden; }
       #receipt-modal-content, #receipt-modal-content * { visibility: visible; }
@@ -37,30 +37,81 @@
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-blue-200">
+<body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-blue-200 min-h-screen flex flex-col">
 
-  <!-- TOP HEADER & NAVIGATION (IOS FRIENDLY) -->
+  <!-- TOP HEADER & NAVIGATION (RESPONSIF DESKTOP & MOBILE) -->
   <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 safe-top shadow-sm">
-    <div class="max-w-md mx-auto px-4 py-2.5 flex items-center justify-between">
-      <div class="flex items-center space-x-2">
-        <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-sm">
-          <i data-lucide="store" class="w-4 h-4"></i>
-        </div>
-        <span class="font-extrabold text-slate-800 text-base tracking-tight">Kasir Pet Shop</span>
-      </div>
+    <div class="max-w-7xl mx-auto px-4 lg:px-6 py-2.5 flex items-center justify-between">
       
-      <div class="flex items-center space-x-1">
-        <button onclick="openAddProductModal()" class="p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition" title="Tambah Produk">
+      <!-- Brand & Status -->
+      <div class="flex items-center space-x-3">
+        <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-sm flex-shrink-0">
+          <i data-lucide="store" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="font-extrabold text-slate-900 text-base lg:text-lg tracking-tight">Kasir Pet Shop</span>
+            <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
+              POS Workstation
+            </span>
+          </div>
+          <p class="text-[10px] text-slate-400 hidden sm:block">Ayam • Burung • Kucing • Ikan</p>
+        </div>
+      </div>
+
+      <!-- DESKTOP CENTER NAVIGATION TABS (TAMPIL DI LAYAR BESAR) -->
+      <nav class="hidden lg:flex items-center bg-slate-100 p-1 rounded-xl space-x-1 border border-slate-200/80">
+        <button onclick="switchTab('kasir')" id="desktop-nav-kasir" class="py-1.5 px-4 rounded-lg text-xs font-bold flex items-center space-x-2 transition bg-blue-600 text-white shadow-sm">
+          <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+          <span>Kasir POS</span>
+        </button>
+        <button onclick="switchTab('dashboard')" id="desktop-nav-dashboard" class="py-1.5 px-4 rounded-lg text-xs font-bold flex items-center space-x-2 transition text-slate-600 hover:text-slate-900 hover:bg-white/60">
+          <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+          <span>Dashboard & Saldo</span>
+        </button>
+        <button onclick="switchTab('riwayat')" id="desktop-nav-riwayat" class="py-1.5 px-4 rounded-lg text-xs font-bold flex items-center space-x-2 transition text-slate-600 hover:text-slate-900 hover:bg-white/60">
+          <i data-lucide="history" class="w-4 h-4"></i>
+          <span>Riwayat Mutasi</span>
+        </button>
+      </nav>
+      
+      <!-- ACTION BUTTONS & SALDO PREVIEW -->
+      <div class="flex items-center space-x-2">
+        <!-- Live Saldo Pill (Desktop Only) -->
+        <div onclick="openSettingsWithTab('balance')" class="hidden xl:flex items-center space-x-2 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl cursor-pointer transition" title="Klik untuk atur saldo">
+          <i data-lucide="wallet" class="w-4 h-4 text-blue-600"></i>
+          <div>
+            <span class="text-[10px] text-blue-600 font-bold block uppercase leading-none">Saldo Kas</span>
+            <span class="text-xs font-black text-slate-900 leading-none" id="header-balance-preview">Rp 0</span>
+          </div>
+        </div>
+
+        <!-- Download APK Link -->
+        <a href="KasirPetShop.apk" download class="hidden sm:inline-flex items-center space-x-1.5 py-1.5 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold transition shadow-sm" title="Download APK Kasir Android">
+          <i data-lucide="smartphone" class="w-4 h-4 text-emerald-600"></i>
+          <span>Unduh APK</span>
+        </a>
+
+        <!-- Tambah Produk Button -->
+        <button onclick="openAddProductModal()" class="p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-xl transition border border-transparent hover:border-slate-200" title="Tambah Produk Baru">
           <i data-lucide="plus-circle" class="w-5 h-5"></i>
         </button>
-        <button onclick="openSettingsModal()" class="p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition" title="Pengaturan">
+
+        <!-- Atur Saldo Button (Layar Sedang / Besar) -->
+        <button onclick="openSettingsWithTab('balance')" class="hidden md:inline-flex items-center space-x-1.5 py-1.5 px-3 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 rounded-xl text-xs font-bold transition" title="Atur Saldo Kasir">
+          <i data-lucide="sliders" class="w-4 h-4"></i>
+          <span>Atur Saldo</span>
+        </button>
+
+        <!-- Pengaturan General -->
+        <button onclick="openSettingsModal()" class="p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-xl transition border border-transparent hover:border-slate-200" title="Pengaturan & Koneksi Spreadsheet">
           <i data-lucide="settings" class="w-5 h-5"></i>
         </button>
       </div>
     </div>
 
-    <!-- TAB NAVIGATION BAR DI ATAS -->
-    <div class="max-w-md mx-auto px-4 pb-2 flex space-x-1">
+    <!-- MOBILE TAB NAVIGATION BAR (< lg) -->
+    <div class="max-w-md mx-auto px-4 pb-2 flex space-x-1 lg:hidden">
       <button onclick="switchTab('dashboard')" id="nav-dashboard" class="flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold flex items-center justify-center space-x-1.5 transition text-slate-500 hover:bg-slate-100">
         <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
         <span>Dashboard</span>
@@ -76,102 +127,250 @@
     </div>
   </header>
 
-  <!-- MAIN CONTAINER (MAX-W-MD UNTUK TAMPILAN MOBILE/TABLET RAPI) -->
-  <main class="max-w-md mx-auto px-4 pt-3 pb-32">
+  <!-- MAIN CONTAINER: MAX-W-7XL RESPONSIF UNTUK PC / LAPTOP -->
+  <main class="max-w-7xl mx-auto px-4 lg:px-6 pt-4 pb-32 lg:pb-12 flex-1 w-full">
 
-    <!-- SCREEN 1: KASIR (UTAMA) -->
-    <section id="screen-kasir" class="space-y-3">
-      <!-- Search Bar -->
-      <div class="relative">
-        <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3 text-slate-400"></i>
-        <input type="text" id="search-input" oninput="renderProducts()" placeholder="Cari pakan, kandang, vitamin..." class="w-full pl-10 pr-4 py-2 bg-white rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent shadow-sm">
-      </div>
+    <!-- SCREEN 1: KASIR (DUAL-PANEL DESKTOP & FLUID MOBILE) -->
+    <section id="screen-kasir">
+      <div class="lg:grid lg:grid-cols-12 lg:gap-6 items-start">
+        
+        <!-- KOLOM KIRI (KATALOG PRODUK): 7 / 8 KOLOM DI DESKTOP -->
+        <div class="lg:col-span-7 xl:col-span-8 space-y-3.5">
+          
+          <!-- Search Bar with Shortcut hint for desktop -->
+          <div class="relative">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3 text-slate-400"></i>
+            <input type="text" id="search-input" oninput="renderProducts()" placeholder="Cari pakan, kandang, vitamin, obat..." class="w-full pl-10 pr-12 py-2.5 bg-white rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent shadow-sm">
+            <span class="hidden md:inline-flex absolute right-3 top-2.5 px-1.5 py-0.5 bg-slate-100 text-slate-400 text-[10px] font-mono rounded border border-slate-200">
+              /
+            </span>
+          </div>
 
-      <!-- Kategori Filter Chips -->
-      <div class="flex space-x-2 overflow-x-auto no-scrollbar py-1" id="category-chips">
-        <!-- Rendered via JS -->
-      </div>
+          <!-- Kategori Filter Chips -->
+          <div class="flex space-x-2 overflow-x-auto no-scrollbar py-1" id="category-chips">
+            <!-- Rendered via JS -->
+          </div>
 
-      <!-- Grid Produk 2 Kolom -->
-      <div class="grid grid-cols-2 gap-2.5 pt-1" id="product-grid">
-        <!-- Rendered via JS -->
+          <!-- Grid Produk (2 kolom di mobile, 3 di tablet, 4 di layar lebar) -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-3 pt-1" id="product-grid">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+
+        <!-- KOLOM KANAN: DESKTOP CHECKOUT SIDEBAR (STICKY PADA LAYAR BESAR >= lg) -->
+        <aside class="hidden lg:block lg:col-span-5 xl:col-span-4 sticky top-20">
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-4">
+            
+            <!-- Sidebar Header -->
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div class="flex items-center space-x-2">
+                <div class="w-7 h-7 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
+                  <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+                </div>
+                <h3 class="font-extrabold text-slate-900 text-sm">Pesanan Kasir</h3>
+              </div>
+              <div class="flex items-center space-x-2">
+                <span id="desktop-cart-count-badge" class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-blue-600 text-white">0 Item</span>
+                <button onclick="clearCart()" class="text-xs font-semibold text-slate-400 hover:text-red-600 transition" title="Kosongkan keranjang">
+                  Kosongkan
+                </button>
+              </div>
+            </div>
+
+            <!-- Daftar Item Keranjang Desktop -->
+            <div id="desktop-cart-items-container" class="space-y-2 max-h-[260px] overflow-y-auto pr-1">
+              <!-- Rendered via JS -->
+            </div>
+
+            <!-- Divider -->
+            <div class="border-t border-slate-100 pt-3 space-y-3">
+              
+              <!-- Nama Pembeli (Opsional) -->
+              <div>
+                <label class="text-[11px] font-bold text-slate-600 block mb-1">Nama Pembeli (Opsional):</label>
+                <input type="text" id="desktop-cust-name" value="Pelanggan Umum" placeholder="Nama Pelanggan..." class="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-600">
+              </div>
+
+              <!-- Metode Pembayaran -->
+              <div>
+                <label class="text-[11px] font-bold text-slate-600 block mb-1">Metode Pembayaran:</label>
+                <div class="grid grid-cols-2 gap-1.5">
+                  <button onclick="setPaymentMethod('Tunai')" id="desktop-btn-tunai" class="py-2 px-2.5 rounded-xl border-2 border-blue-600 bg-blue-600 text-white font-bold text-xs flex items-center justify-center space-x-1.5 transition">
+                    <i data-lucide="banknote" class="w-3.5 h-3.5"></i>
+                    <span>Tunai (Cash)</span>
+                  </button>
+                  <button onclick="setPaymentMethod('QRIS')" id="desktop-btn-qris" class="py-2 px-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 font-bold text-xs flex items-center justify-center space-x-1.5 transition">
+                    <i data-lucide="qr-code" class="w-3.5 h-3.5"></i>
+                    <span>QRIS Toko</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Panel Tunai Desktop -->
+              <div id="desktop-panel-tunai" class="space-y-2.5 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                <div class="flex items-center justify-between">
+                  <label class="text-xs font-bold text-slate-700">Uang Diterima:</label>
+                  <span id="desktop-cash-underpaid-warning" class="text-[11px] text-red-500 font-semibold hidden">Kurang</span>
+                </div>
+                <div class="relative">
+                  <span class="absolute left-3 top-2 text-xs font-bold text-slate-400">Rp</span>
+                  <input type="number" id="desktop-cash-paid-input" oninput="calculateDesktopChange()" class="w-full pl-9 pr-3 py-1.5 rounded-lg border border-slate-300 text-sm font-black text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                </div>
+
+                <!-- Pilihan Cepat Nominal -->
+                <div class="flex flex-wrap gap-1" id="desktop-quick-cash-chips">
+                  <!-- Chips via JS -->
+                </div>
+
+                <!-- Kembalian -->
+                <div class="flex items-center justify-between pt-1 border-t border-slate-200 text-xs">
+                  <span class="font-bold text-slate-600">Kembalian:</span>
+                  <span class="font-black text-emerald-700 text-base" id="desktop-change-amount-display">Rp 0</span>
+                </div>
+              </div>
+
+              <!-- Panel QRIS Desktop -->
+              <div id="desktop-panel-qris" class="hidden bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-center space-y-1">
+                <div class="flex items-center justify-center space-x-2 text-emerald-800 font-bold text-xs">
+                  <i data-lucide="qr-code" class="w-4 h-4"></i>
+                  <span>Scan QRIS Toko (Nominal Pas)</span>
+                </div>
+                <div class="text-base font-black text-emerald-800" id="desktop-qris-amount">Rp 0</div>
+                <p class="text-[10px] text-emerald-600">Pastikan notifikasi dana masuk sudah tampil.</p>
+              </div>
+
+              <!-- Ringkasan Total Tagihan -->
+              <div class="pt-1 flex items-baseline justify-between">
+                <div>
+                  <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Total Tagihan</span>
+                  <span class="text-[10px] text-slate-500">Otomatis masuk mutasi kas</span>
+                </div>
+                <span class="text-2xl font-black text-blue-700" id="desktop-total-display">Rp 0</span>
+              </div>
+
+              <!-- Tombol Checkout Utama Desktop -->
+              <button onclick="submitDesktopPayment()" id="desktop-btn-submit" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-black text-sm rounded-xl shadow-md transition flex items-center justify-center space-x-2">
+                <i data-lucide="printer" class="w-4 h-4"></i>
+                <span id="desktop-btn-submit-text">Bayar & Cetak Struk (F2)</span>
+              </button>
+            </div>
+          </div>
+        </aside>
+
       </div>
     </section>
 
-    <!-- SCREEN 2: DASHBOARD -->
+    <!-- SCREEN 2: DASHBOARD (RESPONSIF GRID DI DESKTOP) -->
     <section id="screen-dashboard" class="hidden space-y-4">
-      <!-- KARTU HERO TOTAL SALDO KAS TOKO (CROSS PLATFORM) -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 text-white shadow-xl relative overflow-hidden">
-        <div class="flex items-center justify-between mb-3">
-          <div class="flex items-center space-x-2.5">
-            <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-              <i data-lucide="wallet" class="w-5 h-5"></i>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        
+        <!-- KARTU HERO: TOTAL SALDO KAS TOKO (GRADIEN BIRU BESAR UTAMA) -->
+        <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-5 text-white shadow-xl relative overflow-hidden flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center space-x-2.5">
+                <div class="w-10 h-10 rounded-xl bg-white/20 text-white flex items-center justify-center">
+                  <i data-lucide="wallet" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <p class="text-xs font-bold text-blue-100 tracking-wider uppercase">Total Saldo Kas Toko</p>
+                  <span class="text-[11px] text-blue-200">Realtime Cloud Google Sheets</span>
+                </div>
+              </div>
+              <button onclick="syncData()" class="py-1.5 px-3 bg-white/20 hover:bg-white/30 text-white rounded-xl text-xs font-bold transition flex items-center space-x-1.5 border border-white/30 backdrop-blur-sm" title="Segarkan Saldo">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                <span>Segarkan</span>
+              </button>
             </div>
-            <div>
-              <p class="text-[11px] font-bold text-slate-400 tracking-wider uppercase">Total Saldo Kas Toko</p>
-              <span class="text-[10px] text-slate-500">Realtime Cloud & Kasir</span>
+            <h2 class="text-3xl lg:text-4xl font-black text-white tracking-tight mt-2" id="dash-total-balance">Rp 0</h2>
+          </div>
+          <div class="mt-4 pt-3 border-t border-white/20 flex items-center justify-between text-xs text-blue-100">
+            <div class="flex items-center space-x-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+              <span>Tersinkron dengan Riwayat Kas 7 Kolom</span>
+            </div>
+            <button onclick="openSettingsWithTab('balance')" class="underline hover:text-white font-semibold">Atur Saldo</button>
+          </div>
+        </div>
+
+        <!-- KARTU TERPISAH KHUSUS: OMSET HARI INI -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center space-x-2.5">
+                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                  <i data-lucide="trending-up" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <p class="text-xs font-bold text-slate-700 uppercase tracking-wider">Omset Hari Ini</p>
+                  <span class="text-[11px] text-slate-400" id="dash-today-date">Hari Ini</span>
+                </div>
+              </div>
+              <span class="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded-xl">
+                <span id="dash-today-count">0</span> Transaksi
+              </span>
+            </div>
+            <h2 class="text-3xl lg:text-4xl font-black text-slate-900 mt-2" id="dash-today-total">Rp 0</h2>
+          </div>
+          <p class="text-xs text-slate-500 mt-4 pt-3 border-t border-slate-100">
+            Total omset penjualan yang berhasil dicatat hari ini.
+          </p>
+        </div>
+
+      </div>
+
+      <!-- ROW 2: RINGKASAN MENU KASIR & STATUS SPREADSHEET -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        
+        <div class="bg-white rounded-2xl p-4 lg:p-5 border border-slate-200 shadow-sm">
+          <h3 class="font-bold text-sm text-slate-800 mb-3 flex items-center space-x-2">
+            <i data-lucide="layout-grid" class="w-4 h-4 text-blue-600"></i>
+            <span>Ringkasan Menu Kasir</span>
+          </h3>
+          <div class="grid grid-cols-2 gap-3 text-center">
+            <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-100">
+              <span class="text-xs text-slate-500">Total Katalog Produk</span>
+              <p class="text-2xl font-bold text-slate-800 mt-1" id="dash-total-products">0</p>
+            </div>
+            <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-100">
+              <span class="text-xs text-slate-500">Item di Keranjang</span>
+              <p class="text-2xl font-bold text-blue-600 mt-1" id="dash-cart-count">0</p>
             </div>
           </div>
-          <button onclick="openAdjustBalancePrompt()" class="py-1.5 px-3 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 border border-slate-700">
-            <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-            <span>Atur Saldo</span>
+        </div>
+
+        <div class="bg-white rounded-2xl p-4 lg:p-5 border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div>
+            <h3 class="font-bold text-sm text-slate-800 mb-2 flex items-center space-x-2">
+              <i data-lucide="database" class="w-4 h-4 text-emerald-600"></i>
+              <span>Status Google Spreadsheet</span>
+            </h3>
+            <p class="text-xs text-slate-500 leading-relaxed mb-3">
+              Tersambung ke Google Apps Script Web App mutasi saldo 7 kolom. Data tersinkron antara Android, Web Desktop, dan Spreadsheet.
+            </p>
+          </div>
+          <button onclick="syncData()" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center justify-center space-x-2">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+            <span>Sinkronkan Data Sekarang</span>
           </button>
         </div>
-        <h2 class="text-3xl font-black text-emerald-400 tracking-tight" id="dash-total-balance">Rp 0</h2>
-        <div class="mt-3 flex items-center space-x-1.5 text-[11px] text-slate-400">
-          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-          <span>Otomatis bertambah dari tiap penjualan Tunai & QRIS</span>
-        </div>
-      </div>
 
-      <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-5 text-white shadow-lg">
-        <p class="text-xs font-medium text-blue-100 uppercase tracking-wider">Omset Hari Ini</p>
-        <h2 class="text-3xl font-black mt-1" id="dash-today-total">Rp 0</h2>
-        <div class="mt-4 pt-3 border-t border-blue-400/30 flex justify-between text-xs text-blue-100">
-          <span>Jumlah Transaksi: <strong class="text-white" id="dash-today-count">0</strong></span>
-          <span id="dash-today-date">Hari Ini</span>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
-        <h3 class="font-bold text-sm text-slate-800 mb-3 flex items-center space-x-1.5">
-          <i data-lucide="trending-up" class="w-4 h-4 text-blue-600"></i>
-          <span>Ringkasan Menu Kasir</span>
-        </h3>
-        <div class="grid grid-cols-2 gap-3 text-center">
-          <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
-            <span class="text-xs text-slate-500">Total Katalog</span>
-            <p class="text-xl font-bold text-slate-800 mt-1" id="dash-total-products">0</p>
-          </div>
-          <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
-            <span class="text-xs text-slate-500">Item Keranjang</span>
-            <p class="text-xl font-bold text-blue-600 mt-1" id="dash-cart-count">0</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
-        <h3 class="font-bold text-sm text-slate-800 mb-3 flex items-center space-x-1.5">
-          <i data-lucide="database" class="w-4 h-4 text-emerald-600"></i>
-          <span>Status Google Spreadsheet</span>
-        </h3>
-        <p class="text-xs text-slate-500 leading-relaxed mb-3">Tersambung ke Spreadsheet via Google Apps Script Web App (6 Kolom Sederhana).</p>
-        <button onclick="syncData()" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center justify-center space-x-2">
-          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-          <span>Sinkronkan Data Sekarang</span>
-        </button>
       </div>
     </section>
 
-    <!-- SCREEN 3: RIWAYAT PENJUALAN -->
-    <section id="screen-riwayat" class="hidden space-y-3">
-      <div class="flex items-center justify-between">
-        <h3 class="font-bold text-sm text-slate-800">Riwayat Penjualan Terakhir</h3>
-        <button onclick="loadRecentSales()" class="text-xs text-blue-600 font-semibold flex items-center space-x-1">
+    <!-- SCREEN 3: RIWAYAT PENJUALAN (TABLE / WIDE CARDS DI DESKTOP) -->
+    <section id="screen-riwayat" class="hidden space-y-3.5">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-200">
+        <div>
+          <h3 class="font-extrabold text-base text-slate-900">Riwayat Mutasi & Transaksi Kas</h3>
+          <p class="text-xs text-slate-500">Tersinkron langsung dengan baris mutasi Google Sheets</p>
+        </div>
+        <button onclick="loadRecentSales()" class="text-xs font-bold bg-blue-50 text-blue-600 hover:bg-blue-100 py-1.5 px-3 rounded-xl transition flex items-center space-x-1.5">
           <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
           <span>Segarkan</span>
         </button>
       </div>
+
       <div id="history-list" class="space-y-2.5">
         <!-- Rendered via JS -->
       </div>
@@ -179,8 +378,8 @@
 
   </main>
 
-  <!-- FLOATING CART BANNER (BILAH BAWAH KASIR) -->
-  <aside id="floating-cart-bar" class="fixed bottom-0 left-0 right-0 z-20 pointer-events-none safe-bottom pb-3 px-4 hidden">
+  <!-- FLOATING CART BANNER (HANYA MUNCUL DI MOBILE / TABLET KECIL < lg) -->
+  <aside id="floating-cart-bar" class="fixed bottom-0 left-0 right-0 z-20 pointer-events-none safe-bottom pb-3 px-4 hidden lg:hidden">
     <div class="max-w-md mx-auto pointer-events-auto bg-white/95 backdrop-blur-md rounded-2xl border border-blue-200 p-2.5 shadow-xl flex items-center justify-between">
       <!-- Tombol Rincian Keranjang -->
       <div onclick="openCartModal()" class="flex items-center space-x-3 cursor-pointer pl-1">
@@ -202,7 +401,7 @@
     </div>
   </aside>
 
-  <!-- MODAL: RINCIAN KERANJANG (CART SHEET) -->
+  <!-- MODAL: RINCIAN KERANJANG MOBILE (CART SHEET UNTUK LAYAR KECIL) -->
   <div id="cart-modal" class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-0 sm:p-4 transition-opacity">
     <div class="w-full max-w-md bg-white rounded-t-3xl sm:rounded-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-in slide-in-from-bottom">
       <div class="p-4 border-b border-slate-100 flex items-center justify-between">
@@ -237,11 +436,11 @@
     </div>
   </div>
 
-  <!-- MODAL: PEMBAYARAN (TUNAI & QRIS) -->
+  <!-- MODAL: PEMBAYARAN MOBILE (TUNAI & QRIS UNTUK LAYAR KECIL) -->
   <div id="payment-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4 transition-opacity">
     <div class="w-full max-w-md bg-white rounded-2xl max-h-[90vh] overflow-y-auto p-5 shadow-2xl space-y-4">
       <div class="flex items-center justify-between">
-        <h3 class="font-bold text-lg text-slate-800">Pembayaran</h3>
+        <h3 class="font-bold text-lg text-slate-800">Pembayaran Kasir</h3>
         <button onclick="closePaymentModal()" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
@@ -268,7 +467,7 @@
         </div>
       </div>
 
-      <!-- Panel Mode Tunai -->
+      <!-- Panel Mode Tunai Mobile -->
       <div id="panel-tunai" class="space-y-3">
         <div>
           <label class="text-xs font-semibold text-slate-600 block mb-1">Uang Diterima (Rp):</label>
@@ -291,7 +490,7 @@
         </div>
       </div>
 
-      <!-- Panel Mode QRIS -->
+      <!-- Panel Mode QRIS Mobile -->
       <div id="panel-qris" class="hidden bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-center space-y-2">
         <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl mx-auto flex items-center justify-center">
           <i data-lucide="qr-code" class="w-6 h-6"></i>
@@ -374,7 +573,7 @@
     </div>
   </div>
 
-  <!-- MODAL: FORM TAMBAH PRODUK (DENGAN VALIDASI LENGKAP) -->
+  <!-- MODAL: FORM TAMBAH PRODUK -->
   <div id="product-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="w-full max-w-md bg-white rounded-2xl p-5 shadow-2xl space-y-3.5">
       <div class="flex items-center justify-between">
@@ -428,54 +627,136 @@
     </div>
   </div>
 
-  <!-- MODAL: PENGATURAN SPREADSHEET -->
+  <!-- MODAL: PENGATURAN TOKO (DUA TAB TERPISAH) -->
   <div id="settings-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="w-full max-w-md bg-white rounded-2xl p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between">
-        <h3 class="font-bold text-base text-slate-800">Pengaturan Google Spreadsheet</h3>
+        <div>
+          <h3 class="font-bold text-base text-slate-800">Pengaturan Toko</h3>
+          <p class="text-[11px] text-slate-400">Kelola koneksi spreadsheet & mutasi saldo kas</p>
+        </div>
         <button onclick="closeSettingsModal()" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <div class="space-y-1.5">
-        <label class="text-xs font-bold text-slate-700 block">URL Web App (APPS_SCRIPT_URL):</label>
-        <input type="text" id="setting-script-url" placeholder="https://script.google.com/macros/s/.../exec" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-600 font-mono">
-        <p class="text-[11px] text-slate-400">URL ini didapat dari Deploy > Web App di Google Apps Script Spreadsheet Anda.</p>
-      </div>
-
-      <div class="flex space-x-2">
-        <button onclick="saveSettings()" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow transition">
-          Simpan URL
+      <!-- TAB SWITCHER PENGATURAN -->
+      <div class="flex p-1 bg-slate-100 rounded-xl space-x-1">
+        <button onclick="switchSettingsTab('sheets')" id="tab-btn-sheets" class="flex-1 py-2 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center space-x-1.5 bg-white text-blue-700 shadow-sm">
+          <i data-lucide="cloud" class="w-4 h-4"></i>
+          <span>Koneksi Sheets</span>
         </button>
-        <button onclick="saveSettings(); syncData();" class="flex-1 py-2.5 border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold text-xs rounded-xl transition">
-          Simpan & Sinkron
+        <button onclick="switchSettingsTab('balance')" id="tab-btn-balance" class="flex-1 py-2 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center space-x-1.5 text-slate-500 hover:text-slate-800">
+          <i data-lucide="wallet" class="w-4 h-4"></i>
+          <span>Atur Saldo Kas</span>
         </button>
       </div>
 
-      <!-- PENGATURAN SALDO KAS TOKO -->
-      <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3.5 space-y-2">
-        <div class="flex items-center space-x-2 text-emerald-800">
-          <i data-lucide="wallet" class="w-4 h-4 text-emerald-600"></i>
-          <label class="text-xs font-bold block">Saldo Kas Toko Saat Ini (Rp):</label>
+      <!-- TAB 1: KONEKSI SPREADSHEET -->
+      <div id="settings-view-sheets" class="space-y-4">
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-slate-700 block">URL Web App (APPS_SCRIPT_URL):</label>
+          <input type="text" id="setting-script-url" placeholder="https://script.google.com/macros/s/.../exec" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-600 font-mono">
+          <p class="text-[11px] text-slate-400">Didapat dari Deploy > Web App Google Apps Script Spreadsheet Anda.</p>
         </div>
+
         <div class="flex space-x-2">
-          <input type="number" id="setting-cash-balance" placeholder="Contoh: 500000" class="flex-1 px-3 py-2 rounded-xl border border-emerald-300 text-xs font-bold text-emerald-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600">
-          <button onclick="saveBalanceFromSettings()" class="py-2 px-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition whitespace-nowrap">
-            Update Saldo
+          <button onclick="saveSettings()" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center space-x-1.5">
+            <i data-lucide="save" class="w-4 h-4"></i>
+            <span>Simpan URL</span>
+          </button>
+          <button onclick="saveSettings(); syncData();" class="flex-1 py-2.5 border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold text-xs rounded-xl transition flex items-center justify-center space-x-1.5">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+            <span>Simpan & Sinkron</span>
           </button>
         </div>
-        <p class="text-[11px] text-emerald-700 leading-tight">Ubah saldo untuk modal awal laci kasir atau koreksi fisik uang kas. Otomatis sinkron ke Cloud Spreadsheet.</p>
+
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-3.5 space-y-2 text-xs text-blue-900">
+          <h5 class="font-bold flex items-center space-x-1.5 text-blue-950">
+            <i data-lucide="info" class="w-4 h-4 text-blue-700"></i>
+            <span>Format Riwayat Mutasi Kas 7 Kolom:</span>
+          </h5>
+          <p class="text-[11px] text-blue-800 leading-relaxed">
+            Sheet <strong>Penjualan</strong> mencatat mutasi: <code>Tanggal | Jam | Keterangan | Masuk (+) | Keluar (-) | Saldo Kas Akhir | Metode</code>. Tiap penjualan dan penyesuaian saldo langsung tersinkron rapi.
+          </p>
+        </div>
+
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2 text-xs text-slate-600">
+          <h5 class="font-bold text-slate-800">Petunjuk Akses di iPhone / iOS:</h5>
+          <ol class="list-decimal pl-4 space-y-1 leading-relaxed">
+            <li>Buka link website Vercel di <strong>Safari iPhone</strong>.</li>
+            <li>Tekan ikon <strong>Share</strong> (kotak panah ke atas di bawah layar).</li>
+            <li>Pilih <strong>"Add to Home Screen"</strong> (Tambah ke Layar Utama).</li>
+            <li>Aplikasi kasir siap digunakan penuh seperti aplikasi iOS bawaan!</li>
+          </ol>
+        </div>
       </div>
 
-      <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2 text-xs text-slate-600">
-        <h5 class="font-bold text-slate-800">Petunjuk Akses di iPhone / iOS:</h5>
-        <ol class="list-decimal pl-4 space-y-1 leading-relaxed">
-          <li>Buka link website Vercel di <strong>Safari iPhone</strong>.</li>
-          <li>Tekan ikon <strong>Share</strong> (kotak panah ke atas di bawah layar).</li>
-          <li>Pilih <strong>"Add to Home Screen"</strong> (Tambah ke Layar Utama).</li>
-          <li>Aplikasi siap digunakan layaknya aplikasi bawaan iOS!</li>
-        </ol>
+      <!-- TAB 2: KELOLA SALDO KAS TOKO -->
+      <div id="settings-view-balance" class="hidden space-y-4">
+        <!-- Saldo Kas Berjalan Saat Ini -->
+        <div class="bg-gradient-to-br from-indigo-50 to-blue-50 border border-blue-200 rounded-xl p-4">
+          <span class="text-[11px] font-bold text-blue-700 uppercase tracking-wider block">Saldo Kas Aktif Saat Ini</span>
+          <div class="flex items-baseline justify-between mt-1">
+            <h4 class="text-2xl font-black text-slate-800" id="setting-balance-preview-active">Rp 0</h4>
+            <span class="text-[10px] bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded-full">Cloud Synchronized</span>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-1">Bertambah dari penjualan kasir & penambahan modal di bawah.</p>
+        </div>
+
+        <!-- Tipe Mutasi: Tambah Kas vs Tarik Kas vs Setel Langsung -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-slate-700 block">Pilih Aksi Saldo:</label>
+          <div class="grid grid-cols-3 gap-2">
+            <button onclick="setMutationType('add')" id="mut-btn-add" class="py-2 px-2.5 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-800 text-xs font-bold transition flex items-center justify-center space-x-1">
+              <i data-lucide="plus-circle" class="w-3.5 h-3.5 text-emerald-600"></i>
+              <span>Tambah (+)</span>
+            </button>
+            <button onclick="setMutationType('withdraw')" id="mut-btn-withdraw" class="py-2 px-2.5 rounded-xl border border-slate-200 text-slate-600 text-xs font-bold transition flex items-center justify-center space-x-1 hover:bg-slate-50">
+              <i data-lucide="minus-circle" class="w-3.5 h-3.5 text-red-500"></i>
+              <span>Tarik (-)</span>
+            </button>
+            <button onclick="setMutationType('set')" id="mut-btn-set" class="py-2 px-2.5 rounded-xl border border-slate-200 text-slate-600 text-xs font-bold transition flex items-center justify-center space-x-1 hover:bg-slate-50">
+              <i data-lucide="sliders" class="w-3.5 h-3.5 text-blue-500"></i>
+              <span>Setel</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Input Nominal -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-slate-700 block" id="lbl-balance-amount">Nominal Tambah Saldo (Rp):</label>
+          <div class="relative">
+            <span class="absolute left-3.5 top-2.5 text-xs font-bold text-slate-400">Rp</span>
+            <input type="number" id="input-mutation-amount" oninput="updateProjectedBalance()" placeholder="Contoh: 50000" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-600">
+          </div>
+        </div>
+
+        <!-- Chips Nominal Cepat -->
+        <div class="space-y-1">
+          <span class="text-[11px] text-slate-400 block">Pilihan Nominal Cepat:</span>
+          <div class="flex space-x-1.5 overflow-x-auto no-scrollbar py-0.5" id="quick-balance-chips">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Input Keterangan / Alasan -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-slate-700 block">Keterangan / Alasan Mutasi:</label>
+          <input type="text" id="input-mutation-reason" value="Tambah Modal Kasir" placeholder="Contoh: Setor Modal, Beli Plastik, Tarik Kasir..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-600">
+        </div>
+
+        <!-- Pratinjau Saldo Akhir -->
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 flex justify-between items-center text-xs">
+          <span class="text-slate-500 font-medium">Pratinjau Saldo Baru:</span>
+          <span class="font-black text-sm text-blue-700" id="projected-balance-display">Rp 0</span>
+        </div>
+
+        <!-- Tombol Simpan Mutasi -->
+        <button onclick="executeBalanceMutation()" id="btn-save-mutation" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center space-x-1.5">
+          <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+          <span id="btn-mutation-text">Catat Tambah Kas ke Spreadsheet</span>
+        </button>
       </div>
     </div>
   </div>
@@ -483,7 +764,9 @@
   <!-- JAVASCRIPT LOGIC -->
   <script src="app.js"></script>
   <script>
-    lucide.createIcons();
+    if (window.lucide) {
+      lucide.createIcons();
+    }
   </script>
 </body>
 </html>

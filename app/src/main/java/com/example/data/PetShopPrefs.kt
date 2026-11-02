@@ -16,8 +16,8 @@ class PetShopPrefs(context: Context) {
         private const val KEY_DELETED_PRODUCT_IDS = "deleted_product_ids_set"
         private const val KEY_PRODUCT_OVERRIDES_JSON = "product_overrides_json"
         private const val KEY_CURRENT_BALANCE = "current_cash_balance"
-        const val DEFAULT_PLACEHOLDER_URL = "https://script.google.com/macros/s/AKfycbzPytd-CUJliqYy72HPYRJJg2WD2ycT0r69SMvGQJD-7VLkfrh13idMn0Btah92Ot3c/exec"
-        const val DEFAULT_REAL_URL = "https://script.google.com/macros/s/AKfycbzPytd-CUJliqYy72HPYRJJg2WD2ycT0r69SMvGQJD-7VLkfrh13idMn0Btah92Ot3c/exec"
+        const val DEFAULT_PLACEHOLDER_URL = "https://script.google.com/macros/s/AKfycbxcTpjehRlmfjmTll9V3LYOW79wP5X1WwznkwMn_VlFd9-0Szp1p4ize5bxPTK5Iplp/exec"
+        const val DEFAULT_REAL_URL = "https://script.google.com/macros/s/AKfycbxcTpjehRlmfjmTll9V3LYOW79wP5X1WwznkwMn_VlFd9-0Szp1p4ize5bxPTK5Iplp/exec"
     }
 
     var currentBalance: Double
@@ -27,7 +27,7 @@ class PetShopPrefs(context: Context) {
     var appsScriptUrl: String
         get() {
             val saved = prefs.getString(KEY_APPS_SCRIPT_URL, "") ?: ""
-            return if (saved.isNotBlank() && !saved.contains("CONTOH_ID")) saved else DEFAULT_REAL_URL
+            return if (saved.isNotBlank() && !saved.contains("CONTOH_ID") && !saved.contains("AKfycbzPytd") && !saved.contains("AKfycbxuIhr")) saved else DEFAULT_REAL_URL
         }
         set(value) = prefs.edit().putString(KEY_APPS_SCRIPT_URL, value.trim()).apply()
 

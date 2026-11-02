@@ -2,49 +2,139 @@ package com.example.ui.components
 
 object AppsScriptCodeSnippet {
     val CODE = """
+/**
+ * =========================================================================
+ * GOOGLE APPS SCRIPT (Code.gs) - KASIR PET SHOP & MUTASI SALDO KAS
+ * =========================================================================
+ * 
+ * STRUKTUR RESMI TAB "Penjualan" (HANYA 7 KOLOM - TIDAK ADA HARGA BELI/LABA):
+ * [A: Tanggal] | [B: Jam] | [C: Keterangan / Transaksi] | [D: Masuk (+)] | [E: Keluar (-)] | [F: Saldo Kas Akhir] | [G: Metode]
+ * 
+ * =========================================================================
+ * CARA MEMBERSIHKAN KOLOM ORANYE & MENGAKTIFKAN KE SPREADSHEET (2 LANGKAH):
+ * =========================================================================
+ * LANGKAH 1: BERSIHKAN KOLOM LAMA & BARIS YANG GESER
+ * 1. Buka spreadsheet > Ekstensi > Apps Script.
+ * 2. Hapus semua isi Code.gs, tempel seluruh kode ini, lalu Simpan (Ctrl + S).
+ * 3. Di toolbar atas, pilih fungsi "buatKolomSaldoOtomatis", lalu klik "▶ Jalankan".
+ *    -> Semua kolom oranye H-O dan baris salah format langsung DIHAPUS.
+ *    -> Spreadsheet bersih 100% hanya 7 kolom resmi A s/d G!
+ * 
+ * LANGKAH 2: DEPLOY VERSI BARU (WAJIB AGAR PENJUALAN TIDAK GESER LAGI)
+ * 1. Klik tombol biru "Deploy" di kanan atas > "Kelola deployment" (Manage deployments).
+ * 2. Klik ikon PENSIL (Edit).
+ * 3. Pada baris "Versi" (Version), pilih "Versi baru" (New version).
+ * 4. Klik tombol "Deploy".
+ * =========================================================================
+ */
+
 function doGet(e) {
   var action = (e && e.parameter && e.parameter.action) ? e.parameter.action : "products";
-  if (action === "products") return getProductsJson();
-  if (action === "recent" || action === "balance") return getRecentSalesJson();
-  return jsonResponse({ success: false, message: "Action tidak dikenal" });
+  
+  if (action === "products") {
+    try {
+      var ss = SpreadsheetApp.getActiveSpreadsheet();
+      ensureSalesSheetWithHeaders(ss);
+    } catch (ignore) {}
+    return getProductsJson();
+  } else if (action === "recent" || action === "balance" || action === "get_balance") {
+    return getRecentSalesJson();
+  } else if (action === "setup" || action === "init" || action === "buat_saldo") {
+    var resultMsg = buatKolomSaldoOtomatis();
+    return jsonResponse({ success: true, message: resultMsg });
+  } else {
+    return jsonResponse({ success: false, message: "Action tidak dikenal: " + action });
+  }
 }
 
 function doPost(e) {
   var lock = LockService.getScriptLock();
   try {
     lock.waitLock(30000);
-    var requestData = JSON.parse(e.postData.contents);
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var salesSheet = ss.getSheetByName("Penjualan");
-    if (!salesSheet) {
-      salesSheet = ss.insertSheet("Penjualan");
-      var headers = ["Tanggal", "Jam", "Nama Produk Yang Dibeli", "Total Barang", "Total Harga", "Metode Pembayaran", "Saldo Kas"];
-      salesSheet.appendRow(headers);
+    
+    var requestData = {};
+    if (e && e.postData && e.postData.contents) {
+      requestData = JSON.parse(e.postData.contents);
+    } else {
+      return jsonResponse({ success: false, message: "Tidak ada data yang dikirim" });
     }
+
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var salesSheet = ensureSalesSheetWithHeaders(ss);
 
     var now = new Date();
     var tz = Session.getScriptTimeZone() || "GMT+7";
     var tanggal = Utilities.formatDate(now, tz, "yyyy-MM-dd");
     var jam = Utilities.formatDate(now, tz, "HH:mm:ss");
 
-    // Dapatkan saldo kas terakhir dari baris paling akhir
     var currentBalance = getLastCashBalance(salesSheet);
 
-    // 1. Aksi Penyesuaian Saldo Kas Manual
+    // 1. Aksi Atur Saldo Kas (Tambah / Tarik / Koreksi)
     if (requestData.action === "adjust_balance" || requestData.action === "set_balance") {
-      var targetBalance = Number(requestData.newBalance) || 0;
-      var reason = String(requestData.reason || "Penyesuaian Manual").trim();
+      var mutationType = String(requestData.mutationType || "").toLowerCase();
+      var amount = Number(requestData.amount) || 0;
+      var reason = String(requestData.reason || "").trim();
+      var targetBalance = Number(requestData.newBalance);
+
+      var masuk = 0;
+      var keluar = 0;
+      var finalBalance = currentBalance;
+      var metodeKet = "Kas Toko";
+
+      if (mutationType === "add" || mutationType === "tambah") {
+        masuk = amount;
+        keluar = 0;
+        finalBalance = currentBalance + amount;
+        metodeKet = "Kas Toko (Tambah)";
+        if (!reason) reason = "Tambah Modal Kasir";
+      } else if (mutationType === "withdraw" || mutationType === "tarik" || mutationType === "kurang") {
+        masuk = 0;
+        keluar = amount;
+        finalBalance = Math.max(0, currentBalance - amount);
+        metodeKet = "Kas Toko (Tarik)";
+        if (!reason) reason = "Tarik Saldo Kas / Keperluan Toko";
+      } else {
+        if (isNaN(targetBalance)) targetBalance = amount;
+        var diff = targetBalance - currentBalance;
+        if (diff >= 0) {
+          masuk = diff;
+          keluar = 0;
+          metodeKet = "Koreksi Tambah";
+        } else {
+          masuk = 0;
+          keluar = Math.abs(diff);
+          metodeKet = "Koreksi Kurang";
+        }
+        finalBalance = targetBalance;
+        if (!reason) reason = "Penyesuaian Saldo Kasir";
+      }
+
       salesSheet.appendRow([
-        tanggal, jam, "Penyesuaian Saldo Kas (" + reason + ")", 0, 0, "Koreksi Saldo", targetBalance
+        tanggal,
+        jam,
+        reason,
+        masuk,
+        keluar,
+        finalBalance,
+        metodeKet
       ]);
-      return jsonResponse({ success: true, balance: targetBalance, message: "Saldo kas berhasil diperbarui" });
+      
+      var lastR = salesSheet.getLastRow();
+      salesSheet.getRange(lastR, 4).setNumberFormat('"Rp"#,##0');
+      salesSheet.getRange(lastR, 5).setNumberFormat('"Rp"#,##0');
+      salesSheet.getRange(lastR, 6).setNumberFormat('"Rp"#,##0');
+
+      return jsonResponse({
+        success: true,
+        balance: finalBalance,
+        message: "Mutasi saldo kas berhasil dicatat! Saldo akhir: Rp " + finalBalance
+      });
     }
 
-    // 2. Aksi Penjualan Kasir (Tunai / QRIS Menambah Saldo Kas Berjalan)
+    // 2. Aksi Penjualan Kasir (Mutasi Penjualan Murni 7 Kolom)
     var receiptNumber = requestData.receiptNumber || ("PS-" + Utilities.formatDate(now, tz, "yyyyMMdd-HHmmss"));
     var items = requestData.items || [];
-
-    // Gabung semua nama produk dalam 1 baris
+    
     var productSummary = requestData.productNamesSummary;
     if (!productSummary || productSummary.trim() === "") {
       productSummary = items.map(function(it) {
@@ -54,207 +144,381 @@ function doPost(e) {
       }).join(", ");
     }
     if (!productSummary || productSummary.trim() === "") {
-      productSummary = "-";
+      productSummary = "Penjualan Toko";
     }
 
-    var totalQty = Number(requestData.totalItems) || items.reduce(function(sum, it) { return sum + (Number(it.jumlah) || 1); }, 0);
     var totalPrice = Number(requestData.totalAmount) || 0;
     var paymentMethod = String(requestData.paymentMethod || "Tunai");
-
-    // Akumulasi saldo berjalan kas toko
     var newBalance = currentBalance + totalPrice;
 
-    // Catat 1 baris transaksi penjualan (7 Kolom Lengkap dengan Saldo Kas)
     salesSheet.appendRow([
-      tanggal, jam, productSummary, totalQty, totalPrice, paymentMethod, newBalance
+      tanggal,
+      jam,
+      productSummary,
+      totalPrice,
+      0,
+      newBalance,
+      paymentMethod
     ]);
+
+    var newRow = salesSheet.getLastRow();
+    salesSheet.getRange(newRow, 4).setNumberFormat('"Rp"#,##0');
+    salesSheet.getRange(newRow, 5).setNumberFormat('"Rp"#,##0');
+    salesSheet.getRange(newRow, 6).setNumberFormat('"Rp"#,##0');
 
     return jsonResponse({
       success: true,
+      message: "Transaksi berhasil dicatat ke spreadsheet",
       receiptNumber: receiptNumber,
       date: tanggal,
       time: jam,
       balance: newBalance
     });
+
   } catch (err) {
-    return jsonResponse({ success: false, message: err.toString() });
+    return jsonResponse({
+      success: false,
+      message: "Gagal memproses data: " + err.toString()
+    });
   } finally {
     lock.releaseLock();
   }
 }
 
+function buatKolomSaldoOtomatis() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Penjualan");
+  var headers = [
+    "Tanggal", 
+    "Jam", 
+    "Keterangan / Transaksi", 
+    "Masuk (+)", 
+    "Keluar (-)", 
+    "Saldo Kas Akhir", 
+    "Metode"
+  ];
+  
+  if (!sheet) {
+    sheet = ss.insertSheet("Penjualan");
+  }
+
+  // 1. HAPUS SEMUA KOLOM SISA FORMAT LAMA DARI KOLOM 8 KE ATAS (H s/d O)
+  var totalCols = sheet.getMaxColumns();
+  if (totalCols > 7) {
+    sheet.deleteColumns(8, totalCols - 7);
+  }
+
+  // 2. Tulis 7 header resmi
+  sheet.getRange(1, 1, 1, 7).setValues([headers]);
+  formatHeaderRow(sheet, 7);
+  sheet.setFrozenRows(1);
+
+  // 3. Bersihkan baris yang berantakan / geser
+  var lastRow = sheet.getLastRow();
+  for (var r = lastRow; r >= 2; r--) {
+    var valC = String(sheet.getRange(r, 3).getValue() || "").trim();
+    var valD = String(sheet.getRange(r, 4).getValue() || "").trim();
+    if (valC.indexOf("PS-") === 0 || valD === "-") {
+      sheet.deleteRow(r);
+    }
+  }
+
+  // 4. Baris Saldo Awal jika kosong
+  if (sheet.getLastRow() <= 1) {
+    var now = new Date();
+    var tz = Session.getScriptTimeZone() || "GMT+7";
+    var tgl = Utilities.formatDate(now, tz, "yyyy-MM-dd");
+    var jam = Utilities.formatDate(now, tz, "HH:mm:ss");
+    sheet.appendRow([tgl, jam, "Saldo Awal Kasir", 0, 0, 0, "Sistem"]);
+  }
+
+  // 5. Format Mata Uang Rp
+  var maxR = Math.max(sheet.getLastRow(), 2);
+  sheet.getRange(2, 4, maxR - 1, 3).setNumberFormat('"Rp"#,##0');
+  sheet.autoResizeColumns(1, 7);
+
+  return "Berhasil membersihkan kolom lama H-O dan merapikan 7 kolom mutasi kas murni!";
+}
+
+function ensureSalesSheetWithHeaders(ss) {
+  var sheet = ss.getSheetByName("Penjualan");
+  var headers = [
+    "Tanggal", 
+    "Jam", 
+    "Keterangan / Transaksi", 
+    "Masuk (+)", 
+    "Keluar (-)", 
+    "Saldo Kas Akhir", 
+    "Metode"
+  ];
+
+  if (!sheet) {
+    sheet = ss.insertSheet("Penjualan");
+    var totalCols = sheet.getMaxColumns();
+    if (totalCols > 7) {
+      sheet.deleteColumns(8, totalCols - 7);
+    }
+    sheet.appendRow(headers);
+    formatHeaderRow(sheet, 7);
+    sheet.setFrozenRows(1);
+
+    var now = new Date();
+    var tz = Session.getScriptTimeZone() || "GMT+7";
+    var tgl = Utilities.formatDate(now, tz, "yyyy-MM-dd");
+    var jam = Utilities.formatDate(now, tz, "HH:mm:ss");
+    sheet.appendRow([tgl, jam, "Saldo Awal Kasir", 0, 0, 0, "Sistem"]);
+    sheet.getRange(2, 4, 1, 3).setNumberFormat('"Rp"#,##0');
+    sheet.autoResizeColumns(1, 7);
+    return sheet;
+  }
+
+  var totalCols = sheet.getMaxColumns();
+  if (totalCols > 7) {
+    sheet.deleteColumns(8, totalCols - 7);
+  }
+
+  var currentHeaders = sheet.getRange(1, 1, 1, 7).getValues()[0];
+  var hasSaldo = false;
+  for (var i = 0; i < currentHeaders.length; i++) {
+    if (String(currentHeaders[i]).toLowerCase().includes("saldo")) {
+      hasSaldo = true;
+      break;
+    }
+  }
+
+  if (!hasSaldo) {
+    sheet.getRange(1, 1, 1, 7).setValues([headers]);
+    formatHeaderRow(sheet, 7);
+    sheet.setFrozenRows(1);
+    sheet.autoResizeColumns(1, 7);
+  }
+
+  return sheet;
+}
+
+function formatHeaderRow(sheet, colCount) {
+  var headerRange = sheet.getRange(1, 1, 1, colCount);
+  headerRange.setFontWeight("bold");
+  headerRange.setBackground("#1D4ED8");
+  headerRange.setFontColor("#FFFFFF");
+  headerRange.setHorizontalAlignment("center");
+}
+
 function getLastCashBalance(sh) {
   var lastRow = sh.getLastRow();
   if (lastRow < 2) return 0;
-  // Kolom 7 adalah Saldo Kas
-  var val = sh.getRange(lastRow, 7).getValue();
-  var parsed = Number(val);
-  return isNaN(parsed) ? 0 : parsed;
-}
+  
+  var balanceCol = 6;
 
-function getProductsJson() {
-  try {
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var categories = ["Burung", "Kucing", "Ayam", "Ikan"];
-    var all = [];
-    categories.forEach(function(cat) {
-      var sh = ss.getSheetByName(cat);
-      if (!sh) return;
-      var data = sh.getDataRange().getValues();
-      if (!data || data.length < 2) return;
-      var col = {};
-      for (var c = 0; c < data[0].length; c++) col[String(data[0][c]).trim().toLowerCase()] = c;
-      var idxNama = col["nama produk"] !== undefined ? col["nama produk"] : col["nama barang"];
-      var idxSat = col["satuan"];
-      var idxBeli = col["harga beli (per satuan)"] !== undefined ? col["harga beli (per satuan)"] : col["harga beli"];
-      var idxJual = col["harga jual"];
-      var idxAyamKg = col["harga beli per kg"];
-      for (var r = 1; r < data.length; r++) {
-        var row = data[r];
-        var nama = (idxNama !== undefined && row[idxNama]) ? String(row[idxNama]).trim() : "";
-        if (!nama) break;
-        var sat = (idxSat !== undefined && row[idxSat]) ? String(row[idxSat]).trim() : "pcs";
-        var jual = (idxJual !== undefined) ? Number(row[idxJual]) || 0 : 0;
-        var beli = (idxBeli !== undefined) ? Number(row[idxBeli]) || 0 : 0;
-        var note = "";
-        if (cat.toLowerCase() === "ayam" && sat.toLowerCase() === "zak") {
-          sat = "kg";
-          if (idxAyamKg !== undefined && row[idxAyamKg]) beli = Number(row[idxAyamKg]) || 0;
-          note = "Dijual per kg (dari zak)";
-        }
-        all.push({
-          id: cat + "_" + r, kategori: cat, namaProduk: nama, satuan: sat,
-          hargaJual: jual, hargaBeli: beli, hargaBelumDiisi: (jual <= 0), catatan: note
-        });
-      }
-    });
-    return jsonResponse({ success: true, products: all });
-  } catch (err) {
-    return jsonResponse({ success: false, message: err.toString() });
+  var val = sh.getRange(lastRow, balanceCol).getValue();
+  var parsed = parseNumber(val);
+  if (!isNaN(parsed) && parsed !== 0) {
+    return parsed;
   }
+
+  for (var r = lastRow; r >= 2; r--) {
+    var rowVal = parseNumber(sh.getRange(r, balanceCol).getValue());
+    if (!isNaN(rowVal) && rowVal > 0) {
+      return rowVal;
+    }
+  }
+
+  return 0;
 }
 
 function getRecentSalesJson() {
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sh = ss.getSheetByName("Penjualan");
-    if (!sh) return jsonResponse({ success: true, currentBalance: 0, todayTotal: 0, todayCount: 0, recentTransactions: [] });
-    var data = sh.getDataRange().getValues();
-    if (!data || data.length < 2) return jsonResponse({ success: true, currentBalance: 0, todayTotal: 0, todayCount: 0, recentTransactions: [] });
+    var sheet = ensureSalesSheetWithHeaders(ss);
+
+    var data = sheet.getDataRange().getValues();
+    if (!data || data.length < 2) {
+      return jsonResponse({
+        success: true,
+        currentBalance: 0,
+        todayTotal: 0,
+        todayCount: 0,
+        recentTransactions: []
+      });
+    }
+
     var now = new Date();
     var tz = Session.getScriptTimeZone() || "GMT+7";
     var todayStr = Utilities.formatDate(now, tz, "yyyy-MM-dd");
 
-    var isSimpleFormat = (data[0].length <= 8);
     var todayTotal = 0;
     var todayCount = 0;
     var recent = [];
     var currentBalance = 0;
 
-    if (isSimpleFormat) {
-      // FORMAT RINGKAS: [Tanggal, Jam, Nama Produk Yang Dibeli, Total Barang, Total Harga, Metode Pembayaran, Saldo Kas]
-      for (var r = 1; r < data.length; r++) {
-        var row = data[r];
-        var rawT = row[0];
-        var tgl = "";
-        if (rawT instanceof Date) {
-          tgl = Utilities.formatDate(rawT, tz, "yyyy-MM-dd");
-        } else if (rawT) {
-          tgl = String(rawT).trim();
-        }
-        var rawJ = row[1];
-        var jam = (rawJ instanceof Date) ? Utilities.formatDate(rawJ, tz, "HH:mm:ss") : String(rawJ || "");
-        var namaProduk = String(row[2] || "-");
-        var totalQty = Number(row[3]) || 1;
-        var totalHarga = Number(row[4]) || 0;
-        var metodeBayar = String(row[5] || "Tunai");
-        var rowBalance = Number(row[6]);
-        if (!isNaN(rowBalance)) {
-          currentBalance = rowBalance;
-        } else {
-          currentBalance += totalHarga;
-        }
+    for (var r = 1; r < data.length; r++) {
+      var row = data[r];
+      var rawT = row[0];
+      var tgl = (rawT instanceof Date) ? Utilities.formatDate(rawT, tz, "yyyy-MM-dd") : String(rawT || "").trim();
+      var rawJ = row[1];
+      var jam = (rawJ instanceof Date) ? Utilities.formatDate(rawJ, tz, "HH:mm:ss") : String(rawJ || "").trim();
+      
+      var ket = String(row[2] || "-");
+      var masuk = parseNumber(row[3]);
+      var keluar = parseNumber(row[4]);
+      var rowBal = parseNumber(row[5]);
+      var metode = String(row[6] || "Kas");
 
-        var noStruk = "PS-" + (tgl ? tgl.replace(/-/g, "") : "TRX") + "-" + (r < 10 ? "00" + r : (r < 100 ? "0" + r : r));
-
-        if (tgl === todayStr && !namaProduk.toLowerCase().includes("penyesuaian saldo")) {
-          todayTotal += totalHarga;
-          todayCount++;
-        }
-
-        recent.push({
-          noStruk: noStruk,
-          tanggal: tgl,
-          jam: jam,
-          namaPembeli: "-",
-          metodeBayar: metodeBayar,
-          total: totalHarga,
-          bayar: totalHarga,
-          kembalian: 0,
-          saldoBerjalan: currentBalance,
-          items: [{
-            kategori: "Penjualan",
-            namaProduk: namaProduk,
-            satuan: "item",
-            jumlah: totalQty,
-            hargaJual: totalHarga,
-            subtotal: totalHarga
-          }]
-        });
+      if (rowBal > 0) {
+        currentBalance = rowBal;
+      } else if (masuk > 0) {
+        currentBalance += masuk;
+      } else if (keluar > 0) {
+        currentBalance = Math.max(0, currentBalance - keluar);
       }
-      recent.reverse();
-      if (recent.length > 30) recent = recent.slice(0, 30);
-    } else {
-      // FORMAT LAMA (15 Kolom) - Backward Compatibility
-      var map = {}, order = [];
-      for (var r = 1; r < data.length; r++) {
-        var row = data[r];
-        var noStruk = String(row[2] || "").trim();
-        if (!noStruk) continue;
-        var rawT = row[0];
-        var tgl = (rawT instanceof Date) ? Utilities.formatDate(rawT, tz, "yyyy-MM-dd") : String(rawT || "");
-        var rawJ = row[1];
-        var jam = (rawJ instanceof Date) ? Utilities.formatDate(rawJ, tz, "HH:mm:ss") : String(rawJ || "");
-        var totalItem = Number(row[9]) || (Number(row[7]) * Number(row[8])) || 0;
-        currentBalance += totalItem;
 
-        if (!map[noStruk]) {
-          map[noStruk] = {
-            noStruk: noStruk, tanggal: tgl, jam: jam,
-            namaPembeli: String(row[3] || "-"), metodeBayar: String(row[12] || "Tunai"),
-            bayar: Number(row[13]) || 0, kembalian: Number(row[14]) || 0, total: 0, items: []
-          };
-          order.push(noStruk);
-        }
-        map[noStruk].total += totalItem;
-        map[noStruk].items.push({
-          kategori: String(row[4] || ""), namaProduk: String(row[5] || ""), satuan: String(row[6] || ""),
-          jumlah: Number(row[7]) || 1, hargaJual: Number(row[8]) || 0, subtotal: totalItem
-        });
-        if (tgl === todayStr) {
-          todayTotal += totalItem;
-          todayCount++;
-        }
+      var isMutationNote = ket.toLowerCase().includes("saldo") || ket.toLowerCase().includes("modal") || ket.toLowerCase().includes("tarik");
+      var isSale = (masuk > 0) && !isMutationNote;
+
+      if (tgl === todayStr && isSale) {
+        todayTotal += masuk;
+        todayCount++;
       }
-      for (var i = order.length - 1; i >= 0 && recent.length < 30; i--) {
-        recent.push(map[order[i]]);
-      }
+
+      var noStruk = "PS-" + (tgl ? tgl.replace(/-/g, "") : "TRX") + "-" + (r < 10 ? "00" + r : (r < 100 ? "0" + r : r));
+      var nominalTrx = masuk > 0 ? masuk : keluar;
+
+      recent.push({
+        noStruk: noStruk,
+        tanggal: tgl,
+        jam: jam,
+        namaPembeli: isMutationNote ? "Internal Toko" : "-",
+        metodeBayar: metode,
+        bayar: nominalTrx,
+        kembalian: 0,
+        total: nominalTrx,
+        tipeMutasi: masuk > 0 ? "masuk" : "keluar",
+        saldoAkhir: currentBalance,
+        items: [{
+          kategori: isMutationNote ? "Mutasi Kas" : "Penjualan",
+          namaProduk: ket,
+          satuan: "trx",
+          jumlah: 1,
+          hargaJual: nominalTrx,
+          subtotal: nominalTrx
+        }]
+      });
     }
+
+    var limitedRecent = recent.slice(-30).reverse();
 
     return jsonResponse({
       success: true,
       currentBalance: currentBalance,
       todayTotal: todayTotal,
       todayCount: todayCount,
-      recentTransactions: recent
+      recentTransactions: limitedRecent
     });
+
   } catch (err) {
-    return jsonResponse({ success: false, message: err.toString() });
+    return jsonResponse({
+      success: false,
+      message: "Gagal membaca riwayat: " + err.toString()
+    });
   }
 }
 
+function getProductsJson() {
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var categories = ["Burung", "Kucing", "Ayam", "Ikan"];
+    var allProducts = [];
+
+    categories.forEach(function(catName) {
+      var sheet = ss.getSheetByName(catName);
+      if (!sheet) return;
+
+      var data = sheet.getDataRange().getValues();
+      if (!data || data.length < 2) return;
+
+      var headerRow = data[0];
+      var colMap = {};
+      for (var c = 0; c < headerRow.length; c++) {
+        var hName = String(headerRow[c]).trim().toLowerCase();
+        colMap[hName] = c;
+      }
+
+      var idxNama = findColumnIndex(colMap, ["nama produk", "nama barang", "produk"]);
+      var idxSatuan = findColumnIndex(colMap, ["satuan", "unit"]);
+      var idxHargaBeli = findColumnIndex(colMap, ["harga beli (per satuan)", "harga beli per satuan", "harga beli"]);
+      var idxHargaJual = findColumnIndex(colMap, ["harga jual", "harga jual (per satuan)", "harga"]);
+      var idxHargaBeliPerKg = findColumnIndex(colMap, ["harga beli per kg", "harga beli/kg"]);
+
+      for (var r = 1; r < data.length; r++) {
+        var row = data[r];
+        var namaProduk = (idxNama >= 0 && row[idxNama]) ? String(row[idxNama]).trim() : "";
+        if (!namaProduk) break;
+
+        var satuan = (idxSatuan >= 0 && row[idxSatuan]) ? String(row[idxSatuan]).trim() : "pcs";
+        var rawHargaJual = (idxHargaJual >= 0) ? parseNumber(row[idxHargaJual]) : 0;
+        var rawHargaBeli = (idxHargaBeli >= 0) ? parseNumber(row[idxHargaBeli]) : 0;
+
+        var finalSatuan = satuan;
+        var finalHargaJual = rawHargaJual;
+        var finalHargaBeli = rawHargaBeli;
+        var note = "";
+
+        if (catName.toLowerCase() === "ayam" && satuan.toLowerCase() === "zak") {
+          finalSatuan = "kg";
+          if (idxHargaBeliPerKg >= 0 && row[idxHargaBeliPerKg]) {
+            finalHargaBeli = parseNumber(row[idxHargaBeliPerKg]);
+          }
+          note = "Dijual per kg (dari zak)";
+        }
+
+        allProducts.push({
+          id: catName + "_" + r,
+          kategori: catName,
+          namaProduk: namaProduk,
+          satuan: finalSatuan,
+          satuanAsli: satuan,
+          hargaJual: finalHargaJual,
+          hargaBeli: finalHargaBeli,
+          hargaBelumDiisi: (finalHargaJual <= 0),
+          catatan: note
+        });
+      }
+    });
+
+    return jsonResponse({
+      success: true,
+      products: allProducts,
+      count: allProducts.length,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (err) {
+    return jsonResponse({
+      success: false,
+      message: "Gagal membaca produk: " + err.toString()
+    });
+  }
+}
+
+function findColumnIndex(colMap, candidateNames) {
+  for (var i = 0; i < candidateNames.length; i++) {
+    var name = candidateNames[i].toLowerCase();
+    if (colMap.hasOwnProperty(name)) return colMap[name];
+  }
+  return -1;
+}
+
+function parseNumber(val) {
+  if (val === null || val === undefined || val === "") return 0;
+  if (typeof val === "number") return val;
+  var cleaned = String(val).replace(/[^0-9.,-]/g, "").replace(",", ".");
+  var num = parseFloat(cleaned);
+  return isNaN(num) ? 0 : num;
+}
+
 function jsonResponse(data) {
-  return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
+  return ContentService.createTextOutput(JSON.stringify(data))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 """.trimIndent()
 }

@@ -331,30 +331,37 @@ fun KasirScreen(
         )
     }
 
-    // Dialog Pengaturan Spreadsheet & Kelola Harga
+    // Dialog Pengaturan Spreadsheet & Kelola Saldo
     if (uiState.isSettingsOpen) {
         SettingsDialog(
             currentUrl = uiState.appsScriptUrl,
             currentBalance = uiState.currentBalance,
             unpricedCount = uiState.unpricedProductsCount,
+            initialTab = 0,
             onSaveUrl = { newUrl -> viewModel.updateAppsScriptUrl(newUrl) },
             onSyncNow = { viewModel.loadProducts(); viewModel.loadRecent() },
             onOpenPriceManagement = { currentMainTab = 2 },
-            onAdjustBalance = { newBalance, reason ->
-                viewModel.adjustCashBalance(newBalance, reason)
+            onAdjustBalance = { newBalance, mutationType, amount, reason ->
+                viewModel.adjustCashBalance(newBalance, mutationType, amount, reason)
             },
             onDismiss = { viewModel.closeSettings() }
         )
     }
 
-    // Dialog Khusus Penyesuaian Saldo Kas Toko
+    // Dialog Khusus Penyesuaian Saldo Kas Toko (Membuka Tab Atur Saldo)
     if (uiState.isAdjustBalanceDialogOpen) {
-        AdjustBalanceDialog(
+        SettingsDialog(
+            currentUrl = uiState.appsScriptUrl,
             currentBalance = uiState.currentBalance,
-            onDismiss = { viewModel.closeAdjustBalanceDialog() },
-            onSaveBalance = { newBalance, reason ->
-                viewModel.adjustCashBalance(newBalance, reason)
-            }
+            unpricedCount = uiState.unpricedProductsCount,
+            initialTab = 1,
+            onSaveUrl = { newUrl -> viewModel.updateAppsScriptUrl(newUrl) },
+            onSyncNow = { viewModel.loadProducts(); viewModel.loadRecent() },
+            onOpenPriceManagement = { currentMainTab = 2 },
+            onAdjustBalance = { newBalance, mutationType, amount, reason ->
+                viewModel.adjustCashBalance(newBalance, mutationType, amount, reason)
+            },
+            onDismiss = { viewModel.closeAdjustBalanceDialog() }
         )
     }
 

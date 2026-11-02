@@ -166,7 +166,13 @@ class PetShopRepository {
         }
     }
 
-    suspend fun adjustBalance(url: String, newBalance: Double, reason: String = "Penyesuaian Manual"): Result<Double> = withContext(Dispatchers.IO) {
+    suspend fun adjustBalance(
+        url: String, 
+        newBalance: Double, 
+        mutationType: String = "set",
+        amount: Double = 0.0,
+        reason: String = "Penyesuaian Manual"
+    ): Result<Double> = withContext(Dispatchers.IO) {
         if (url.isBlank()) {
             return@withContext Result.failure(IllegalStateException("URL Google Apps Script belum diisi"))
         }
@@ -174,6 +180,8 @@ class PetShopRepository {
         try {
             val root = JSONObject()
             root.put("action", "adjust_balance")
+            root.put("mutationType", mutationType)
+            root.put("amount", amount)
             root.put("newBalance", newBalance)
             root.put("reason", reason)
 

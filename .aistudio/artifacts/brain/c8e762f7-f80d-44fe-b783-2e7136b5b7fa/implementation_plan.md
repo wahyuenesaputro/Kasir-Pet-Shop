@@ -1,93 +1,100 @@
-# Rencana Implementasi Fitur Saldo Kas Toko Cross-Platform
+# Web POS Desktop Responsif & Sinkronisasi Ekosistem Pet Shop
 
-Rencana komprehensif untuk mengimplementasikan fitur **Saldo Kas Toko** yang terakumulasi otomatis pada setiap transaksi (Tunai maupun QRIS), tersimpan secara permanen pada sheet Riwayat Penjualan di Google Spreadsheet (sebagai Saldo Berjalan / *Running Balance*), tampil di Dashboard kasir, serta dapat diubah/disesuaikan nilainya melalui menu Pengaturan secara serasi (*cross-platform* antara Android, Web Vercel/iOS, dan Spreadsheet).
+Rencana peningkatan antarmuka Web POS Kasir Pet Shop (Vercel/PWA) agar mendukung tampilan layar lebar (Desktop/Laptop PC) dengan tata letak split-screen kasir modern, sekaligus mempertahankan pengalaman mobile yang ramah ponsel (Android/iOS Safari) dan memastikan sinkronisasi penuh dengan Google Sheets dan aplikasi Android.
 
----
-
-### User Review & Critical Decisions
+## Keputusan Kritis & Review Pengguna
 
 > [!IMPORTANT]
-> Ringkasan keputusan berdasarkan jawaban klarifikasi Anda:
-> - **Lokasi Penyimpanan di Spreadsheet**: Dicatat langsung pada sheet **`Penjualan`** (Riwayat Penjualan) dengan menambahkan kolom ke-7: **`Saldo Kas`**. Dengan demikian, setiap baris transaksi akan memperlihatkan pertambahan saldo kas secara transparan dan historis.
-> - **Akumulasi Otomatis Transaksi**: Semua pembayaran baik **Tunai** maupun **QRIS** akan otomatis menambahkan nilai saldo kas berjalan (contoh: saldo Rp 100.000 + belanja Rp 36.000 = saldo baru Rp 136.000).
-> - **Sinkronisasi Cross-Platform**: Berlaku dua arah untuk **Android** dan **Website Vercel (iOS)** melalui URL Google Apps Script yang sama, sehingga saldo di HP Android, iPhone/Web, dan Spreadsheet selalu sinkron dan sama persis.
-> - **Pengaturan Saldo Fleksibel**: Disediakan menu di bagian **Pengaturan** (serta shortcut di Dashboard) untuk mengubah/menyesuaikan nominal saldo kas kapan saja (misal untuk setoran awal kasir, penarikan uang, atau koreksi modal).
+> **Keputusan Terkonfirmasi dari Tanya Jawab:**
+> - **Format Desktop**: Web POS responsif adaptif khusus layar PC atau laptop (tidak memerlukan instalasi software terpisah, langsung dapat dibuka di Chrome, Edge, Safari, dan Firefox).
+> - **Tata Letak Desktop**: Layar lebar memanfaatkan tata letak **Dual-Panel (Split Screen)**:
+>   - **Panel Kiri**: Katalog produk responsif (grid 3–4 kolom pada desktop) dengan filter kategori dan pencarian cepat.
+>   - **Panel Kanan**: Bilah kasir tetap (*Sticky Checkout Sidebar*) berisi daftar item belanja, pengubah jumlah cepat, kalkulator nominal bayar (uang pas, 20rb, 50rb, 100rb), pilihan metode bayar (Tunai, QRIS, Transfer), dan tombol proses transaksi instan.
+> - **Mobile & Tablet**: Tampilan di bawah 1024px tetap mempertahankan antarmuka ponsel yang ringkas (persis seperti Android) lengkap dengan floating cart bar dan drawer popup keranjang.
+> - **Sinkronisasi**: Menggunakan Web App Google Apps Script terbaru (`AKfycbxcTpjehRlmfjmTll9V3LYOW79wP5X1WwznkwMn_VlFd9-0Szp1p4ize5bxPTK5Iplp`) dengan skema 7 kolom mutasi saldo kas.
 
 ---
 
-### 1. Struktur Data Spreadsheet Baru (7 Kolom)
-
-Sheet **`Penjualan`** di Google Spreadsheet akan memiliki format sebagai berikut:
+## 1. Arsitektur & Diagram Komponen
 
 ```
-┌────────────┬──────────┬─────────────────────────────┬──────────────┬─────────────┬─────────────┬─────────────┐
-│  Tanggal   │   Jam    │   Nama Produk Yang Dibeli   │ Total Barang │ Total Harga │ Metode Bayar│  Saldo Kas  │
-├────────────┼──────────┼─────────────────────────────┼──────────────┼─────────────┼─────────────┼─────────────┤
-│ 2026-11-01 │ 08:00:00 │ Modal Awal Kasir            │      0       │           0 │ Saldo Awal  │   100.000   │
-│ 2026-11-01 │ 08:15:30 │ 511 Bravo (1), Topsong (1)  │      2       │      26.000 │ Tunai       │   126.000   │
-│ 2026-11-01 │ 08:30:10 │ Whiskas Tuna 1.2kg (1)      │      1       │      68.000 │ QRIS        │   194.000   │
-│ 2026-11-01 │ 09:00:00 │ Penyesuaian Saldo Kas       │      0       │      50.000 │ Koreksi     │   244.000   │
-└────────────┴──────────┴─────────────────────────────┴──────────────┴─────────────┴─────────────┴─────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                      SISTEM POS KASIR PET SHOP MULTI-PLATFORM               │
+└──────────────────────────────────────┬──────────────────────────────────────┘
+                                       │
+            ┌──────────────────────────┴──────────────────────────┐
+            ▼                                                     ▼
+┌────────────────────────┐                             ┌──────────────────────┐
+│     APLIKASI ANDROID   │                             │  WEB POS (VERCEL)    │
+│  (Kotlin Jetpack POS)  │                             │ (Desktop & Mobile)   │
+└───────────┬────────────┘                             └──────────┬───────────┘
+            │                                                     │
+            │  Layar < 1024px (Mobile/iOS)     Layar >= 1024px (PC/Desktop)       │
+            │  ┌─────────────────────────┐     ┌────────────────────────────┐    │
+            │  │ Single Column Grid      │     │ Panel Kiri: Katalog Produk │    │
+            │  │ Floating Bottom Bar     │     │ Panel Kanan: Sidebar Kasir │    │
+            │  └─────────────────────────┘     └────────────────────────────┘    │
+            │                                                     │
+            └──────────────────────────┬──────────────────────────┘
+                                       │ Fetch / Post JSON (action: products, balance, checkout)
+                                       ▼
+                     ┌───────────────────────────────────┐
+                     │   GOOGLE APPS SCRIPT WEB APP      │
+                     │  (7 Kolom Mutasi Kas Real-Time)   │
+                     └─────────────────┬─────────────────┘
+                                       ▼
+                     ┌───────────────────────────────────┐
+                     │       GOOGLE SPREADSHEETS         │
+                     │  - Sheet "Riwayat Penjualan"      │
+                     │  - Sheet "Produk" (78 Produk)     │
+                     └───────────────────────────────────┘
 ```
 
-- Saldo Kas terakhir selalu dibaca dari baris terbawah pada kolom ke-7 sheet `Penjualan`.
-- Jika pengguna mengubah saldo lewat menu Pengaturan, Apps Script akan mencatat 1 baris riwayat koreksi saldo sehingga pembukuan toko tetap akuntabel dan tidak ada riwayat yang hilang.
+---
+
+## 2. Pengalaman Pengguna & Desain Visual (Desktop vs Mobile)
+
+### A. Tampilan Desktop (Layar Lebar PC & Laptop: `>= 1024px`)
+- **Navigasi Atas Lebar**: Header modern dengan logo Pet Shop, indikator status online/cloud Google Sheets, tombol unduh APK Android, serta pintasan cepat ke Pengaturan & Atur Saldo.
+- **Katalog Produk (Kiri)**:
+  - Kotak pencarian luas dengan shortcut keyboard (`/` atau `Ctrl+F`).
+  - Chip kategori interaktif (Semua, Burung, Kucing, Ayam, Ikan, dll).
+  - Grid kartu produk dinamis (3–4 kolom) dengan indikator harga jelas, satuan produk (pcs, kg, bungkus), dan tombol `+ Tambah` yang responsif.
+- **Bilah Kasir Langsung / Sticky Checkout Sidebar (Kanan)**:
+  - Keranjang belanja selalu terlihat di samping katalog tanpa perlu buka/tutup modal.
+  - Daftar barang dengan tombol `+`, `-`, dan hapus cepat.
+  - Input nama pelanggan & pilihan metode pembayaran (Tunai / QRIS / Transfer).
+  - Pilihan cepat uang tunai (Uang Pas, Rp 10.000, Rp 20.000, Rp 50.000, Rp 100.000).
+  - Kalkulasi kembalian otomatis.
+  - Tombol **"Bayar & Cetak Struk"** berukuran besar yang mencolok dengan dukungan tombol keyboard `F2` atau `Enter`.
+- **Cetak Struk Thermal**: Dukungan cetak struk browser langsung ke printer thermal 58mm / 80mm USB atau Bluetooth.
+
+### B. Tampilan Mobile & Tablet (`< 1024px` - Android & iOS Safari)
+- Tetap ramping dan ergonomis satu tangan (konsisten dengan aplikasi Android).
+- Bilah bawah mengambang (*floating cart pill*) dengan badge jumlah item dan subtotal.
+- Modal slide-up untuk rincian keranjang dan pembayaran.
+
+### C. Dashboard & Riwayat Transaksi di Desktop
+- **Dashboard**: Tampilan multi-kartu berjajar (Total Saldo Kas Toko gradien biru besar di kiri, Omset Hari Ini di kanan, serta statistik total transaksi dan status koneksi spreadsheet).
+- **Riwayat Penjualan**: Tabel riwayat penjualan responsif dengan keterangan transaksi, waktu, metode, dan rincian mutasi kas.
 
 ---
 
-### 2. Alur Kerja Teknis & API Google Apps Script
+## 3. Rencana Langkah Eksekusi
 
-1. **`doGet(e)` (Query Saldo & Ringkasan)**:
-   - Endpoint `?action=recent` dan `?action=balance` akan mengembalikan objek:
-     `{ success: true, currentBalance: 194000, todayTotal: ..., todayCount: ..., recentTransactions: [...] }`
-2. **`doPost(e)` (Penjualan & Penyesuaian Saldo)**:
-   - **Saat Transaksi Penjualan (`action: "sale"`)**:
-     - Membaca saldo terakhir dari sheet.
-     - Menambahkan total belanja: `newBalance = lastBalance + totalAmount`.
-     - Menyimpan baris transaksi lengkap beserta `newBalance`.
-     - Mengembalikan `{ success: true, balance: newBalance }`.
-   - **Saat Pengaturan Saldo Diubah (`action: "adjust_balance"`)**:
-     - Menerima `targetBalance` dan `reason` dari kasir.
-     - Menyimpan baris pencatatan penyesuaian kas.
-     - Mengembalikan `{ success: true, balance: targetBalance }`.
-
----
-
-### 3. Tampilan Antarmuka (UI/UX)
-
-#### A. Pada Layar Dashboard Kasir (Android & Web Vercel/iOS)
-- **Kartu Utama "SALDO KAS TOKO"**:
-  - Ditempatkan di bagian paling atas Dashboard dengan gradasi warna biru safir ke indigo yang elegan.
-  - Menampilkan angka saldo nominal besar: **Rp 194.000**.
-  - Dilengkapi tombol cepat **"Atur Saldo"** dengan ikon pensil/edit untuk membuka modal pengubahan saldo secara instan.
-  - Menampilkan informasi omset hari ini dan jumlah transaksi di bawah kartu saldo.
-
-#### B. Pada Menu Pengaturan (Settings)
-- **Bagian "Manajemen Saldo Kas Toko"**:
-  - Menampilkan saldo aktif saat ini.
-  - Input teks untuk memasukkan nominal saldo baru.
-  - Tombol **"Simpan & Perbarui Saldo ke Spreadsheet"**.
-  - Disertai indikator loading saat sinkronisasi berlangsung ke Google Spreadsheet.
-
----
-
-### 4. Rincian Modifikasi File Proyek
-
-1. **`app/src/main/java/com/example/ui/components/AppsScriptCodeSnippet.kt`**:
-   - Perbarui kode Apps Script template ke versi 7 kolom dengan logika kalkulasi saldo berjalan (*running balance*) dan handler `adjust_balance`.
-2. **`app/src/main/java/com/example/data/PetShopPrefs.kt` & `PetShopRepository.kt`**:
-   - Tambahkan penyimpanan lokal `currentBalance` sebagai cache offline.
-   - Tambahkan fungsi jaringan `fetchBalance()` dan `adjustBalance(newBalance, reason)`.
-3. **`app/src/main/java/com/example/ui/KasirViewModel.kt` & `KasirUiState`**:
-   - Tambahkan state `currentBalance: Double` pada `KasirUiState`.
-   - Saat penjualan berhasil disimpan, perbarui `currentBalance` secara otomatis (`+ totalAmount`).
-   - Buat fungsi `updateCashBalance(newBalance: Double)` yang mengirim pembaruan ke Google Spreadsheet.
-4. **`app/src/main/java/com/example/ui/KasirScreen.kt` & `SettingsDialog.kt`**:
-   - Perbarui kartu Dashboard dengan widget **Saldo Kas Toko** dan tombol ubah saldo.
-   - Tambahkan form input penyesuaian saldo di `SettingsDialog`.
-5. **`web/index.html` & `web/app.js` (Web Vercel / iOS)**:
-   - Terapkan kartu saldo kas toko di Dashboard web.
-   - Tambahkan form atur saldo di modal Pengaturan web.
-   - Sambungkan ke endpoint Apps Script yang sama untuk sinkronisasi *real-time*.
-6. **Kompilasi & Pembaruan APK**:
-   - Jalankan `compile_applet` dan `assembleDebug` untuk memperbarui file instalasi `KasirPetShop.apk`.
+1. **Pembaruan Antarmuka Web (`web/index.html` & `public/index.html`)**:
+   - Menghapus pembatasan `max-w-md` pada layar desktop dan menggantinya dengan layout kontainer adaptif (`max-w-7xl mx-auto`).
+   - Membuat tata letak grid dual-panel di layar `lg:`:
+     - Sisi kiri: Katalog produk & filter kategori.
+     - Sisi kanan: Panel keranjang & checkout permanen yang menempel (*sticky*).
+   - Menjaga tampilan mobile (`< lg`) tetap bersih seperti tampilan aplikasi Android.
+   - Mempercantik Dashboard dan Riwayat untuk memanfaatkan lebar layar desktop.
+2. **Penyelarasan Logika JavaScript (`web/app.js` & `public/app.js`)**:
+   - Menghubungkan manipulasi keranjang secara real-time pada panel sidebar desktop dan modal mobile secara bersamaan (sinkron dua arah).
+   - Menambahkan event listener keyboard shortcut desktop (`F2` untuk checkout cepat, `Escape` untuk tutup modal).
+   - Memastikan default URL Apps Script mengarah ke deployment baru (`AKfycbxcTpjehRlmfjmTll9V3LYOW79wP5X1WwznkwMn_VlFd9-0Szp1p4ize5bxPTK5Iplp`).
+3. **Penyelarasan File Distribusi (`public/`)**:
+   - Memastikan seluruh berkas web (`index.html`, `app.js`, `manifest.json`, `KasirPetShop.apk`) tersinkronisasi 100% sehingga siap dideploy ke Vercel atau diakses via browser laptop/desktop.
+4. **Verifikasi Akhir**:
+   - Pengujian live responsive preview pada berbagai ukuran viewport.
+   - Pengujian simpan transaksi dan penarikan saldo ke Google Sheets.
