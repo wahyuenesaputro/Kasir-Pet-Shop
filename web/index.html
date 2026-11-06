@@ -61,15 +61,19 @@
 
       <!-- DESKTOP CENTER NAVIGATION TABS (TAMPIL DI LAYAR BESAR) -->
       <nav class="hidden lg:flex items-center bg-slate-100 p-1 rounded-xl space-x-1 border border-slate-200/80">
-        <button onclick="switchTab('kasir')" id="desktop-nav-kasir" class="py-1.5 px-4 rounded-lg text-xs font-bold flex items-center space-x-2 transition bg-blue-600 text-white shadow-sm">
+        <button onclick="switchTab('kasir')" id="desktop-nav-kasir" class="py-1.5 px-3.5 rounded-lg text-xs font-bold flex items-center space-x-2 transition bg-blue-600 text-white shadow-sm">
           <i data-lucide="shopping-cart" class="w-4 h-4"></i>
           <span>Kasir POS</span>
         </button>
-        <button onclick="switchTab('dashboard')" id="desktop-nav-dashboard" class="py-1.5 px-4 rounded-lg text-xs font-bold flex items-center space-x-2 transition text-slate-600 hover:text-slate-900 hover:bg-white/60">
+        <button onclick="switchTab('katalog')" id="desktop-nav-katalog" class="py-1.5 px-3.5 rounded-lg text-xs font-bold flex items-center space-x-2 transition text-slate-600 hover:text-slate-900 hover:bg-white/60">
+          <i data-lucide="tags" class="w-4 h-4"></i>
+          <span>Katalog & Harga</span>
+        </button>
+        <button onclick="switchTab('dashboard')" id="desktop-nav-dashboard" class="py-1.5 px-3.5 rounded-lg text-xs font-bold flex items-center space-x-2 transition text-slate-600 hover:text-slate-900 hover:bg-white/60">
           <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
           <span>Dashboard & Saldo</span>
         </button>
-        <button onclick="switchTab('riwayat')" id="desktop-nav-riwayat" class="py-1.5 px-4 rounded-lg text-xs font-bold flex items-center space-x-2 transition text-slate-600 hover:text-slate-900 hover:bg-white/60">
+        <button onclick="switchTab('riwayat')" id="desktop-nav-riwayat" class="py-1.5 px-3.5 rounded-lg text-xs font-bold flex items-center space-x-2 transition text-slate-600 hover:text-slate-900 hover:bg-white/60">
           <i data-lucide="history" class="w-4 h-4"></i>
           <span>Riwayat Mutasi</span>
         </button>
@@ -112,15 +116,19 @@
 
     <!-- MOBILE TAB NAVIGATION BAR (< lg) -->
     <div class="max-w-md mx-auto px-4 pb-2 flex space-x-1 lg:hidden">
-      <button onclick="switchTab('dashboard')" id="nav-dashboard" class="flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold flex items-center justify-center space-x-1.5 transition text-slate-500 hover:bg-slate-100">
-        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
-        <span>Dashboard</span>
-      </button>
-      <button onclick="switchTab('kasir')" id="nav-kasir" class="flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold flex items-center justify-center space-x-1.5 transition bg-blue-600 text-white shadow-sm">
+      <button onclick="switchTab('kasir')" id="nav-kasir" class="flex-1 py-1.5 px-1 rounded-lg text-xs font-semibold flex items-center justify-center space-x-1 transition bg-blue-600 text-white shadow-sm">
         <i data-lucide="shopping-cart" class="w-4 h-4"></i>
         <span>Kasir</span>
       </button>
-      <button onclick="switchTab('riwayat')" id="nav-riwayat" class="flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold flex items-center justify-center space-x-1.5 transition text-slate-500 hover:bg-slate-100">
+      <button onclick="switchTab('katalog')" id="nav-katalog" class="flex-1 py-1.5 px-1 rounded-lg text-xs font-semibold flex items-center justify-center space-x-1 transition text-slate-500 hover:bg-slate-100">
+        <i data-lucide="tags" class="w-4 h-4"></i>
+        <span>Katalog</span>
+      </button>
+      <button onclick="switchTab('dashboard')" id="nav-dashboard" class="flex-1 py-1.5 px-1 rounded-lg text-xs font-semibold flex items-center justify-center space-x-1 transition text-slate-500 hover:bg-slate-100">
+        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+        <span>Saldo</span>
+      </button>
+      <button onclick="switchTab('riwayat')" id="nav-riwayat" class="flex-1 py-1.5 px-1 rounded-lg text-xs font-semibold flex items-center justify-center space-x-1 transition text-slate-500 hover:bg-slate-100">
         <i data-lucide="history" class="w-4 h-4"></i>
         <span>Riwayat</span>
       </button>
@@ -185,12 +193,6 @@
             <!-- Divider -->
             <div class="border-t border-slate-100 pt-3 space-y-3">
               
-              <!-- Nama Pembeli (Opsional) -->
-              <div>
-                <label class="text-[11px] font-bold text-slate-600 block mb-1">Nama Pembeli (Opsional):</label>
-                <input type="text" id="desktop-cust-name" value="Pelanggan Umum" placeholder="Nama Pelanggan..." class="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-600">
-              </div>
-
               <!-- Metode Pembayaran -->
               <div>
                 <label class="text-[11px] font-bold text-slate-600 block mb-1">Metode Pembayaran:</label>
@@ -260,7 +262,49 @@
       </div>
     </section>
 
-    <!-- SCREEN 2: DASHBOARD (RESPONSIF GRID DI DESKTOP) -->
+    <!-- SCREEN 2: KATALOG & EDIT HARGA CEPAT (DESKTOP & MOBILE) -->
+    <section id="screen-katalog" class="hidden space-y-4">
+      <!-- Header Banner / Title -->
+      <div class="bg-white rounded-2xl p-4 lg:p-5 border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <div class="flex items-center space-x-2">
+            <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+              <i data-lucide="tags" class="w-4 h-4"></i>
+            </div>
+            <h2 class="font-extrabold text-slate-900 text-base lg:text-lg">Katalog & Edit Harga Produk</h2>
+          </div>
+          <p class="text-xs text-slate-500 mt-1">Ubah harga jual produk dengan cepat. Perubahan seketika aktif pada kasir desktop & mobile.</p>
+        </div>
+        <div class="flex items-center space-x-2">
+          <span class="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-xl" id="katalog-total-badge">
+            0 Produk
+          </span>
+          <button onclick="openAddProductModal()" class="py-1.5 px-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition flex items-center space-x-1.5 shadow-sm">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <span>+ Produk Baru</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Search & Filter Controls -->
+      <div class="space-y-2.5">
+        <div class="relative">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3 text-slate-400"></i>
+          <input type="text" id="katalog-search-input" oninput="renderCatalogManager()" placeholder="Cari nama produk yang ingin diedit harganya..." class="w-full pl-10 pr-4 py-2.5 bg-white rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent shadow-sm">
+        </div>
+
+        <div class="flex space-x-2 overflow-x-auto no-scrollbar py-1" id="katalog-category-chips">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+
+      <!-- Daftar Produk untuk Edit Harga (Responsive Grid: 1 col di hp, 2 col di tablet, 3 col di desktop) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" id="katalog-products-list">
+        <!-- Rendered via JS -->
+      </div>
+    </section>
+
+    <!-- SCREEN 3: DASHBOARD (RESPONSIF GRID DI DESKTOP) -->
     <section id="screen-dashboard" class="hidden space-y-4">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         
@@ -358,7 +402,7 @@
       </div>
     </section>
 
-    <!-- SCREEN 3: RIWAYAT PENJUALAN (TABLE / WIDE CARDS DI DESKTOP) -->
+    <!-- SCREEN 4: RIWAYAT PENJUALAN (TABLE / WIDE CARDS DI DESKTOP) -->
     <section id="screen-riwayat" class="hidden space-y-3.5">
       <div class="flex items-center justify-between pb-2 border-b border-slate-200">
         <div>
@@ -568,6 +612,61 @@
         </button>
         <button onclick="closeReceiptModal()" class="py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition">
           Selesai
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: EDIT HARGA CEPAT (QUICK EDIT PRICE MODAL) -->
+  <div id="quick-edit-price-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-sm bg-white rounded-2xl p-5 shadow-2xl space-y-4 animate-in fade-in">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+            <i data-lucide="edit-3" class="w-4 h-4"></i>
+          </div>
+          <h3 class="font-extrabold text-sm text-slate-900">Ubah Harga Jual</h3>
+        </div>
+        <button onclick="closeQuickEditPriceModal()" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <input type="hidden" id="edit-price-prod-id">
+
+      <div class="bg-slate-50 rounded-xl p-3 border border-slate-200/80">
+        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wide block" id="edit-price-prod-cat">Kategori • Satuan</span>
+        <h4 class="text-sm font-bold text-slate-900 mt-0.5 line-clamp-2" id="edit-price-prod-name">Nama Produk</h4>
+        <div class="flex justify-between items-center text-xs mt-2 pt-2 border-t border-slate-200">
+          <span class="text-slate-500 font-medium">Harga Sekarang:</span>
+          <span class="font-black text-slate-800" id="edit-price-current-disp">Rp 0</span>
+        </div>
+      </div>
+
+      <div>
+        <label class="text-xs font-bold text-slate-700 block mb-1">Harga Jual Baru (Rp):</label>
+        <div class="relative">
+          <span class="absolute left-3.5 top-2.5 text-xs font-bold text-slate-400">Rp</span>
+          <input type="number" id="edit-price-new-input" placeholder="Masukkan harga baru..." class="w-full pl-10 pr-3 py-2.5 rounded-xl border border-slate-300 text-base font-black text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-600">
+        </div>
+        <span id="err-edit-price" class="text-xs text-red-500 font-medium mt-1 block hidden">Harga harus lebih dari Rp 0</span>
+      </div>
+
+      <!-- Quick adjust chips -->
+      <div>
+        <span class="text-[11px] text-slate-400 font-medium block mb-1">Tambah / Kurang Cepat:</span>
+        <div class="flex flex-wrap gap-1.5" id="edit-price-quick-chips">
+          <!-- chips via JS -->
+        </div>
+      </div>
+
+      <div class="flex space-x-2 pt-1">
+        <button type="button" onclick="closeQuickEditPriceModal()" class="flex-1 py-2.5 px-3 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl transition">
+          Batal
+        </button>
+        <button type="button" onclick="saveQuickPrice()" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center space-x-1.5">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>Simpan Harga</span>
         </button>
       </div>
     </div>

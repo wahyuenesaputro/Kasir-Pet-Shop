@@ -1,100 +1,87 @@
-# Web POS Desktop Responsif & Sinkronisasi Ekosistem Pet Shop
+# Menu Katalog Edit Harga Cepat & Pembersihan Input Nama Pembeli
 
-Rencana peningkatan antarmuka Web POS Kasir Pet Shop (Vercel/PWA) agar mendukung tampilan layar lebar (Desktop/Laptop PC) dengan tata letak split-screen kasir modern, sekaligus mempertahankan pengalaman mobile yang ramah ponsel (Android/iOS Safari) dan memastikan sinkronisasi penuh dengan Google Sheets dan aplikasi Android.
+Rencana implementasi penambahan tab menu baru **"Katalog"** pada Web POS (Desktop & Mobile iOS/Android) untuk mengubah harga jual produk secara cepat, serta menghapus kolom input nama pembeli pada seluruh alur kasir.
 
 ## Keputusan Kritis & Review Pengguna
 
 > [!IMPORTANT]
 > **Keputusan Terkonfirmasi dari Tanya Jawab:**
-> - **Format Desktop**: Web POS responsif adaptif khusus layar PC atau laptop (tidak memerlukan instalasi software terpisah, langsung dapat dibuka di Chrome, Edge, Safari, dan Firefox).
-> - **Tata Letak Desktop**: Layar lebar memanfaatkan tata letak **Dual-Panel (Split Screen)**:
->   - **Panel Kiri**: Katalog produk responsif (grid 3–4 kolom pada desktop) dengan filter kategori dan pencarian cepat.
->   - **Panel Kanan**: Bilah kasir tetap (*Sticky Checkout Sidebar*) berisi daftar item belanja, pengubah jumlah cepat, kalkulator nominal bayar (uang pas, 20rb, 50rb, 100rb), pilihan metode bayar (Tunai, QRIS, Transfer), dan tombol proses transaksi instan.
-> - **Mobile & Tablet**: Tampilan di bawah 1024px tetap mempertahankan antarmuka ponsel yang ringkas (persis seperti Android) lengkap dengan floating cart bar dan drawer popup keranjang.
-> - **Sinkronisasi**: Menggunakan Web App Google Apps Script terbaru (`AKfycbxcTpjehRlmfjmTll9V3LYOW79wP5X1WwznkwMn_VlFd9-0Szp1p4ize5bxPTK5Iplp`) dengan skema 7 kolom mutasi saldo kas.
+> - **Penghapusan Nama Pembeli**: Input "Nama Pembeli" pada sidebar kasir desktop dan modal mobile dihapus sepenuhnya. Semua transaksi dicatat langsung tanpa memerlukan input nama pelanggan.
+> - **Letak Menu Edit Harga**: Menambahkan tab navigasi baru bernama **"Katalog"** yang ditempatkan tepat di samping tab **Kasir** (urutan navigasi: Kasir | Katalog | Dashboard | Riwayat) pada versi Desktop maupun Mobile (iOS/Android).
+> - **Fokus Fitur**: Cukup edit harga jual produk secara cepat (inline edit / modal edit harga cepat dengan input nominal baru dan tombol simpan instan).
+> - **Penyimpanan Harga**: Harga kustom tersimpan langsung di browser (localStorage) dan dapat disinkronkan langsung saat kasir memilih produk untuk transaksi.
 
 ---
 
-## 1. Arsitektur & Diagram Komponen
+## 1. Arsitektur & Alur Navigasi
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                      SISTEM POS KASIR PET SHOP MULTI-PLATFORM               │
-└──────────────────────────────────────┬──────────────────────────────────────┘
-                                       │
-            ┌──────────────────────────┴──────────────────────────┐
-            ▼                                                     ▼
-┌────────────────────────┐                             ┌──────────────────────┐
-│     APLIKASI ANDROID   │                             │  WEB POS (VERCEL)    │
-│  (Kotlin Jetpack POS)  │                             │ (Desktop & Mobile)   │
-└───────────┬────────────┘                             └──────────┬───────────┘
-            │                                                     │
-            │  Layar < 1024px (Mobile/iOS)     Layar >= 1024px (PC/Desktop)       │
-            │  ┌─────────────────────────┐     ┌────────────────────────────┐    │
-            │  │ Single Column Grid      │     │ Panel Kiri: Katalog Produk │    │
-            │  │ Floating Bottom Bar     │     │ Panel Kanan: Sidebar Kasir │    │
-            │  └─────────────────────────┘     └────────────────────────────┘    │
-            │                                                     │
-            └──────────────────────────┬──────────────────────────┘
-                                       │ Fetch / Post JSON (action: products, balance, checkout)
-                                       ▼
-                     ┌───────────────────────────────────┐
-                     │   GOOGLE APPS SCRIPT WEB APP      │
-                     │  (7 Kolom Mutasi Kas Real-Time)   │
-                     └─────────────────┬─────────────────┘
-                                       ▼
-                     ┌───────────────────────────────────┐
-                     │       GOOGLE SPREADSHEETS         │
-                     │  - Sheet "Riwayat Penjualan"      │
-                     │  - Sheet "Produk" (78 Produk)     │
-                     └───────────────────────────────────┘
+│                           NAVIGASI WEB POS BARU                             │
+├─────────────────┬─────────────────┬───────────────────────┬─────────────────┤
+│   [1] KASIR     │   [2] KATALOG   │    [3] DASHBOARD      │   [4] RIWAYAT   │
+│   (Transaksi)   │   (Edit Harga)  │   (Saldo & Omset)     │    (Mutasi)     │
+└────────┬────────┴────────┬────────┴───────────────────────┴─────────────────┘
+         │                 │
+         │                 ▼
+         │        ┌──────────────────────────────────────────────────┐
+         │        │               LAYAR MENU KATALOG                 │
+         │        │ - Pencarian produk & filter kategori             │
+         │        │ - Daftar produk dengan harga jual saat ini       │
+         │        │ - Tombol cepat "Ubah Harga" / input harga baru   │
+         │        │ - Simpan & perbarui harga jual seketika          │
+         │        └──────────────────────────────────────────────────┘
+         │                                 │
+         │                                 ▼ Update harga jual
+         └─────────────────────────────────┘ (Harga di kasir otomatis update)
 ```
 
 ---
 
-## 2. Pengalaman Pengguna & Desain Visual (Desktop vs Mobile)
+## 2. Rincian Perubahan Fitur & Tampilan
 
-### A. Tampilan Desktop (Layar Lebar PC & Laptop: `>= 1024px`)
-- **Navigasi Atas Lebar**: Header modern dengan logo Pet Shop, indikator status online/cloud Google Sheets, tombol unduh APK Android, serta pintasan cepat ke Pengaturan & Atur Saldo.
-- **Katalog Produk (Kiri)**:
-  - Kotak pencarian luas dengan shortcut keyboard (`/` atau `Ctrl+F`).
-  - Chip kategori interaktif (Semua, Burung, Kucing, Ayam, Ikan, dll).
-  - Grid kartu produk dinamis (3–4 kolom) dengan indikator harga jelas, satuan produk (pcs, kg, bungkus), dan tombol `+ Tambah` yang responsif.
-- **Bilah Kasir Langsung / Sticky Checkout Sidebar (Kanan)**:
-  - Keranjang belanja selalu terlihat di samping katalog tanpa perlu buka/tutup modal.
-  - Daftar barang dengan tombol `+`, `-`, dan hapus cepat.
-  - Input nama pelanggan & pilihan metode pembayaran (Tunai / QRIS / Transfer).
-  - Pilihan cepat uang tunai (Uang Pas, Rp 10.000, Rp 20.000, Rp 50.000, Rp 100.000).
-  - Kalkulasi kembalian otomatis.
-  - Tombol **"Bayar & Cetak Struk"** berukuran besar yang mencolok dengan dukungan tombol keyboard `F2` atau `Enter`.
-- **Cetak Struk Thermal**: Dukungan cetak struk browser langsung ke printer thermal 58mm / 80mm USB atau Bluetooth.
+### A. Penghapusan Kolom Nama Pembeli
+- Menghapus elemen input `desktop-cust-name` pada *Sticky Checkout Sidebar* layar desktop.
+- Menghapus input nama pelanggan pada form pembayaran modal mobile.
+- Menghapus baris nama pembeli pada struk belanja thermal sehingga struk lebih ringkas.
+- Memperbarui fungsi `submitDesktopPayment` dan `submitPayment` agar langsung memproses transaksi tanpa membaca input nama pembeli.
 
-### B. Tampilan Mobile & Tablet (`< 1024px` - Android & iOS Safari)
-- Tetap ramping dan ergonomis satu tangan (konsisten dengan aplikasi Android).
-- Bilah bawah mengambang (*floating cart pill*) dengan badge jumlah item dan subtotal.
-- Modal slide-up untuk rincian keranjang dan pembayaran.
+### B. Tab Navigasi Baru: "Katalog"
+- **Desktop Header Navigation**:
+  - Menambahkan tombol menu: `[Kasir POS]` • `[Katalog Produk]` • `[Dashboard & Saldo]` • `[Riwayat Mutasi]`.
+- **Mobile Top Tab Navigation**:
+  - Menambahkan tab `Katalog` dengan ikon buku/katalog di samping tab `Kasir`.
+- **Layar Menu Katalog (`#screen-katalog`)**:
+  - Kotak pencarian produk dan tombol filter kategori (Ayam, Burung, Kucing, Ikan, dll).
+  - Tampilan daftar produk (format kartu bersih atau tabel modern responsif):
+    - Ikon kategori, nama produk, dan satuan.
+    - Harga jual saat ini yang ditonjolkan.
+    - Tombol aksi **"Ubah Harga"** (atau kolom input harga inline) yang memudahkan kasir mengubah harga dalam 1 klik.
+  - Modal / Dialog Edit Harga Cepat:
+    - Menampilkan nama produk dan harga lama.
+    - Input nominal harga baru.
+    - Tombol "Simpan Harga Baru".
+    - Indikator notifikasi perubahan berhasil.
 
-### C. Dashboard & Riwayat Transaksi di Desktop
-- **Dashboard**: Tampilan multi-kartu berjajar (Total Saldo Kas Toko gradien biru besar di kiri, Omset Hari Ini di kanan, serta statistik total transaksi dan status koneksi spreadsheet).
-- **Riwayat Penjualan**: Tabel riwayat penjualan responsif dengan keterangan transaksi, waktu, metode, dan rincian mutasi kas.
+### C. Sinkronisasi Data & File
+- Memperbarui `web/index.html` dan `web/app.js`.
+- Menyalin seluruh pembaruan ke `public/index.html` dan `public/app.js` agar langsung aktif di Vercel dan browser pengguna.
+- Memastikan tidak ada benturan dengan fungsionalitas Android dan Google Sheets.
 
 ---
 
-## 3. Rencana Langkah Eksekusi
+## 3. Langkah Eksekusi
 
-1. **Pembaruan Antarmuka Web (`web/index.html` & `public/index.html`)**:
-   - Menghapus pembatasan `max-w-md` pada layar desktop dan menggantinya dengan layout kontainer adaptif (`max-w-7xl mx-auto`).
-   - Membuat tata letak grid dual-panel di layar `lg:`:
-     - Sisi kiri: Katalog produk & filter kategori.
-     - Sisi kanan: Panel keranjang & checkout permanen yang menempel (*sticky*).
-   - Menjaga tampilan mobile (`< lg`) tetap bersih seperti tampilan aplikasi Android.
-   - Mempercantik Dashboard dan Riwayat untuk memanfaatkan lebar layar desktop.
-2. **Penyelarasan Logika JavaScript (`web/app.js` & `public/app.js`)**:
-   - Menghubungkan manipulasi keranjang secara real-time pada panel sidebar desktop dan modal mobile secara bersamaan (sinkron dua arah).
-   - Menambahkan event listener keyboard shortcut desktop (`F2` untuk checkout cepat, `Escape` untuk tutup modal).
-   - Memastikan default URL Apps Script mengarah ke deployment baru (`AKfycbxcTpjehRlmfjmTll9V3LYOW79wP5X1WwznkwMn_VlFd9-0Szp1p4ize5bxPTK5Iplp`).
-3. **Penyelarasan File Distribusi (`public/`)**:
-   - Memastikan seluruh berkas web (`index.html`, `app.js`, `manifest.json`, `KasirPetShop.apk`) tersinkronisasi 100% sehingga siap dideploy ke Vercel atau diakses via browser laptop/desktop.
-4. **Verifikasi Akhir**:
-   - Pengujian live responsive preview pada berbagai ukuran viewport.
-   - Pengujian simpan transaksi dan penarikan saldo ke Google Sheets.
+1. **Pembaruan Layout HTML (`web/index.html` & `public/index.html`)**:
+   - Menghapus bagian input nama pembeli di sidebar desktop dan modal pembayaran.
+   - Menambahkan tombol navigasi `desktop-nav-katalog` dan `nav-katalog`.
+   - Membuat kontainer tampilan baru `<section id="screen-katalog">` berisi antarmuka kelola harga produk.
+   - Menyiapkan modal cepat `quick-price-modal`.
+2. **Pembaruan Logika JavaScript (`web/app.js` & `public/app.js`)**:
+   - Menambahkan tab `katalog` pada fungsi `switchTab(tab)`.
+   - Menambahkan fungsi `renderCatalogManager()` untuk menampilkan daftar produk lengkap dengan tombol edit harga.
+   - Menambahkan fungsi `openEditPriceModal(productId)` dan `saveQuickPrice()`.
+   - Memastikan harga baru otomatis tersimpan di `localStorage` (`custom_price_*` / `petshop_price_overrides`) dan seketika memperbarui harga di layar kasir.
+3. **Pengujian & Verifikasi**:
+   - Uji alur ubah harga produk di tab Katalog, lalu kembali ke Kasir untuk memastikan harga baru diterapkan.
+   - Uji transaksi kasir tanpa nama pembeli di desktop dan mobile.

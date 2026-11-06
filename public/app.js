@@ -6,6 +6,7 @@
 let products = [];
 let cart = {}; // productId -> { product, qty }
 let selectedCategory = "Semua";
+let katalogSelectedCategory = "Semua";
 let currentPaymentMethod = "Tunai";
 let activeReceipt = null;
 let currentMutationType = "add"; // 'add', 'withdraw', 'set'
@@ -48,6 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
   loadStoredProducts();
   renderCategories();
   renderProducts();
+  renderCatalogManager();
   updateCartUI();
   updateDashboard();
   renderQuickBalanceChips();
@@ -101,13 +103,21 @@ function setupKeyboardShortcuts() {
       closeReceiptModal();
       closeAddProductModal();
       closeSettingsModal();
+      closeQuickEditPriceModal();
     }
   });
 }
 
 function loadStoredProducts() {
   const custom = JSON.parse(localStorage.getItem("petshop_custom_products") || "[]");
-  products = [...defaultCatalog, ...custom];
+  const overrides = JSON.parse(localStorage.getItem("petshop_price_overrides") || "{}");
+  
+  products = [...defaultCatalog, ...custom].map(p => {
+    if (overrides[p.id] !== undefined) {
+      return { ...p, hargaJual: Number(overrides[p.id]) };
+    }
+    return p;
+  });
 }
 
 // FORMAT RUPIAH
@@ -115,22 +125,22 @@ function formatRupiah(number) {
   return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(number || 0);
 }
 
-// TAB SWITCHER RESPONSIF
+// TAB SWITCHER RESPONSIF (KASIR, KATALOG, DASHBOARD, RIWAYAT)
 function switchTab(tab) {
-  ["kasir", "dashboard", "riwayat"].forEach(t => {
+  ["kasir", "katalog", "dashboard", "riwayat"].forEach(t => {
     const screen = document.getElementById(`screen-${t}`);
     if (screen) screen.classList.add("hidden");
 
     // Mobile nav
     const btn = document.getElementById(`nav-${t}`);
     if (btn) {
-      btn.className = "flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold flex items-center justify-center space-x-1.5 transition text-slate-500 hover:bg-slate-100";
+      btn.className = "flex-1 py-1.5 px-1 rounded-lg text-xs font-semibold flex items-center justify-center space-x-1 transition text-slate-500 hover:bg-slate-100";
     }
 
     // Desktop nav
     const deskBtn = document.getElementById(`desktop-nav-${t}`);
     if (deskBtn) {
-      deskBtn.className = "py-1.5 px-4 rounded-lg text-xs font-bold flex items-center space-x-2 transition text-slate-600 hover:text-slate-900 hover:bg-white/60";
+      deskBtn.className = "py-1.5 px-3.5 rounded-lg text-xs font-bold flex items-center space-x-2 transition text-slate-600 hover:text-slate-900 hover:bg-white/60";
     }
   });
 
@@ -139,20 +149,21 @@ function switchTab(tab) {
 
   const activeBtn = document.getElementById(`nav-${tab}`);
   if (activeBtn) {
-    activeBtn.className = "flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold flex items-center justify-center space-x-1.5 transition bg-blue-600 text-white shadow-sm";
+    activeBtn.className = "flex-1 py-1.5 px-1 rounded-lg text-xs font-semibold flex items-center justify-center space-x-1 transition bg-blue-600 text-white shadow-sm";
   }
 
   const activeDeskBtn = document.getElementById(`desktop-nav-${tab}`);
   if (activeDeskBtn) {
-    activeDeskBtn.className = "py-1.5 px-4 rounded-lg text-xs font-bold flex items-center space-x-2 transition bg-blue-600 text-white shadow-sm";
+    activeDeskBtn.className = "py-1.5 px-3.5 rounded-lg text-xs font-bold flex items-center space-x-2 transition bg-blue-600 text-white shadow-sm";
   }
 
+  if (tab === "katalog") renderCatalogManager();
   if (tab === "dashboard") updateDashboard();
   if (tab === "riwayat") loadRecentSales();
   if (window.lucide) lucide.createIcons();
 }
 
-// KATEGORI FILTER
+// KATEGORI FILTER KASIR
 function renderCategories() {
   const cats = [
     { id: "Semua", label: "🔍 Semua" },
@@ -182,7 +193,7 @@ function selectCategory(cat) {
   renderProducts();
 }
 
-// RENDER GRID PRODUK
+// RENDER GRID PRODUK KASIR
 function renderProducts() {
   const searchInput = document.getElementById("search-input");
   const search = searchInput ? searchInput.value.toLowerCase().trim() : "";
@@ -244,6 +255,193 @@ function renderProducts() {
   }).join("");
 
   if (window.lucide) lucide.createIcons();
+}
+
+// LOGIKA LAYAR MENU KATALOG & EDIT HARGA
+function renderCatalogCategories() {
+  const cats = [
+    { id: "Semua", label: "🔍 Semua" },
+    { id: "Ayam", label: "🐔 Ayam" },
+    { id: "Burung", label: "🐦 Burung" },
+    { id: "Kucing", label: "🐱 Kucing" },
+    { id: "Ikan", label: "🐟 Ikan" }
+  ];
+
+  const container = document.getElementById("katalog-category-chips");
+  if (!container) return;
+  container.innerHTML = cats.map(c => {
+    const isAct = katalogSelectedCategory === c.id;
+    return `
+      <button onclick="selectKatalogCategory('${c.id}')" class="whitespace-nowrap py-1.5 px-3.5 rounded-xl text-xs font-bold transition ${
+        isAct ? 'bg-blue-600 text-white shadow-sm ring-2 ring-blue-200' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+      }">
+        ${c.label}
+      </button>
+    `;
+  }).join("");
+}
+
+function selectKatalogCategory(cat) {
+  katalogSelectedCategory = cat;
+  renderCatalogCategories();
+  renderCatalogManager();
+}
+
+function renderCatalogManager() {
+  renderCatalogCategories();
+  const searchInput = document.getElementById("katalog-search-input");
+  const search = searchInput ? searchInput.value.toLowerCase().trim() : "";
+  const listContainer = document.getElementById("katalog-products-list");
+  if (!listContainer) return;
+
+  const filtered = products.filter(p => {
+    const matchCat = (katalogSelectedCategory === "Semua") || (p.kategori.toLowerCase() === katalogSelectedCategory.toLowerCase());
+    const matchSearch = p.namaProduk.toLowerCase().includes(search);
+    return matchCat && matchSearch;
+  });
+
+  const badge = document.getElementById("katalog-total-badge");
+  if (badge) badge.innerText = `${filtered.length} dari ${products.length} Produk`;
+
+  if (filtered.length === 0) {
+    listContainer.innerHTML = `
+      <div class="col-span-1 sm:col-span-2 lg:col-span-3 py-16 text-center text-slate-400 space-y-2">
+        <i data-lucide="package-search" class="w-12 h-12 mx-auto stroke-1 text-slate-300"></i>
+        <p class="text-sm font-semibold">Tidak ada produk ditemukan</p>
+      </div>
+    `;
+    if (window.lucide) lucide.createIcons();
+    return;
+  }
+
+  listContainer.innerHTML = filtered.map(p => {
+    let catIcon = "box";
+    if (p.kategori === "Ayam") catIcon = "egg";
+    if (p.kategori === "Burung") catIcon = "feather";
+    if (p.kategori === "Kucing") catIcon = "cat";
+    if (p.kategori === "Ikan") catIcon = "fish";
+
+    return `
+      <div class="bg-white rounded-2xl p-4 border border-slate-200 hover:border-blue-300 hover:shadow-md transition flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-600 uppercase tracking-wider">
+              ${p.kategori} • ${p.satuan}
+            </span>
+            <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xs">
+              <i data-lucide="${catIcon}" class="w-3.5 h-3.5"></i>
+            </div>
+          </div>
+          <h4 class="text-sm font-bold text-slate-900 line-clamp-2 leading-snug">${p.namaProduk}</h4>
+        </div>
+
+        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+          <div>
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Harga Jual</span>
+            <span class="text-base font-black text-blue-700">${formatRupiah(p.hargaJual)}</span>
+          </div>
+
+          <button onclick="openEditPriceModal('${p.id}')" class="py-2 px-3.5 bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white font-bold text-xs rounded-xl transition flex items-center space-x-1.5 shadow-sm border border-blue-200 hover:border-transparent">
+            <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+            <span>Ubah Harga</span>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  if (window.lucide) lucide.createIcons();
+}
+
+// MODAL EDIT HARGA CEPAT
+function openEditPriceModal(productId) {
+  const p = products.find(x => x.id === productId);
+  if (!p) return;
+
+  document.getElementById("edit-price-prod-id").value = p.id;
+  document.getElementById("edit-price-prod-name").innerText = p.namaProduk;
+  document.getElementById("edit-price-prod-cat").innerText = `${p.kategori} • ${p.satuan}`;
+  document.getElementById("edit-price-current-disp").innerText = formatRupiah(p.hargaJual);
+  
+  const input = document.getElementById("edit-price-new-input");
+  input.value = p.hargaJual;
+  document.getElementById("err-edit-price").classList.add("hidden");
+
+  renderEditPriceQuickChips(p.hargaJual);
+
+  document.getElementById("quick-edit-price-modal").classList.remove("hidden");
+  if (window.lucide) lucide.createIcons();
+  setTimeout(() => {
+    input.focus();
+    input.select();
+  }, 100);
+}
+
+function closeQuickEditPriceModal() {
+  document.getElementById("quick-edit-price-modal").classList.add("hidden");
+}
+
+function renderEditPriceQuickChips(basePrice) {
+  const container = document.getElementById("edit-price-quick-chips");
+  if (!container) return;
+  const chips = [
+    { label: "+1.000", delta: 1000 },
+    { label: "+2.000", delta: 2000 },
+    { label: "+5.000", delta: 5000 },
+    { label: "+10.000", delta: 10000 },
+    { label: "-1.000", delta: -1000 }
+  ];
+  container.innerHTML = chips.map(c => `
+    <button type="button" onclick="adjustEditPrice(${c.delta})" class="py-1 px-2.5 bg-slate-100 hover:bg-blue-100 hover:text-blue-700 text-slate-700 font-bold text-xs rounded-lg transition border border-slate-200">
+      ${c.label}
+    </button>
+  `).join("");
+}
+
+function adjustEditPrice(delta) {
+  const input = document.getElementById("edit-price-new-input");
+  const cur = Number(input.value) || 0;
+  const newVal = Math.max(500, cur + delta);
+  input.value = newVal;
+}
+
+function saveQuickPrice() {
+  const pId = document.getElementById("edit-price-prod-id").value;
+  const newPrice = Number(document.getElementById("edit-price-new-input").value) || 0;
+  
+  if (newPrice <= 0) {
+    document.getElementById("err-edit-price").classList.remove("hidden");
+    return;
+  }
+
+  // Simpan override ke local storage
+  const overrides = JSON.parse(localStorage.getItem("petshop_price_overrides") || "{}");
+  overrides[pId] = newPrice;
+  localStorage.setItem("petshop_price_overrides", JSON.stringify(overrides));
+
+  // Update memori produk
+  const prod = products.find(x => x.id === pId);
+  if (prod) {
+    prod.hargaJual = newPrice;
+  }
+
+  // Update pada custom products jika ada
+  const custom = JSON.parse(localStorage.getItem("petshop_custom_products") || "[]");
+  const customItem = custom.find(x => x.id === pId);
+  if (customItem) {
+    customItem.hargaJual = newPrice;
+    localStorage.setItem("petshop_custom_products", JSON.stringify(custom));
+  }
+
+  // Update item di keranjang jika produk ini sedang ada di keranjang
+  if (cart[pId]) {
+    cart[pId].product.hargaJual = newPrice;
+    updateCartUI();
+  }
+
+  renderProducts();
+  renderCatalogManager();
+  closeQuickEditPriceModal();
 }
 
 // LOGIKA KERANJANG BELANJA
@@ -483,7 +681,7 @@ function setPaymentMethod(method) {
   }
 }
 
-// PROSES TRANSAKSI KASIR DESKTOP LANGSUNG
+// PROSES TRANSAKSI KASIR DESKTOP LANGSUNG (TANPA PERLU NAMA ORANG)
 async function submitDesktopPayment() {
   const { totalQty, totalAmount } = getCartTotals();
   if (totalAmount <= 0) {
@@ -505,16 +703,13 @@ async function submitDesktopPayment() {
     changeAmount = paidAmount - totalAmount;
   }
 
-  const custInput = document.getElementById("desktop-cust-name");
-  const customerName = (custInput && custInput.value.trim()) ? custInput.value.trim() : "Pelanggan Umum";
-
   const btn = document.getElementById("desktop-btn-submit");
   if (btn) {
     btn.disabled = true;
     btn.innerText = "Menyimpan ke Spreadsheet...";
   }
 
-  await processCheckout(customerName, paidAmount, changeAmount, totalAmount, totalQty);
+  await processCheckout("-", paidAmount, changeAmount, totalAmount, totalQty);
 
   if (btn) {
     btn.disabled = false;
@@ -547,7 +742,7 @@ async function submitPayment() {
   }
 
   closePaymentModal();
-  await processCheckout("Pelanggan Umum", paidAmount, changeAmount, totalAmount, totalQty);
+  await processCheckout("-", paidAmount, changeAmount, totalAmount, totalQty);
 
   if (btn) {
     btn.disabled = false;
@@ -569,7 +764,7 @@ async function processCheckout(customerName, paidAmount, changeAmount, totalAmou
   const transactionData = {
     action: "sale",
     receiptNumber: receiptNumber,
-    customerName: customerName,
+    customerName: customerName || "-",
     paymentMethod: currentPaymentMethod,
     totalAmount: totalAmount,
     paidAmount: paidAmount,
@@ -958,6 +1153,7 @@ function saveNewProduct() {
 
   products.push(newProd);
   renderProducts();
+  renderCatalogManager();
   closeAddProductModal();
   alert(`Produk "${name}" berhasil ditambahkan ke katalog kasir!`);
 }
@@ -1166,14 +1362,22 @@ async function syncData() {
     return;
   }
 
-  // 1. Ambil Katalog Produk dari Google Sheets
+  // 1. Ambil Katalog Produk dari Google Sheets (jaga harga kustom jika sudah diedit)
   try {
     const res = await fetch(`${scriptUrl}?action=products`);
     const data = await res.json();
     if (data && data.success && Array.isArray(data.products) && data.products.length > 0) {
       const custom = JSON.parse(localStorage.getItem("petshop_custom_products") || "[]");
-      products = [...data.products, ...custom];
+      const overrides = JSON.parse(localStorage.getItem("petshop_price_overrides") || "{}");
+      
+      products = [...data.products, ...custom].map(p => {
+        if (overrides[p.id] !== undefined) {
+          return { ...p, hargaJual: Number(overrides[p.id]) };
+        }
+        return p;
+      });
       renderProducts();
+      renderCatalogManager();
     }
   } catch (err) {
     console.warn("Gagal sync katalog produk:", err);
