@@ -63,7 +63,8 @@ class PetShopRepository {
                     val pObj = productsArray.getJSONObject(i)
                     val catName = pObj.optString("kategori", "Lainnya")
                     val nama = pObj.optString("namaProduk", "")
-                    val satuan = pObj.optString("satuan", "pcs")
+                    val rawSatuan = pObj.optString("satuan", "pcs").trim().lowercase()
+                    val satuan = if (rawSatuan == "zak" || rawSatuan == "karung" || rawSatuan == "sak" || rawSatuan.contains("kg")) "kg" else "pcs"
                     val satuanAsli = pObj.optString("satuanAsli", satuan)
                     val hargaJual = pObj.optDouble("hargaJual", 0.0)
                     val hargaBeli = pObj.optDouble("hargaBeli", 0.0)

@@ -463,12 +463,12 @@ function getProductsJson() {
         var finalHargaBeli = rawHargaBeli;
         var note = "";
 
-        if (catName.toLowerCase() === "ayam" && satuan.toLowerCase() === "zak") {
+        if (catName.toLowerCase() === "ayam" && (satuan.toLowerCase() === "zak" || satuan.toLowerCase() === "karung")) {
           finalSatuan = "kg";
           if (idxHargaBeliPerKg >= 0 && row[idxHargaBeliPerKg]) {
             finalHargaBeli = parseNumber(row[idxHargaBeliPerKg]);
           }
-          note = "Dijual per kg (dari zak)";
+          note = "Dijual per kg (dari karung)";
         }
 
         allProducts.push({

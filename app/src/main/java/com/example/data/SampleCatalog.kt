@@ -10,8 +10,8 @@ object SampleCatalog {
         Product(
             id = "ayam_1",
             kategori = "Ayam",
-            namaProduk = "511 (1 Zak)",
-            satuan = "zak",
+            namaProduk = "511 (1 Karung)",
+            satuan = "kg",
             hargaJual = 11500.0,
             hargaBelumDiisi = false
         ),
@@ -66,32 +66,32 @@ object SampleCatalog {
         Product(
             id = "ayam_8",
             kategori = "Ayam",
-            namaProduk = "Buras (1 Zak)",
-            satuan = "zak",
+            namaProduk = "Buras (1 Karung)",
+            satuan = "kg",
             hargaJual = 7000.0,
             hargaBelumDiisi = false
         ),
         Product(
             id = "ayam_9",
             kategori = "Ayam",
-            namaProduk = "EH 610 (1 Zak)",
-            satuan = "zak",
+            namaProduk = "EH 610 (1 Karung)",
+            satuan = "kg",
             hargaJual = 9500.0,
             hargaBelumDiisi = false
         ),
         Product(
             id = "ayam_10",
             kategori = "Ayam",
-            namaProduk = "Jagung (1 Zak Meniran)",
-            satuan = "zak",
+            namaProduk = "Jagung (1 Karung Meniran)",
+            satuan = "kg",
             hargaJual = 10500.0,
             hargaBelumDiisi = false
         ),
         Product(
             id = "ayam_11",
             kategori = "Ayam",
-            namaProduk = "Jagung (1 Zak Kasar)",
-            satuan = "zak",
+            namaProduk = "Jagung (1 Karung Kasar)",
+            satuan = "kg",
             hargaJual = 10500.0,
             hargaBelumDiisi = false
         ),
@@ -106,16 +106,16 @@ object SampleCatalog {
         Product(
             id = "ayam_13",
             kategori = "Ayam",
-            namaProduk = "524 A (Zak)",
-            satuan = "zak",
+            namaProduk = "524 A (Karung)",
+            satuan = "kg",
             hargaJual = 9000.0,
             hargaBelumDiisi = false
         ),
         Product(
             id = "ayam_14",
             kategori = "Ayam",
-            namaProduk = "324KJ (Zak)",
-            satuan = "zak",
+            namaProduk = "324KJ (Karung)",
+            satuan = "kg",
             hargaJual = 9500.0,
             hargaBelumDiisi = false
         ),
@@ -607,7 +607,7 @@ object SampleCatalog {
             id = "kucing_17",
             kategori = "Kucing",
             namaProduk = "Whiskas Pouch (1 Dus 28 Pcs Junior)",
-            satuan = "dus",
+            satuan = "pcs",
             hargaJual = 6000.0,
             hargaBelumDiisi = false
         ),
@@ -615,7 +615,7 @@ object SampleCatalog {
             id = "kucing_18",
             kategori = "Kucing",
             namaProduk = "Whiskas Pouch (1 Dus isi 28 Pcs Adult)",
-            satuan = "dus",
+            satuan = "pcs",
             hargaJual = 6000.0,
             hargaBelumDiisi = false
         ),
@@ -623,7 +623,7 @@ object SampleCatalog {
             id = "kucing_19",
             kategori = "Kucing",
             namaProduk = "Life Cat (1 Dus Pouch 24pcs)",
-            satuan = "dus",
+            satuan = "pcs",
             hargaJual = 5000.0,
             hargaBelumDiisi = false
         ),

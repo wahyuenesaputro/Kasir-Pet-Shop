@@ -74,7 +74,7 @@ fun ProductFormDialog(
     var priceErrorMessage by remember { mutableStateOf<String?>(null) }
 
     val categories = listOf("Ayam", "Burung", "Ikan", "Kucing", "Lainnya")
-    val popularUnits = listOf("pcs", "kg", "zak", "dus", "bungkus", "botol")
+    val popularUnits = listOf("pcs", "kg", "karung", "dus", "bungkus", "botol")
     val quickPrices = listOf(3000, 5000, 8000, 10000, 12000, 15000, 20000)
 
     Dialog(
@@ -207,7 +207,7 @@ fun ProductFormDialog(
                         if (it.isNotBlank()) unitErrorMessage = null
                     },
                     label = { Text("Satuan Jual *") },
-                    placeholder = { Text("Contoh: pcs, kg, zak") },
+                    placeholder = { Text("Contoh: pcs, kg, karung") },
                     singleLine = true,
                     isError = unitErrorMessage != null,
                     supportingText = {
@@ -336,7 +336,7 @@ fun ProductFormDialog(
 
                             // Validasi 2: Satuan wajib diisi
                             if (unitInput.isBlank()) {
-                                unitErrorMessage = "Satuan produk wajib diisi (contoh: pcs, kg, zak)"
+                                unitErrorMessage = "Satuan produk wajib diisi (contoh: pcs, kg, karung)"
                                 hasError = true
                             } else {
                                 unitErrorMessage = null

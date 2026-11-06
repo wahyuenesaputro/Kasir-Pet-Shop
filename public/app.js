@@ -1,10 +1,12 @@
 /**
  * Kasir Pet Shop Web POS (Desktop Workstation & Mobile iOS/Android PWA)
+ * - Standarisasi: Produk pakan/karungan/curah ber-satuan 'kg' (bisa desimal: 0,25 kg, 0,5 kg, 1,5 kg).
+ * - Produk lainnya (kemasan, vitamin, obat, aksesoris) ber-satuan 'pcs'.
  */
 
 // State
 let products = [];
-let cart = {}; // productId -> { product, qty }
+let cart = {}; // productId -> { product, qty: Float }
 let selectedCategory = "Semua";
 let katalogSelectedCategory = "Semua";
 let currentPaymentMethod = "Tunai";
@@ -18,30 +20,49 @@ if (scriptUrl.includes("AKfycbzPytd") || scriptUrl.includes("AKfycbxuIhr") || !s
   localStorage.setItem("petshop_apps_script_url", scriptUrl);
 }
 
+// Sanitasi nama produk: ganti Zak/zak menjadi Karung/karung
+function sanitizeProductName(name) {
+  return String(name || "")
+    .replace(/\b1\s*Zak\b/gi, "1 Karung")
+    .replace(/\bZak\b/g, "Karung")
+    .replace(/\bzak\b/g, "karung");
+}
+
+// FUNGSI NORMALISASI SATUAN (KARUNG/ZAK/CURAH -> KG, LAINNYA -> PCS)
+function normalizeSatuan(rawSatuan, productName = "") {
+  const s = String(rawSatuan || "").trim().toLowerCase();
+  const name = String(productName || "").trim().toLowerCase();
+  
+  if (s === "zak" || s === "karung" || s === "sak" || s.includes("kg") || name.includes("zak") || name.includes("karung")) {
+    return "kg";
+  }
+  return "pcs";
+}
+
 const defaultCatalog = [
-  // Ayam
+  // Ayam (Pakan curah/karungan dijual per kg)
   { id: "ayam_1", kategori: "Ayam", namaProduk: "511 Bravo Pakan Ayam", satuan: "kg", hargaJual: 14000 },
   { id: "ayam_2", kategori: "Ayam", namaProduk: "BR-1 Pakan Ayam Starter", satuan: "kg", hargaJual: 13500 },
-  { id: "ayam_3", kategori: "Ayam", namaProduk: "Vita Chick Vitamin Ayam", satuan: "sachet", hargaJual: 3500 },
+  { id: "ayam_3", kategori: "Ayam", namaProduk: "Vita Chick Vitamin Ayam", satuan: "pcs", hargaJual: 3500 },
   { id: "ayam_4", kategori: "Ayam", namaProduk: "Jagung Giling Halus", satuan: "kg", hargaJual: 8500 },
 
-  // Burung
-  { id: "burung_1", kategori: "Burung", namaProduk: "Topsong Rumput Laut", satuan: "bungkus", hargaJual: 9000 },
-  { id: "burung_2", kategori: "Burung", namaProduk: "Kroto Sari Pakan Burung", satuan: "bungkus", hargaJual: 6000 },
+  // Burung (Biji-bijian per kg, pakan bungkus per pcs)
+  { id: "burung_1", kategori: "Burung", namaProduk: "Topsong Rumput Laut", satuan: "pcs", hargaJual: 9000 },
+  { id: "burung_2", kategori: "Burung", namaProduk: "Kroto Sari Pakan Burung", satuan: "pcs", hargaJual: 6000 },
   { id: "burung_3", kategori: "Burung", namaProduk: "Milet Putih Super", satuan: "kg", hargaJual: 16000 },
-  { id: "burung_4", kategori: "Burung", namaProduk: "Bio Bird Vitamin Kicau", satuan: "botol", hargaJual: 25000 },
+  { id: "burung_4", kategori: "Burung", namaProduk: "Bio Bird Vitamin Kicau", satuan: "pcs", hargaJual: 25000 },
 
   // Kucing
-  { id: "kucing_1", kategori: "Kucing", namaProduk: "Whiskas Tuna Adult 1kg", satuan: "bungkus", hargaJual: 42000 },
-  { id: "kucing_2", kategori: "Kucing", namaProduk: "Bolt Cat Food Tuna 1kg", satuan: "bungkus", hargaJual: 24000 },
-  { id: "kucing_3", kategori: "Kucing", namaProduk: "Pasir Kucing Gumpal Wangi 5L", satuan: "sak", hargaJual: 32000 },
-  { id: "kucing_4", kategori: "Kucing", namaProduk: "Me-O Creamy Treats 4x15g", satuan: "pack", hargaJual: 18000 },
+  { id: "kucing_1", kategori: "Kucing", namaProduk: "Whiskas Tuna Adult 1kg", satuan: "pcs", hargaJual: 42000 },
+  { id: "kucing_2", kategori: "Kucing", namaProduk: "Bolt Cat Food Tuna 1kg", satuan: "pcs", hargaJual: 24000 },
+  { id: "kucing_3", kategori: "Kucing", namaProduk: "Pasir Kucing Gumpal Wangi", satuan: "kg", hargaJual: 7000 },
+  { id: "kucing_4", kategori: "Kucing", namaProduk: "Me-O Creamy Treats 4x15g", satuan: "pcs", hargaJual: 18000 },
 
   // Ikan
-  { id: "ikan_1", kategori: "Ikan", namaProduk: "Takari Fish Food 100g", satuan: "bungkus", hargaJual: 7500 },
+  { id: "ikan_1", kategori: "Ikan", namaProduk: "Takari Fish Food 100g", satuan: "pcs", hargaJual: 7500 },
   { id: "ikan_2", kategori: "Ikan", namaProduk: "Pelet PF-500 Bibit Ikan", satuan: "kg", hargaJual: 22000 },
-  { id: "ikan_3", kategori: "Ikan", namaProduk: "Metil Biru Obat Ikan", satuan: "botol", hargaJual: 5000 },
-  { id: "ikan_4", kategori: "Ikan", namaProduk: "Aquarium Pump Filter", satuan: "unit", hargaJual: 45000 }
+  { id: "ikan_3", kategori: "Ikan", namaProduk: "Metil Biru Obat Ikan", satuan: "pcs", hargaJual: 5000 },
+  { id: "ikan_4", kategori: "Ikan", namaProduk: "Aquarium Pump Filter", satuan: "pcs", hargaJual: 45000 }
 ];
 
 // Inisialisasi Saat Dokumen Dimuat
@@ -113,16 +134,28 @@ function loadStoredProducts() {
   const overrides = JSON.parse(localStorage.getItem("petshop_price_overrides") || "{}");
   
   products = [...defaultCatalog, ...custom].map(p => {
+    const cleanedName = sanitizeProductName(p.namaProduk);
+    const normSatuan = normalizeSatuan(p.satuan, cleanedName);
+    let finalPrice = p.hargaJual;
     if (overrides[p.id] !== undefined) {
-      return { ...p, hargaJual: Number(overrides[p.id]) };
+      finalPrice = Number(overrides[p.id]);
     }
-    return p;
+    return { ...p, namaProduk: cleanedName, satuan: normSatuan, hargaJual: finalPrice };
   });
 }
 
 // FORMAT RUPIAH
 function formatRupiah(number) {
   return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(number || 0);
+}
+
+// FORMAT KUANTITAS (0.5 kg, 1 kg, 2 pcs)
+function formatQty(qty, satuan) {
+  if (satuan === "kg") {
+    const formatted = (qty % 1 === 0) ? qty.toString() : qty.toFixed(2).replace(/\.?0+$/, "");
+    return `${formatted} kg`;
+  }
+  return `${Math.round(qty)} pcs`;
 }
 
 // TAB SWITCHER RESPONSIF (KASIR, KATALOG, DASHBOARD, RIWAYAT)
@@ -221,6 +254,7 @@ function renderProducts() {
   grid.innerHTML = filtered.map(p => {
     const cartItem = cart[p.id];
     const qty = cartItem ? cartItem.qty : 0;
+    const isKg = p.satuan === "kg";
     
     let catIcon = "box";
     if (p.kategori === "Ayam") catIcon = "egg";
@@ -230,18 +264,26 @@ function renderProducts() {
 
     return `
       <div class="bg-white rounded-2xl p-3 sm:p-3.5 border ${qty > 0 ? 'border-blue-500 ring-2 ring-blue-100 shadow-md' : 'border-slate-200 hover:border-slate-300'} shadow-sm flex flex-col justify-between transition relative overflow-hidden group">
-        ${qty > 0 ? `<div class="absolute top-2.5 right-2.5 bg-blue-600 text-white text-[11px] font-black px-2 py-0.5 rounded-full shadow-sm">${qty}</div>` : ''}
+        ${qty > 0 ? `<div class="absolute top-2.5 right-2.5 bg-blue-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm">${formatQty(qty, p.satuan)}</div>` : ''}
         
         <div>
-          <div class="w-8 h-8 rounded-xl bg-slate-100 group-hover:bg-blue-50 text-slate-600 group-hover:text-blue-600 flex items-center justify-center text-xs mb-2 transition">
-            <i data-lucide="${catIcon}" class="w-4 h-4"></i>
+          <div class="flex items-center justify-between mb-1.5">
+            <div class="w-8 h-8 rounded-xl bg-slate-100 group-hover:bg-blue-50 text-slate-600 group-hover:text-blue-600 flex items-center justify-center text-xs transition">
+              <i data-lucide="${catIcon}" class="w-4 h-4"></i>
+            </div>
+            <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-md ${isKg ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600'}">
+              ${p.satuan}
+            </span>
           </div>
-          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wide block">${p.kategori} • ${p.satuan}</span>
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wide block">${p.kategori}</span>
           <h4 class="text-xs sm:text-sm font-bold text-slate-800 line-clamp-2 leading-snug mt-0.5">${p.namaProduk}</h4>
         </div>
 
         <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
-          <span class="text-xs sm:text-sm font-black text-blue-700">${formatRupiah(p.hargaJual)}</span>
+          <div>
+            <span class="text-xs sm:text-sm font-black text-blue-700">${formatRupiah(p.hargaJual)}</span>
+            <span class="text-[10px] text-slate-400 block">/${p.satuan}</span>
+          </div>
           
           <div class="flex items-center space-x-1">
             ${qty > 0 ? `
@@ -320,12 +362,13 @@ function renderCatalogManager() {
     if (p.kategori === "Burung") catIcon = "feather";
     if (p.kategori === "Kucing") catIcon = "cat";
     if (p.kategori === "Ikan") catIcon = "fish";
+    const isKg = p.satuan === "kg";
 
     return `
       <div class="bg-white rounded-2xl p-4 border border-slate-200 hover:border-blue-300 hover:shadow-md transition flex flex-col justify-between">
         <div>
           <div class="flex items-center justify-between mb-2">
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-600 uppercase tracking-wider">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-[10px] font-bold ${isKg ? 'bg-amber-100 text-amber-900' : 'bg-slate-100 text-slate-700'} uppercase tracking-wider">
               ${p.kategori} • ${p.satuan}
             </span>
             <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xs">
@@ -339,6 +382,7 @@ function renderCatalogManager() {
           <div>
             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Harga Jual</span>
             <span class="text-base font-black text-blue-700">${formatRupiah(p.hargaJual)}</span>
+            <span class="text-[10px] text-slate-400">/${p.satuan}</span>
           </div>
 
           <button onclick="openEditPriceModal('${p.id}')" class="py-2 px-3.5 bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white font-bold text-xs rounded-xl transition flex items-center space-x-1.5 shadow-sm border border-blue-200 hover:border-transparent">
@@ -360,8 +404,8 @@ function openEditPriceModal(productId) {
 
   document.getElementById("edit-price-prod-id").value = p.id;
   document.getElementById("edit-price-prod-name").innerText = p.namaProduk;
-  document.getElementById("edit-price-prod-cat").innerText = `${p.kategori} • ${p.satuan}`;
-  document.getElementById("edit-price-current-disp").innerText = formatRupiah(p.hargaJual);
+  document.getElementById("edit-price-prod-cat").innerText = `${p.kategori} • Satuan: ${p.satuan}`;
+  document.getElementById("edit-price-current-disp").innerText = `${formatRupiah(p.hargaJual)} / ${p.satuan}`;
   
   const input = document.getElementById("edit-price-new-input");
   input.value = p.hargaJual;
@@ -444,15 +488,20 @@ function saveQuickPrice() {
   closeQuickEditPriceModal();
 }
 
-// LOGIKA KERANJANG BELANJA
-function addToCart(productId) {
+// LOGIKA KERANJANG BELANJA (DUKUNGAN DESIMAL KG & PCS INTEGER)
+function addToCart(productId, delta = null) {
   const prod = products.find(p => p.id === productId);
   if (!prod) return;
 
+  const isKg = prod.satuan === "kg";
+  const defaultStep = isKg ? 0.5 : 1;
+  const change = (delta !== null) ? delta : (cart[productId] ? defaultStep : (isKg ? 1 : 1));
+
   if (!cart[productId]) {
-    cart[productId] = { product: prod, qty: 1 };
+    cart[productId] = { product: prod, qty: (delta !== null ? Math.max(0.1, delta) : (isKg ? 1 : 1)) };
   } else {
-    cart[productId].qty += 1;
+    const updated = Math.round((cart[productId].qty + change) * 100) / 100;
+    cart[productId].qty = Math.max(0.1, updated);
   }
   updateCartUI();
   renderProducts();
@@ -460,10 +509,30 @@ function addToCart(productId) {
 
 function decrementCart(productId) {
   if (!cart[productId]) return;
-  cart[productId].qty -= 1;
-  if (cart[productId].qty <= 0) {
+  const isKg = cart[productId].product.satuan === "kg";
+  const step = isKg ? 0.5 : 1;
+  const updated = Math.round((cart[productId].qty - step) * 100) / 100;
+  if (updated <= 0) {
     delete cart[productId];
+  } else {
+    cart[productId].qty = updated;
   }
+  updateCartUI();
+  renderProducts();
+}
+
+function setCartItemQty(productId, qtyVal) {
+  if (!cart[productId]) {
+    const prod = products.find(p => p.id === productId);
+    if (!prod) return;
+    cart[productId] = { product: prod, qty: 1 };
+  }
+  const isKg = cart[productId].product.satuan === "kg";
+  let val = Number(qtyVal);
+  if (isNaN(val) || val <= 0) {
+    val = isKg ? 0.1 : 1;
+  }
+  cart[productId].qty = isKg ? Math.round(val * 100) / 100 : Math.round(val);
   updateCartUI();
   renderProducts();
 }
@@ -486,7 +555,7 @@ function getCartTotals() {
   let totalAmount = 0;
   Object.values(cart).forEach(item => {
     totalQty += item.qty;
-    totalAmount += (item.qty * item.product.hargaJual);
+    totalAmount += Math.round(item.qty * item.product.hargaJual);
   });
   return { totalQty, totalAmount };
 }
@@ -494,14 +563,15 @@ function getCartTotals() {
 // PERBARUI SELURUH TAMPILAN KERANJANG (MOBILE & DESKTOP SIDEBAR)
 function updateCartUI() {
   const { totalQty, totalAmount } = getCartTotals();
+  const itemCount = Object.keys(cart).length;
 
   // 1. Mobile Floating Bottom Bar
   const bar = document.getElementById("floating-cart-bar");
   if (bar) {
-    if (totalQty > 0) {
+    if (itemCount > 0) {
       bar.classList.remove("hidden");
       const badge = document.getElementById("cart-badge");
-      if (badge) badge.innerText = totalQty;
+      if (badge) badge.innerText = itemCount;
       const totalTxt = document.getElementById("cart-total-text");
       if (totalTxt) totalTxt.innerText = formatRupiah(totalAmount);
     } else {
@@ -511,7 +581,7 @@ function updateCartUI() {
 
   // 2. Desktop Sticky Sidebar
   const deskBadge = document.getElementById("desktop-cart-count-badge");
-  if (deskBadge) deskBadge.innerText = `${totalQty} Item`;
+  if (deskBadge) deskBadge.innerText = `${itemCount} Produk`;
 
   const deskTotal = document.getElementById("desktop-total-display");
   if (deskTotal) deskTotal.innerText = formatRupiah(totalAmount);
@@ -522,7 +592,7 @@ function updateCartUI() {
   // Render Item List Desktop
   renderDesktopCartItems();
 
-  // Update Nominal Tunai Default Desktop jika belum diisi atau kurang
+  // Update Nominal Tunai Default Desktop
   const deskCashInput = document.getElementById("desktop-cash-paid-input");
   if (deskCashInput) {
     const curVal = Number(deskCashInput.value) || 0;
@@ -556,27 +626,60 @@ function renderDesktopCartItems() {
     return;
   }
 
-  container.innerHTML = items.map(item => `
-    <div class="p-2.5 bg-slate-50 hover:bg-slate-100/80 rounded-xl border border-slate-200/80 flex items-center justify-between transition">
-      <div class="flex-1 pr-2 min-w-0">
-        <h5 class="text-xs font-bold text-slate-800 truncate">${item.product.namaProduk}</h5>
-        <div class="flex items-center space-x-1.5 text-[10px] text-slate-500 mt-0.5">
-          <span>${formatRupiah(item.product.hargaJual)}</span>
-          <span>•</span>
-          <span>${item.product.satuan}</span>
-        </div>
-      </div>
+  container.innerHTML = items.map(item => {
+    const isKg = item.product.satuan === "kg";
+    const subtotal = Math.round(item.qty * item.product.hargaJual);
 
-      <div class="flex items-center space-x-1.5 flex-shrink-0">
-        <button onclick="decrementCart('${item.product.id}')" class="w-6 h-6 rounded-md bg-white border border-slate-300 text-slate-700 text-xs font-bold flex items-center justify-center hover:bg-slate-200 transition">-</button>
-        <span class="text-xs font-extrabold text-slate-800 w-5 text-center">${item.qty}</span>
-        <button onclick="addToCart('${item.product.id}')" class="w-6 h-6 rounded-md bg-white border border-slate-300 text-slate-700 text-xs font-bold flex items-center justify-center hover:bg-slate-200 transition">+</button>
-        <button onclick="removeCartItem('${item.product.id}')" class="p-1 text-slate-400 hover:text-red-600 transition" title="Hapus">
-          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-        </button>
+    return `
+      <div class="p-2.5 bg-slate-50 hover:bg-slate-100/90 rounded-xl border border-slate-200/90 flex flex-col space-y-1.5 transition">
+        <div class="flex items-start justify-between">
+          <div class="flex-1 pr-2 min-w-0">
+            <h5 class="text-xs font-bold text-slate-800 truncate">${item.product.namaProduk}</h5>
+            <div class="flex items-center space-x-1.5 text-[10px] text-slate-500 mt-0.5">
+              <span class="font-bold text-blue-700">${formatRupiah(item.product.hargaJual)}</span>
+              <span>/ ${item.product.satuan}</span>
+            </div>
+          </div>
+          <button onclick="removeCartItem('${item.product.id}')" class="p-1 text-slate-400 hover:text-red-600 transition" title="Hapus">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+
+        <!-- Kontrol Kuantitas: Desimal untuk kg, bulat untuk pcs -->
+        <div class="flex items-center justify-between pt-1 border-t border-slate-200/70">
+          ${isKg ? `
+            <div class="flex items-center space-x-1">
+              <button onclick="decrementCart('${item.product.id}')" class="w-6 h-6 rounded-md bg-white border border-slate-300 text-slate-700 text-xs font-black flex items-center justify-center hover:bg-slate-200 transition" title="Kurangi 0,5 kg">-</button>
+              <input type="number" step="0.1" min="0.1" value="${item.qty}" onchange="setCartItemQty('${item.product.id}', this.value)" class="w-14 px-1 py-0.5 text-center text-xs font-black bg-white border border-slate-300 rounded-md text-blue-900 focus:outline-none focus:ring-1 focus:ring-blue-600">
+              <span class="text-[10px] font-bold text-slate-500">kg</span>
+              <button onclick="addToCart('${item.product.id}', 0.5)" class="w-6 h-6 rounded-md bg-white border border-slate-300 text-slate-700 text-xs font-black flex items-center justify-center hover:bg-slate-200 transition" title="Tambah 0,5 kg">+</button>
+            </div>
+          ` : `
+            <div class="flex items-center space-x-1.5">
+              <button onclick="decrementCart('${item.product.id}')" class="w-6 h-6 rounded-md bg-white border border-slate-300 text-slate-700 text-xs font-bold flex items-center justify-center hover:bg-slate-200 transition">-</button>
+              <span class="text-xs font-extrabold text-slate-800 w-5 text-center">${Math.round(item.qty)}</span>
+              <span class="text-[10px] font-bold text-slate-400">pcs</span>
+              <button onclick="addToCart('${item.product.id}', 1)" class="w-6 h-6 rounded-md bg-white border border-slate-300 text-slate-700 text-xs font-bold flex items-center justify-center hover:bg-slate-200 transition">+</button>
+            </div>
+          `}
+          
+          <span class="text-xs font-black text-blue-700">${formatRupiah(subtotal)}</span>
+        </div>
+
+        ${isKg ? `
+          <!-- Quick Weight Chips untuk Barang Kiloan -->
+          <div class="flex items-center space-x-1 pt-0.5 overflow-x-auto no-scrollbar">
+            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-tight">Takar:</span>
+            ${[0.25, 0.5, 1, 1.5, 2].map(w => `
+              <button type="button" onclick="setCartItemQty('${item.product.id}', ${w})" class="px-1.5 py-0.5 rounded text-[10px] font-bold ${Math.abs(item.qty - w) < 0.01 ? 'bg-blue-600 text-white shadow-sm' : 'bg-white hover:bg-slate-200 text-slate-700 border border-slate-200'} transition">
+                ${w} kg
+              </button>
+            `).join("")}
+          </div>
+        ` : ''}
       </div>
-    </div>
-  `).join("");
+    `;
+  }).join("");
 
   if (window.lucide) lucide.createIcons();
 }
@@ -681,7 +784,7 @@ function setPaymentMethod(method) {
   }
 }
 
-// PROSES TRANSAKSI KASIR DESKTOP LANGSUNG (TANPA PERLU NAMA ORANG)
+// PROSES TRANSAKSI KASIR DESKTOP LANGSUNG
 async function submitDesktopPayment() {
   const { totalQty, totalAmount } = getCartTotals();
   if (totalAmount <= 0) {
@@ -759,7 +862,7 @@ async function processCheckout(customerName, paidAmount, changeAmount, totalAmou
   const receiptNumber = `PS-${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
 
   const itemsList = Object.values(cart);
-  const productSummary = itemsList.map(it => `${it.product.namaProduk} (${it.qty} ${it.product.satuan})`).join(", ");
+  const productSummary = itemsList.map(it => `${it.product.namaProduk} (${formatQty(it.qty, it.product.satuan)})`).join(", ");
 
   const transactionData = {
     action: "sale",
@@ -777,6 +880,7 @@ async function processCheckout(customerName, paidAmount, changeAmount, totalAmou
       satuan: it.product.satuan,
       jumlah: it.qty,
       hargaJual: it.product.hargaJual,
+      subtotal: Math.round(it.qty * it.product.hargaJual),
       hargaBeli: 0
     }))
   };
@@ -851,23 +955,55 @@ function renderCartModalItems() {
     return;
   }
 
-  container.innerHTML = items.map(item => `
-    <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
-      <div class="flex-1 pr-2">
-        <h5 class="text-xs font-bold text-slate-800 line-clamp-1">${item.product.namaProduk}</h5>
-        <span class="text-[11px] text-slate-500">${formatRupiah(item.product.hargaJual)} / ${item.product.satuan}</span>
-      </div>
+  container.innerHTML = items.map(item => {
+    const isKg = item.product.satuan === "kg";
+    const subtotal = Math.round(item.qty * item.product.hargaJual);
 
-      <div class="flex items-center space-x-2">
-        <button onclick="decrementCart('${item.product.id}'); renderCartModalItems();" class="w-6 h-6 rounded-md bg-white border border-slate-300 text-slate-700 text-xs font-bold flex items-center justify-center">-</button>
-        <span class="text-xs font-bold text-slate-800 w-4 text-center">${item.qty}</span>
-        <button onclick="addToCart('${item.product.id}'); renderCartModalItems();" class="w-6 h-6 rounded-md bg-white border border-slate-300 text-slate-700 text-xs font-bold flex items-center justify-center">+</button>
-        <button onclick="removeCartItem('${item.product.id}')" class="p-1 text-red-500 hover:text-red-700">
-          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-        </button>
+    return `
+      <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col space-y-2">
+        <div class="flex items-start justify-between">
+          <div class="flex-1 pr-2">
+            <h5 class="text-xs font-bold text-slate-800 line-clamp-1">${item.product.namaProduk}</h5>
+            <span class="text-[11px] text-slate-500">${formatRupiah(item.product.hargaJual)} / ${item.product.satuan}</span>
+          </div>
+          <button onclick="removeCartItem('${item.product.id}')" class="p-1 text-red-500 hover:text-red-700">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+
+        <div class="flex items-center justify-between pt-1 border-t border-slate-200">
+          ${isKg ? `
+            <div class="flex items-center space-x-1">
+              <button onclick="decrementCart('${item.product.id}')" class="w-7 h-7 rounded-md bg-white border border-slate-300 text-slate-700 text-xs font-bold flex items-center justify-center">-</button>
+              <input type="number" step="0.1" min="0.1" value="${item.qty}" onchange="setCartItemQty('${item.product.id}', this.value)" class="w-14 px-1 py-1 text-center text-xs font-black bg-white border border-slate-300 rounded-md text-blue-900 focus:outline-none">
+              <span class="text-[10px] font-bold text-slate-500">kg</span>
+              <button onclick="addToCart('${item.product.id}', 0.5)" class="w-7 h-7 rounded-md bg-white border border-slate-300 text-slate-700 text-xs font-bold flex items-center justify-center">+</button>
+            </div>
+          ` : `
+            <div class="flex items-center space-x-2">
+              <button onclick="decrementCart('${item.product.id}')" class="w-7 h-7 rounded-md bg-white border border-slate-300 text-slate-700 text-xs font-bold flex items-center justify-center">-</button>
+              <span class="text-xs font-bold text-slate-800 w-6 text-center">${Math.round(item.qty)}</span>
+              <span class="text-[10px] font-bold text-slate-400">pcs</span>
+              <button onclick="addToCart('${item.product.id}', 1)" class="w-7 h-7 rounded-md bg-white border border-slate-300 text-slate-700 text-xs font-bold flex items-center justify-center">+</button>
+            </div>
+          `}
+          
+          <span class="text-xs font-black text-blue-700">${formatRupiah(subtotal)}</span>
+        </div>
+
+        ${isKg ? `
+          <div class="flex items-center space-x-1 pt-0.5 overflow-x-auto no-scrollbar">
+            <span class="text-[9px] font-bold text-slate-400 uppercase">Takar:</span>
+            ${[0.25, 0.5, 1, 1.5, 2].map(w => `
+              <button type="button" onclick="setCartItemQty('${item.product.id}', ${w})" class="px-2 py-0.5 rounded text-[10px] font-bold ${Math.abs(item.qty - w) < 0.01 ? 'bg-blue-600 text-white' : 'bg-white text-slate-700 border border-slate-200'}">
+                ${w} kg
+              </button>
+            `).join("")}
+          </div>
+        ` : ''}
       </div>
-    </div>
-  `).join("");
+    `;
+  }).join("");
   if (window.lucide) lucide.createIcons();
 }
 
@@ -976,8 +1112,8 @@ function openReceiptModal() {
   if (list) {
     list.innerHTML = activeReceipt.items.map(it => `
       <div class="flex justify-between">
-        <span class="line-clamp-1 flex-1 pr-2">${it.product.namaProduk} x${it.qty}</span>
-        <span>${formatRupiah(it.product.hargaJual * it.qty)}</span>
+        <span class="line-clamp-1 flex-1 pr-2">${it.product.namaProduk} x${formatQty(it.qty, it.product.satuan)}</span>
+        <span>${formatRupiah(Math.round(it.product.hargaJual * it.qty))}</span>
       </div>
     `).join("");
   }
@@ -1081,14 +1217,13 @@ function updateDashboard() {
   const tProds = document.getElementById("dash-total-products");
   if (tProds) tProds.innerText = products.length;
   
-  const { totalQty } = getCartTotals();
   const cartCnt = document.getElementById("dash-cart-count");
-  if (cartCnt) cartCnt.innerText = totalQty;
+  if (cartCnt) cartCnt.innerText = Object.keys(cart).length;
 
   if (window.lucide) lucide.createIcons();
 }
 
-// FORM TAMBAH PRODUK
+// FORM TAMBAH PRODUK (DENGAN PILIHAN SATUAN KG & PCS)
 function openAddProductModal() {
   document.getElementById("new-prod-name").value = "";
   document.getElementById("new-prod-unit").value = "pcs";
@@ -1112,7 +1247,7 @@ function saveNewProduct() {
 
   const name = nameInput.value.trim();
   const cat = catInput.value;
-  const unit = unitInput.value.trim();
+  const rawUnit = unitInput.value.trim();
   const price = Number(priceInput.value) || 0;
 
   let hasError = false;
@@ -1123,7 +1258,7 @@ function saveNewProduct() {
     document.getElementById("err-new-prod-name").classList.add("hidden");
   }
 
-  if (!unit) {
+  if (!rawUnit) {
     document.getElementById("err-new-prod-unit").classList.remove("hidden");
     hasError = true;
   } else {
@@ -1138,6 +1273,8 @@ function saveNewProduct() {
   }
 
   if (hasError) return;
+
+  const unit = normalizeSatuan(rawUnit, name);
 
   const newProd = {
     id: `custom_${Date.now()}`,
@@ -1155,7 +1292,7 @@ function saveNewProduct() {
   renderProducts();
   renderCatalogManager();
   closeAddProductModal();
-  alert(`Produk "${name}" berhasil ditambahkan ke katalog kasir!`);
+  alert(`Produk "${name}" (${unit}) berhasil ditambahkan ke katalog kasir!`);
 }
 
 // MODAL PENGATURAN TOKO & ATUR SALDO KAS
@@ -1362,7 +1499,7 @@ async function syncData() {
     return;
   }
 
-  // 1. Ambil Katalog Produk dari Google Sheets (jaga harga kustom jika sudah diedit)
+  // 1. Ambil Katalog Produk dari Google Sheets (normalisasi satuan karung -> kg, lainnya -> pcs)
   try {
     const res = await fetch(`${scriptUrl}?action=products`);
     const data = await res.json();
@@ -1371,10 +1508,13 @@ async function syncData() {
       const overrides = JSON.parse(localStorage.getItem("petshop_price_overrides") || "{}");
       
       products = [...data.products, ...custom].map(p => {
+        const cleanedName = sanitizeProductName(p.namaProduk);
+        const normSatuan = normalizeSatuan(p.satuan, cleanedName);
+        let finalPrice = p.hargaJual;
         if (overrides[p.id] !== undefined) {
-          return { ...p, hargaJual: Number(overrides[p.id]) };
+          finalPrice = Number(overrides[p.id]);
         }
-        return p;
+        return { ...p, namaProduk: cleanedName, satuan: normSatuan, hargaJual: finalPrice };
       });
       renderProducts();
       renderCatalogManager();
@@ -1396,7 +1536,7 @@ async function syncData() {
       const formatted = dataSales.recentTransactions.map(tx => {
         let prodSummary = "-";
         if (Array.isArray(tx.items) && tx.items.length > 0) {
-          prodSummary = tx.items.map(i => `${i.namaProduk} (${i.jumlah} ${i.satuan || ''})`).join(", ");
+          prodSummary = tx.items.map(i => `${i.namaProduk} (${formatQty(i.jumlah || 1, normalizeSatuan(i.satuan))})`).join(", ");
         }
         return {
           noStruk: tx.noStruk,
