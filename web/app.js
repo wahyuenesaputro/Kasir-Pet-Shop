@@ -1492,34 +1492,6 @@ function saveSettings() {
   alert("URL Google Spreadsheet berhasil disimpan!");
 }
 
-async function setupKatalogSpreadsheetAuto() {
-  if (!scriptUrl) {
-    alert("Harap masukkan URL Google Apps Script di Pengaturan terlebih dahulu.");
-    return;
-  }
-  const btn = document.getElementById("btn-auto-katalog");
-  if (btn) {
-    btn.disabled = true;
-    btn.innerText = "Membuat Sheet...";
-  }
-
-  try {
-    const res = await fetch(`${scriptUrl}?action=setup_katalog`);
-    const data = await res.json();
-    alert(data.message || "Berhasil membuat/memperbarui tab kategori di Google Spreadsheet!");
-    await syncData();
-  } catch (err) {
-    alert("Sedang membuat sheet kategori di Google Spreadsheet. Silakan tunggu 3 detik lalu tekan 'Simpan & Sinkron'.");
-    setTimeout(syncData, 3000);
-  } finally {
-    if (btn) {
-      btn.disabled = false;
-      btn.innerHTML = `<i data-lucide="sparkles" class="w-3.5 h-3.5"></i><span>Buat Sheet Kategori Otomatis</span>`;
-      if (window.lucide) lucide.createIcons();
-    }
-  }
-}
-
 async function syncData() {
   if (!scriptUrl) {
     alert("Harap masukkan URL Google Apps Script di Pengaturan terlebih dahulu.");

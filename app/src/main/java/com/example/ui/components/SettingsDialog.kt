@@ -324,56 +324,6 @@ fun SettingsDialog(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    // KARTU PEMBUAT TEMPLATE SPREADSHEET KATALOG (AYAM, BURUNG, KUCING, IKAN)
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFF10B981).copy(alpha = 0.12f)),
-                        shape = RoundedCornerShape(14.dp),
-                        border = BorderStroke(1.dp, Color(0xFF10B981).copy(alpha = 0.4f))
-                    ) {
-                        Column(modifier = Modifier.padding(14.dp)) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Default.CheckCircle,
-                                    contentDescription = null,
-                                    tint = Color(0xFF059669),
-                                    modifier = Modifier.size(20.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = "Template Spreadsheet per Kategori",
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 13.sp,
-                                    color = Color(0xFF065F46)
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "Menyediakan tab terpisah untuk Ayam (pakan karung dijual per kg), Burung, Kucing, dan Ikan lengkap dengan kolom Harga Beli & Jual.",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Spacer(modifier = Modifier.height(10.dp))
-                            Button(
-                                onClick = {
-                                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                                    val clip = ClipData.newPlainText("Apps Script Code.gs", AppsScriptCodeSnippet.CODE)
-                                    clipboard.setPrimaryClip(clip)
-                                    Toast.makeText(context, "Kode Apps Script disalin! Di Google Sheets, jalankan fungsi 'buatKatalogKategoriOtomatis'.", Toast.LENGTH_LONG).show()
-                                },
-                                shape = RoundedCornerShape(10.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF059669)),
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp))
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text("Salin Script Pembuat Sheet Otomatis", fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                            }
-                        }
-                    }
-
                     Spacer(modifier = Modifier.height(18.dp))
 
                     // Pintasan Input Harga Manual jika ada produk belum ada harganya

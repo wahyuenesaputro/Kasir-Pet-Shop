@@ -42,9 +42,6 @@ function doGet(e) {
   } else if (action === "setup" || action === "init" || action === "buat_saldo") {
     var resultMsg = buatKolomSaldoOtomatis();
     return jsonResponse({ success: true, message: resultMsg });
-  } else if (action === "setup_katalog" || action === "buat_katalog") {
-    var katMsg = buatKatalogKategoriOtomatis();
-    return jsonResponse({ success: true, message: katMsg });
   } else {
     return jsonResponse({ success: false, message: "Action tidak dikenal: " + action });
   }
@@ -522,124 +519,6 @@ function parseNumber(val) {
 function jsonResponse(data) {
   return ContentService.createTextOutput(JSON.stringify(data))
     .setMimeType(ContentService.MimeType.JSON);
-}
-
-/**
- * FUNGSI PEMBUAT OTOMATIS SHEET KATALOG BARANG (PER KATEGORI)
- * Otomatis membuat 4 Tab: Ayam, Burung, Kucing, Ikan lengkap dengan data awal.
- */
-function buatKatalogKategoriOtomatis() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  
-  var catalogData = {
-    "Ayam": [
-      ["511 (1 Karung)", "karung", 9800, 11500, 9800, "Dijual per kg (dari karung)"],
-      ["511 (511 K)", "kg", 13600, 14500, "", ""],
-      ["591 (591k)", "kg", 13700, 14500, "", ""],
-      ["592 (592k)", "kg", 13700, 14500, "", ""],
-      ["594 (594k)", "kg", 13500, 14500, "", ""],
-      ["BR-1 Super", "kg", 11100, 12000, "", ""],
-      ["BR-611", "kg", 9200, 10000, "", ""],
-      ["Buras (1 Karung)", "karung", 5900, 7000, 5900, "Dijual per kg (dari karung)"],
-      ["EH 610 (1 Karung)", "karung", 8700, 9500, 8700, "Dijual per kg (dari karung)"],
-      ["Jagung (1 Karung Meniran)", "karung", 9400, 10500, 9400, "Dijual per kg (dari karung)"],
-      ["Jagung (1 Karung Kasar)", "karung", 9400, 10500, 9400, "Dijual per kg (dari karung)"],
-      ["Jagung (Unyil Kristal)", "pcs", 12200, 13000, "", ""],
-      ["524 A (Karung)", "karung", 8320, 9000, 8320, "Dijual per kg (dari karung)"],
-      ["324KJ (Karung)", "karung", 8430, 9500, 8430, "Dijual per kg (dari karung)"],
-      ["CP 124 P", "kg", 10100, 11000, "", ""]
-    ],
-    "Burung": [
-      ["Leopard (MD Halus)", "pcs", 6900, 8000, "", ""],
-      ["Leopard (MD Kasar)", "pcs", 6900, 8000, "", ""],
-      ["Leopard (Hijau Kasar)", "pcs", 7100, 8500, "", ""],
-      ["Topsong (Top Song Coklat)", "pcs", 10900, 12000, "", ""],
-      ["Topsong (Top Song Hijau)", "pcs", 11000, 12000, "", ""],
-      ["SKM (SKM Halus)", "pcs", 3200, 4500, "", ""],
-      ["SKM (SKM Kasar)", "pcs", 3200, 4500, "", ""],
-      ["Kroto Sari (KSK)", "pcs", 2600, 3500, "", ""],
-      ["Kroto Sari (Krotosari Kasar)", "pcs", 2700, 3500, "", ""],
-      ["Alam Sakti (Love Bird)", "pcs", 9500, 11500, "", ""],
-      ["Alam Sakti (Kenari)", "pcs", 10400, 12500, "", ""],
-      ["Alam Sakti (Perkutut)", "pcs", 8700, 10500, "", ""],
-      ["Milet Putih Super", "kg", 14000, 16000, "", ""],
-      ["Milet Merah", "kg", 15000, 17500, "", ""],
-      ["Bio Bird Vitamin Kicau", "pcs", 21000, 25000, "", ""]
-    ],
-    "Kucing": [
-      ["Bolt (Tuna)", "pcs", 22000, 25000, "", ""],
-      ["Bolt (Salmon)", "pcs", 22500, 25500, "", ""],
-      ["Chester (Tuna)", "pcs", 18500, 21000, "", ""],
-      ["Cleo (Ocean Fish)", "pcs", 34000, 38000, "", ""],
-      ["Ori Cat (Kitten)", "pcs", 20000, 23000, "", ""],
-      ["Ori Cat (Adult)", "pcs", 19500, 22500, "", ""],
-      ["Me-O (Creamy Treats)", "pcs", 19000, 22000, "", ""],
-      ["Whiskas (Pouch Tuna)", "pcs", 6500, 8000, "", ""],
-      ["Life Cat (1 Dus Pouch 24pcs)", "pcs", 95000, 110000, "", ""],
-      ["Life Cat (Kaleng Adult 400gr)", "pcs", 11500, 13500, "", ""],
-      ["Life Cat (Kaleng Kitten 400gr)", "pcs", 11500, 13500, "", ""]
-    ],
-    "Ikan": [
-      ["Takari (Mix Red & Green)", "pcs", 8500, 10500, "", ""],
-      ["Saki-Hikari (Fancy Goldfish)", "pcs", 38000, 45000, "", ""],
-      ["Pelet PF 1000 Pakan Benih", "kg", 18000, 22000, "", ""],
-      ["Pelet 781-1 Pakan Ikan", "kg", 14500, 17000, "", ""],
-      ["Obat Biru (Methylene Blue)", "pcs", 5000, 7000, "", ""]
-    ]
-  };
-
-  var headerNames = ["NO", "NAMA BARANG", "SATUAN", "HARGA BELI", "HARGA JUAL", "HARGA BELI / KG", "KETERANGAN"];
-  var headerColors = {
-    "Ayam": "#E65100",
-    "Burung": "#2E7D32",
-    "Kucing": "#6A1B9A",
-    "Ikan": "#0277BD"
-  };
-
-  for (var cat in catalogData) {
-    var sheet = ss.getSheetByName(cat);
-    if (!sheet) {
-      sheet = ss.insertSheet(cat);
-    }
-
-    var headerRange = sheet.getRange(1, 1, 1, 7);
-    headerRange.setValues([headerNames]);
-    headerRange.setFontWeight("bold");
-    headerRange.setBackground(headerColors[cat] || "#1565C0");
-    headerRange.setFontColor("#FFFFFF");
-    headerRange.setHorizontalAlignment("center");
-    headerRange.setVerticalAlignment("middle");
-    sheet.setRowHeight(1, 34);
-
-    var rows = catalogData[cat];
-    var outputRows = [];
-    for (var i = 0; i < rows.length; i++) {
-      var item = rows[i];
-      outputRows.push([
-        (i + 1),
-        item[0],
-        item[1],
-        item[2],
-        item[3],
-        item[4] || "",
-        item[5] || ""
-      ]);
-    }
-
-    if (outputRows.length > 0) {
-      var dataRange = sheet.getRange(2, 1, outputRows.length, 7);
-      dataRange.setValues(outputRows);
-      sheet.getRange(2, 4, outputRows.length, 3).setNumberFormat("#,##0");
-      sheet.getRange(2, 1, outputRows.length, 1).setHorizontalAlignment("center");
-      sheet.getRange(2, 3, outputRows.length, 1).setHorizontalAlignment("center");
-    }
-
-    for (var c = 1; c <= 7; c++) {
-      sheet.autoResizeColumn(c);
-    }
-  }
-
-  return "Berhasil membuat/memperbarui tab kategori: Ayam, Burung, Kucing, Ikan!";
 }
 """.trimIndent()
 }
