@@ -83,10 +83,34 @@ document.addEventListener("DOMContentLoaded", () => {
 
   setupKeyboardShortcuts();
 
-  if (scriptUrl) {
-    syncData();
-  }
+  // Jalankan sinkronisasi otomatis saat pertama kali dibuka (onLoad)
+  autoSync();
+
+  // Mekanisme polling berkala setiap 5 menit (300.000 ms) agar data selalu up to date
+  setInterval(() => {
+    console.log("[AutoSync] Menjalankan sinkronisasi berkala 5 menit...");
+    autoSync(true); // silent = true agar tidak mengganggu kasir jika sedang transaksi
+  }, 5 * 60 * 1000);
 });
+
+// FUNGSI SINKRONISASI OTOMATIS (ONLOAD & POLLING 5 MENIT)
+async function autoSync(silent = false) {
+  if (!scriptUrl) return;
+  try {
+    const syncBadge = document.getElementById("header-sync-badge");
+    if (syncBadge) {
+      syncBadge.classList.remove("hidden");
+      syncBadge.innerText = "Menyinkronkan...";
+    }
+    await syncData();
+    if (syncBadge) {
+      syncBadge.innerText = "Tersinkron";
+      setTimeout(() => syncBadge.classList.add("hidden"), 3000);
+    }
+  } catch (e) {
+    if (!silent) console.warn("[AutoSync Error]:", e);
+  }
+}
 
 // KEYBOARD SHORTCUTS KHUSUS DESKTOP
 function setupKeyboardShortcuts() {

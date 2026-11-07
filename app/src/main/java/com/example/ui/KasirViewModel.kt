@@ -13,10 +13,12 @@ import com.example.model.RecentTransactionSummary
 import com.example.model.SaleTransaction
 import com.example.model.TodaySalesSummary
 import com.example.model.formatRupiah
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -174,7 +176,20 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
     val uiState: StateFlow<KasirUiState> = _uiState.asStateFlow()
 
     init {
-        loadProducts()
+        // Sinkronisasi otomatis saat pertama kali dibuka (onLoad)
+        autoSync()
+
+        // Polling berkala setiap 5 menit (300.000 ms) agar data produk dan saldo kas selalu terkini
+        viewModelScope.launch {
+            while (isActive) {
+                delay(5 * 60 * 1000L)
+                autoSync(silent = true)
+            }
+        }
+    }
+
+    fun autoSync(silent: Boolean = false) {
+        loadProducts(silent = silent)
         loadRecent()
     }
 
@@ -543,9 +558,11 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
         _uiState.update { it.copy(errorMessage = null, successMessage = null) }
     }
 
-    fun loadProducts() {
+    fun loadProducts(silent: Boolean = false) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoadingProducts = true, errorMessage = null) }
+            if (!silent) {
+                _uiState.update { it.copy(isLoadingProducts = true, errorMessage = null) }
+            }
             val currentUrl = _uiState.value.appsScriptUrl
             val result = repository.fetchProducts(currentUrl)
 
@@ -564,9 +581,9 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
                     val fallback = applyPriceOverrides(SampleCatalog.defaultProducts)
                     _uiState.update {
                         it.copy(
-                            products = fallback,
+                            products = if (it.products.isNotEmpty()) it.products else fallback,
                             isLoadingProducts = false,
-                            errorMessage = "Gagal memuat dari Spreadsheet: ${error.localizedMessage ?: "Cek URL"}. Menggunakan katalog lokal."
+                            errorMessage = if (silent) null else "Gagal memuat dari Spreadsheet: ${error.localizedMessage ?: "Cek URL"}. Menggunakan katalog lokal."
                         )
                     }
                 }
