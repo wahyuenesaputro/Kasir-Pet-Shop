@@ -42,6 +42,12 @@ function doGet(e) {
       ensureSalesSheetWithHeaders(ss);
     } catch (ignore) {}
     return getProductsJson();
+  } else if (action === "update_product_price" || action === "update_price") {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    return jsonResponse(updateProductPriceInSheets(ss, e.parameter || {}));
+  } else if (action === "add_product") {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    return jsonResponse(addProductToSheets(ss, e.parameter || {}));
   } else if (action === "recent" || action === "balance" || action === "get_balance") {
     return getRecentSalesJson();
   } else if (action === "setup" || action === "init" || action === "buat_saldo") {
@@ -65,6 +71,23 @@ function doPost(e) {
     }
 
     var ss = SpreadsheetApp.getActiveSpreadsheet();
+
+    // -------------------------------------------------------------
+    // 0. AKSI UPDATE HARGA PRODUK DI TAB KATEGORI SPREADSHEET
+    // -------------------------------------------------------------
+    if (requestData.action === "update_product_price" || requestData.action === "update_price") {
+      var updateRes = updateProductPriceInSheets(ss, requestData);
+      return jsonResponse(updateRes);
+    }
+
+    // -------------------------------------------------------------
+    // 0B. AKSI TAMBAH PRODUK BARU KE TAB KATEGORI SPREADSHEET
+    // -------------------------------------------------------------
+    if (requestData.action === "add_product" || requestData.action === "tambah_produk") {
+      var addRes = addProductToSheets(ss, requestData);
+      return jsonResponse(addRes);
+    }
+
     var salesSheet = ensureSalesSheetWithHeaders(ss);
 
     var now = new Date();
@@ -542,3 +565,173 @@ function jsonResponse(data) {
   return ContentService.createTextOutput(JSON.stringify(data))
     .setMimeType(ContentService.MimeType.JSON);
 }
+
+/**
+ * Memperbarui Harga Jual Produk di tab Sheet Kategori Google Spreadsheet
+ */
+function updateProductPriceInSheets(ss, data) {
+  var targetCat = String(data.kategori || data.category || "").trim();
+  var targetName = String(data.namaProduk || data.nama || "").trim();
+  var newPrice = Number(data.hargaJual || data.harga || data.newPrice) || 0;
+  var productId = String(data.id || data.productId || "").trim();
+
+  if (!targetName && !productId) {
+    return { success: false, message: "Nama produk atau ID produk harus diisi" };
+  }
+
+  var categories = ["Ayam", "Burung", "Kucing", "Ikan", "Lainnya"];
+  if (targetCat) {
+    var formattedCat = targetCat.charAt(0).toUpperCase() + targetCat.slice(1).toLowerCase();
+    categories = [formattedCat].concat(categories.filter(function(c) { return c.toLowerCase() !== formattedCat.toLowerCase(); }));
+  }
+
+  var found = false;
+  var matchedCat = "";
+  var matchedRow = -1;
+
+  for (var i = 0; i < categories.length; i++) {
+    var catName = categories[i];
+    var sheet = ss.getSheetByName(catName);
+    if (!sheet) continue;
+
+    var values = sheet.getDataRange().getValues();
+    if (!values || values.length < 2) continue;
+
+    var headerRow = values[0];
+    var colMap = {};
+    for (var c = 0; c < headerRow.length; c++) {
+      colMap[String(headerRow[c]).trim().toLowerCase()] = c;
+    }
+
+    var idxNama = findColumnIndex(colMap, ["nama produk", "nama barang", "produk", "barang"]);
+    var idxHargaJual = findColumnIndex(colMap, ["harga jual", "harga jual (per satuan)", "harga"]);
+
+    if (idxNama < 0 || idxHargaJual < 0) continue;
+
+    for (var r = 1; r < values.length; r++) {
+      var rowName = String(values[r][idxNama] || "").trim();
+      var cleanTarget = sanitizeNameForMatch(targetName);
+      var cleanRow = sanitizeNameForMatch(rowName);
+
+      var isMatch = (cleanRow && cleanTarget && cleanRow === cleanTarget) ||
+                    (productId && productId.toLowerCase() === (catName + "_" + r).toLowerCase());
+
+      if (isMatch) {
+        sheet.getRange(r + 1, idxHargaJual + 1).setValue(newPrice);
+        sheet.getRange(r + 1, idxHargaJual + 1).setNumberFormat('"Rp"#,##0');
+        found = true;
+        matchedCat = catName;
+        matchedRow = r + 1;
+        break;
+      }
+    }
+
+    if (found) break;
+  }
+
+  if (found) {
+    return {
+      success: true,
+      message: "Harga produk '" + targetName + "' berhasil diperbarui menjadi Rp " + newPrice + " di tab " + matchedCat + " (baris " + matchedRow + ")",
+      kategori: matchedCat,
+      namaProduk: targetName,
+      hargaJual: newPrice
+    };
+  } else {
+    var addRes = addProductToSheets(ss, {
+      kategori: targetCat || "Lainnya",
+      namaProduk: targetName,
+      satuan: data.satuan || "pcs",
+      hargaJual: newPrice,
+      hargaBeli: data.hargaBeli || 0
+    });
+    return {
+      success: true,
+      message: "Produk belum terdaftar di spreadsheet, otomatis ditambahkan: " + addRes.message,
+      kategori: targetCat || "Lainnya",
+      namaProduk: targetName,
+      hargaJual: newPrice
+    };
+  }
+}
+
+/**
+ * Menambahkan Produk Baru ke tab Sheet Kategori Google Spreadsheet
+ */
+function addProductToSheets(ss, data) {
+  var cat = String(data.kategori || data.category || "Lainnya").trim();
+  cat = cat.charAt(0).toUpperCase() + cat.slice(1).toLowerCase();
+  var name = String(data.namaProduk || data.nama || "").trim();
+  var unit = String(data.satuan || data.unit || "pcs").trim();
+  var price = Number(data.hargaJual || data.harga || data.price) || 0;
+  var cost = Number(data.hargaBeli || data.costPrice) || 0;
+
+  if (!name) {
+    return { success: false, message: "Nama produk tidak boleh kosong" };
+  }
+
+  var sheet = ss.getSheetByName(cat);
+  if (!sheet) {
+    sheet = ss.insertSheet(cat);
+    sheet.appendRow(["NO", "NAMA BARANG", "SATUAN", "HARGA BELI", "HARGA JUAL", "HARGA BELI / KG", "KETERANGAN"]);
+    formatHeaderRow(sheet, 7);
+    sheet.setFrozenRows(1);
+  }
+
+  var values = sheet.getDataRange().getValues();
+  var colMap = {};
+  if (values.length > 0) {
+    var headerRow = values[0];
+    for (var c = 0; c < headerRow.length; c++) {
+      colMap[String(headerRow[c]).trim().toLowerCase()] = c;
+    }
+  }
+
+  var idxNama = findColumnIndex(colMap, ["nama produk", "nama barang", "produk", "barang"]);
+  var idxHargaJual = findColumnIndex(colMap, ["harga jual", "harga jual (per satuan)", "harga"]);
+
+  // Jika produk sudah ada, cukup update harganya
+  if (idxNama >= 0 && values.length > 1) {
+    for (var r = 1; r < values.length; r++) {
+      var rowName = String(values[r][idxNama] || "").trim();
+      if (sanitizeNameForMatch(rowName) === sanitizeNameForMatch(name)) {
+        if (idxHargaJual >= 0 && price > 0) {
+          sheet.getRange(r + 1, idxHargaJual + 1).setValue(price);
+          sheet.getRange(r + 1, idxHargaJual + 1).setNumberFormat('"Rp"#,##0');
+        }
+        return {
+          success: true,
+          message: "Produk sudah ada di tab " + cat + ", harga jual diperbarui menjadi Rp " + price,
+          kategori: cat,
+          namaProduk: name,
+          hargaJual: price
+        };
+      }
+    }
+  }
+
+  var nextNo = Math.max(1, sheet.getLastRow());
+  var rowData = [nextNo, name, unit, cost, price, 0, "Ditambahkan dari Kasir"];
+  sheet.appendRow(rowData);
+
+  var newRowIdx = sheet.getLastRow();
+  sheet.getRange(newRowIdx, 4).setNumberFormat('"Rp"#,##0');
+  sheet.getRange(newRowIdx, 5).setNumberFormat('"Rp"#,##0');
+  sheet.autoResizeColumns(1, 7);
+
+  return {
+    success: true,
+    message: "Produk '" + name + "' berhasil ditambahkan ke tab " + cat + " (baris " + newRowIdx + ")",
+    kategori: cat,
+    namaProduk: name,
+    satuan: unit,
+    hargaJual: price
+  };
+}
+
+function sanitizeNameForMatch(str) {
+  return String(str || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+}
+

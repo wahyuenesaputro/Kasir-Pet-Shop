@@ -300,4 +300,82 @@ class PetShopRepository {
             Result.failure(e)
         }
     }
+
+    suspend fun updateProductPrice(url: String, product: Product, newSellingPrice: Double): Result<Unit> = withContext(Dispatchers.IO) {
+        if (url.isBlank()) {
+            return@withContext Result.success(Unit) // Offline / local only
+        }
+
+        try {
+            val root = JSONObject()
+            root.put("action", "update_product_price")
+            root.put("id", product.id)
+            root.put("kategori", product.kategori)
+            root.put("namaProduk", product.namaProduk)
+            root.put("hargaJual", newSellingPrice)
+
+            val requestBody = root.toString().toRequestBody(textPlainMediaType)
+            val fullUrl = if (url.contains("?")) "$url&action=update_product_price" else "$url?action=update_product_price"
+
+            val request = Request.Builder()
+                .url(fullUrl)
+                .post(requestBody)
+                .build()
+
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    return@withContext Result.failure(IOException("Server error HTTP ${response.code}"))
+                }
+                val bodyString = response.body?.string().orEmpty()
+                val json = JSONObject(bodyString)
+                if (!json.optBoolean("success", false)) {
+                    val msg = json.optString("message", "Gagal memperbarui harga di spreadsheet")
+                    return@withContext Result.failure(IOException(msg))
+                }
+                Result.success(Unit)
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun addProduct(url: String, product: Product): Result<Unit> = withContext(Dispatchers.IO) {
+        if (url.isBlank()) {
+            return@withContext Result.success(Unit) // Offline / local only
+        }
+
+        try {
+            val root = JSONObject()
+            root.put("action", "add_product")
+            root.put("kategori", product.kategori)
+            root.put("namaProduk", product.namaProduk)
+            root.put("satuan", product.satuan)
+            root.put("hargaJual", product.hargaJual)
+            root.put("hargaBeli", product.hargaBeli)
+
+            val requestBody = root.toString().toRequestBody(textPlainMediaType)
+            val fullUrl = if (url.contains("?")) "$url&action=add_product" else "$url?action=add_product"
+
+            val request = Request.Builder()
+                .url(fullUrl)
+                .post(requestBody)
+                .build()
+
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    return@withContext Result.failure(IOException("Server error HTTP ${response.code}"))
+                }
+                val bodyString = response.body?.string().orEmpty()
+                val json = JSONObject(bodyString)
+                if (!json.optBoolean("success", false)) {
+                    val msg = json.optString("message", "Gagal menambah produk di spreadsheet")
+                    return@withContext Result.failure(IOException(msg))
+                }
+                Result.success(Unit)
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
+

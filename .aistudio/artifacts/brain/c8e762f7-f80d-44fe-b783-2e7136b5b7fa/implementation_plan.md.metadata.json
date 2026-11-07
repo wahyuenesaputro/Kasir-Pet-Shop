@@ -1,6 +1,6 @@
 {
-  "summary":  "Rencana pembuatan template Spreadsheet barang katalog Pet Shop yang dipisah per kategori (Ayam, Burung, Kucing, Ikan, Lainnya), lengkap dengan script pembuat otomatis di Google Spreadsheet dan tombol unduh file CSV/XLSX dari aplikasi Kasir.",
-  "updatedAt":  "2026-11-07T13:31:12.665543992Z",
+  "summary":  "Rencana arsitektur penyimpanan pusat data di Google Spreadsheet dan implementasi sinkronisasi 2 arah (Two-Way Sync) produk, harga, dan kategori antara Google Sheets, Web POS, dan Android.",
+  "updatedAt":  "2026-11-07T15:27:04.189618283Z",
   "requestFeedback":  true,
   "userFacing":  true
 }

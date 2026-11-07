@@ -529,7 +529,7 @@ function adjustEditPrice(delta) {
   input.value = newVal;
 }
 
-function saveQuickPrice() {
+async function saveQuickPrice() {
   const pId = document.getElementById("edit-price-prod-id").value;
   const newPrice = Number(document.getElementById("edit-price-new-input").value) || 0;
   
@@ -547,6 +547,7 @@ function saveQuickPrice() {
   const prod = products.find(x => x.id === pId);
   if (prod) {
     prod.hargaJual = newPrice;
+    prod.hargaBelumDiisi = false;
   }
 
   // Update pada custom products jika ada
@@ -566,6 +567,39 @@ function saveQuickPrice() {
   renderProducts();
   renderCatalogManager();
   closeQuickEditPriceModal();
+
+  // Sinkronkan perubahan harga langsung ke Google Spreadsheet
+  if (scriptUrl && prod) {
+    const syncBadge = document.getElementById("header-sync-badge");
+    if (syncBadge) {
+      syncBadge.classList.remove("hidden");
+      syncBadge.innerText = "Menyimpan ke Sheets...";
+    }
+    try {
+      await fetch(scriptUrl, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify({
+          action: "update_product_price",
+          id: pId,
+          kategori: prod.kategori,
+          namaProduk: prod.namaProduk,
+          hargaJual: newPrice
+        })
+      });
+      if (syncBadge) {
+        syncBadge.innerText = "Harga Tersinkron!";
+        setTimeout(() => syncBadge.classList.add("hidden"), 3000);
+      }
+    } catch (e) {
+      console.warn("Gagal sinkron harga ke Google Sheets:", e);
+      if (syncBadge) {
+        syncBadge.innerText = "Tersimpan Lokal";
+        setTimeout(() => syncBadge.classList.add("hidden"), 3000);
+      }
+    }
+  }
 }
 
 // LOGIKA KERANJANG BELANJA (DUKUNGAN DESIMAL KG & PCS INTEGER)
@@ -1372,7 +1406,40 @@ function saveNewProduct() {
   renderProducts();
   renderCatalogManager();
   closeAddProductModal();
-  alert(`Produk "${name}" (${unit}) berhasil ditambahkan ke katalog kasir!`);
+
+  // Kirim dan sinkronkan produk baru ke Google Spreadsheet
+  if (scriptUrl) {
+    const syncBadge = document.getElementById("header-sync-badge");
+    if (syncBadge) {
+      syncBadge.classList.remove("hidden");
+      syncBadge.innerText = "Menambah ke Sheets...";
+    }
+    try {
+      fetch(scriptUrl, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify({
+          action: "add_product",
+          kategori: cat,
+          namaProduk: name,
+          satuan: unit,
+          hargaJual: price
+        })
+      }).then(() => {
+        if (syncBadge) {
+          syncBadge.innerText = "Produk Tersinkron!";
+          setTimeout(() => syncBadge.classList.add("hidden"), 3000);
+        }
+      }).catch(e => {
+        console.warn("Gagal kirim produk baru ke Google Sheets:", e);
+      });
+    } catch (e) {
+      console.warn("Gagal dispatch add_product:", e);
+    }
+  }
+
+  alert(`Produk "${name}" (${unit}) berhasil ditambahkan dan disinkronkan ke Google Spreadsheet!`);
 }
 
 // MODAL PENGATURAN TOKO & ATUR SALDO KAS

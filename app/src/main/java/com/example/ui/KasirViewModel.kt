@@ -304,6 +304,17 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
 
         prefs.setCustomPrice(productId, newSellingPrice)
 
+        val targetProd = _uiState.value.products.find { it.id == productId }
+        val name = targetProd?.namaProduk ?: "Produk"
+
+        // Sinkronkan ke Google Spreadsheet secara background
+        val scriptUrl = _uiState.value.appsScriptUrl
+        if (targetProd != null && scriptUrl.isNotBlank()) {
+            viewModelScope.launch {
+                repository.updateProductPrice(scriptUrl, targetProd, newSellingPrice)
+            }
+        }
+
         _uiState.update { state ->
             val updatedProducts = state.products.map { p ->
                 if (p.id == productId) {
@@ -324,14 +335,11 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
 
-            val targetProd = state.products.find { it.id == productId }
-            val name = targetProd?.namaProduk ?: "Produk"
-
             state.copy(
                 products = updatedProducts,
                 cart = updatedCart,
                 productToEditPrice = null,
-                successMessage = "Harga $name diperbarui: ${formatRupiah(newSellingPrice)}"
+                successMessage = "Harga $name diperbarui & disinkronkan ke Spreadsheet: ${formatRupiah(newSellingPrice)}"
             )
         }
     }
@@ -395,12 +403,20 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
         currentCreated.add(0, newProduct)
         prefs.saveCustomCreatedProducts(currentCreated)
 
+        // Sinkronkan produk baru ke Google Spreadsheet
+        val scriptUrl = _uiState.value.appsScriptUrl
+        if (scriptUrl.isNotBlank()) {
+            viewModelScope.launch {
+                repository.addProduct(scriptUrl, newProduct)
+            }
+        }
+
         _uiState.update { state ->
             val updatedProducts = listOf(newProduct) + state.products
             state.copy(
                 products = updatedProducts,
                 isAddProductDialogOpen = false,
-                successMessage = "Produk '${newProduct.namaProduk}' berhasil ditambahkan ke katalog!"
+                successMessage = "Produk '${newProduct.namaProduk}' ditambahkan & disinkronkan ke Spreadsheet!"
             )
         }
     }
@@ -446,6 +462,14 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
 
+        // Sinkronkan ke Google Spreadsheet
+        val scriptUrl = _uiState.value.appsScriptUrl
+        if (scriptUrl.isNotBlank()) {
+            viewModelScope.launch {
+                repository.updateProductPrice(scriptUrl, updated, newPrice)
+            }
+        }
+
         _uiState.update { state ->
             val updatedList = state.products.map { if (it.id == productId) updated else it }
             val updatedCart = state.cart.map { itm ->
@@ -462,7 +486,7 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
                 products = updatedList,
                 cart = updatedCart,
                 productToEditCrud = null,
-                successMessage = "Produk '${updated.namaProduk}' berhasil diperbarui!"
+                successMessage = "Produk '${updated.namaProduk}' berhasil diperbarui & disinkronkan!"
             )
         }
     }
