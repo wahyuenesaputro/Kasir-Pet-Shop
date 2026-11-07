@@ -448,7 +448,7 @@ function getRecentSalesJson() {
 function getProductsJson() {
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var categories = ["Burung", "Kucing", "Ayam", "Ikan"];
+    var categories = ["Ayam", "Burung", "Kucing", "Ikan", "Lainnya"];
     var allProducts = [];
 
     categories.forEach(function(catName) {

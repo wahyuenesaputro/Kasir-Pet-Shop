@@ -40,30 +40,86 @@ function normalizeSatuan(rawSatuan, productName = "") {
 }
 
 const defaultCatalog = [
-  // Ayam (Pakan curah/karungan dijual per kg)
-  { id: "ayam_1", kategori: "Ayam", namaProduk: "511 Bravo Pakan Ayam", satuan: "kg", hargaJual: 14000 },
-  { id: "ayam_2", kategori: "Ayam", namaProduk: "BR-1 Pakan Ayam Starter", satuan: "kg", hargaJual: 13500 },
-  { id: "ayam_3", kategori: "Ayam", namaProduk: "Vita Chick Vitamin Ayam", satuan: "pcs", hargaJual: 3500 },
-  { id: "ayam_4", kategori: "Ayam", namaProduk: "Jagung Giling Halus", satuan: "kg", hargaJual: 8500 },
-
-  // Burung (Biji-bijian per kg, pakan bungkus per pcs)
-  { id: "burung_1", kategori: "Burung", namaProduk: "Topsong Rumput Laut", satuan: "pcs", hargaJual: 9000 },
-  { id: "burung_2", kategori: "Burung", namaProduk: "Kroto Sari Pakan Burung", satuan: "pcs", hargaJual: 6000 },
-  { id: "burung_3", kategori: "Burung", namaProduk: "Milet Putih Super", satuan: "kg", hargaJual: 16000 },
-  { id: "burung_4", kategori: "Burung", namaProduk: "Bio Bird Vitamin Kicau", satuan: "pcs", hargaJual: 25000 },
-
-  // Kucing
-  { id: "kucing_1", kategori: "Kucing", namaProduk: "Whiskas Tuna Adult 1kg", satuan: "pcs", hargaJual: 42000 },
-  { id: "kucing_2", kategori: "Kucing", namaProduk: "Bolt Cat Food Tuna 1kg", satuan: "pcs", hargaJual: 24000 },
-  { id: "kucing_3", kategori: "Kucing", namaProduk: "Pasir Kucing Gumpal Wangi", satuan: "kg", hargaJual: 7000 },
-  { id: "kucing_4", kategori: "Kucing", namaProduk: "Me-O Creamy Treats 4x15g", satuan: "pcs", hargaJual: 18000 },
-
-  // Ikan
-  { id: "ikan_1", kategori: "Ikan", namaProduk: "Takari Fish Food 100g", satuan: "pcs", hargaJual: 7500 },
-  { id: "ikan_2", kategori: "Ikan", namaProduk: "Pelet PF-500 Bibit Ikan", satuan: "kg", hargaJual: 22000 },
-  { id: "ikan_3", kategori: "Ikan", namaProduk: "Metil Biru Obat Ikan", satuan: "pcs", hargaJual: 5000 },
-  { id: "ikan_4", kategori: "Ikan", namaProduk: "Aquarium Pump Filter", satuan: "pcs", hargaJual: 45000 }
+  { id: "ayam_1", kategori: "Ayam", namaProduk: "511 (1 Karung)", satuan: "kg", hargaJual: 11500 },
+  { id: "ayam_2", kategori: "Ayam", namaProduk: "511 (511 K)", satuan: "kg", hargaJual: 14500 },
+  { id: "ayam_3", kategori: "Ayam", namaProduk: "591 (591k)", satuan: "kg", hargaJual: 14500 },
+  { id: "ayam_4", kategori: "Ayam", namaProduk: "592 (592k)", satuan: "kg", hargaJual: 14500 },
+  { id: "ayam_5", kategori: "Ayam", namaProduk: "594 (594k)", satuan: "kg", hargaJual: 14500 },
+  { id: "ayam_6", kategori: "Ayam", namaProduk: "BR-1 Super", satuan: "kg", hargaJual: 12000 },
+  { id: "ayam_7", kategori: "Ayam", namaProduk: "BR-611", satuan: "kg", hargaJual: 10000 },
+  { id: "ayam_8", kategori: "Ayam", namaProduk: "Buras (1 Karung)", satuan: "kg", hargaJual: 7000 },
+  { id: "ayam_9", kategori: "Ayam", namaProduk: "EH 610 (1 Karung)", satuan: "kg", hargaJual: 9500 },
+  { id: "ayam_10", kategori: "Ayam", namaProduk: "Jagung (1 Karung Meniran)", satuan: "kg", hargaJual: 10500 },
+  { id: "ayam_11", kategori: "Ayam", namaProduk: "Jagung (1 Karung Kasar)", satuan: "kg", hargaJual: 10500 },
+  { id: "ayam_12", kategori: "Ayam", namaProduk: "Jagung (Unyil Kristal)", satuan: "pcs", hargaJual: 13000 },
+  { id: "ayam_13", kategori: "Ayam", namaProduk: "524 A (Karung)", satuan: "kg", hargaJual: 9000 },
+  { id: "ayam_14", kategori: "Ayam", namaProduk: "324KJ (Karung)", satuan: "kg", hargaJual: 9500 },
+  { id: "ayam_15", kategori: "Ayam", namaProduk: "CP 124 P", satuan: "kg", hargaJual: 11000 },
+  { id: "burung_1", kategori: "Burung", namaProduk: "Leopard (MD Halus)", satuan: "pcs", hargaJual: 8000 },
+  { id: "burung_2", kategori: "Burung", namaProduk: "Leopard (MD Kasar)", satuan: "pcs", hargaJual: 8000 },
+  { id: "burung_3", kategori: "Burung", namaProduk: "Leopard (Hijau Kasar)", satuan: "pcs", hargaJual: 8500 },
+  { id: "burung_4", kategori: "Burung", namaProduk: "Topsong (Top Song Coklat)", satuan: "pcs", hargaJual: 12000 },
+  { id: "burung_5", kategori: "Burung", namaProduk: "Topsong (Top Song Hijau)", satuan: "pcs", hargaJual: 12000 },
+  { id: "burung_6", kategori: "Burung", namaProduk: "SKM (SKM Halus)", satuan: "pcs", hargaJual: 0 },
+  { id: "burung_7", kategori: "Burung", namaProduk: "SKM (SKM Kasar)", satuan: "pcs", hargaJual: 0 },
+  { id: "burung_8", kategori: "Burung", namaProduk: "Kroto Sari (KSK)", satuan: "pcs", hargaJual: 0 },
+  { id: "burung_9", kategori: "Burung", namaProduk: "Kroto Sari (Krotosari Kasar)", satuan: "pcs", hargaJual: 0 },
+  { id: "burung_10", kategori: "Burung", namaProduk: "Alam Sakti (Love Bird)", satuan: "pcs", hargaJual: 0 },
+  { id: "burung_11", kategori: "Burung", namaProduk: "Alam Sakti (Kenari)", satuan: "pcs", hargaJual: 0 },
+  { id: "burung_12", kategori: "Burung", namaProduk: "Madura Koung (Madura Koung)", satuan: "pcs", hargaJual: 0 },
+  { id: "burung_13", kategori: "Burung", namaProduk: "Kutut Profit (Profit)", satuan: "pcs", hargaJual: 0 },
+  { id: "burung_14", kategori: "Burung", namaProduk: "Derkuku Comet (Comet Derkuku)", satuan: "pcs", hargaJual: 0 },
+  { id: "burung_15", kategori: "Burung", namaProduk: "Gold Coin (Kutut 250gr)", satuan: "pcs", hargaJual: 0 },
+  { id: "burung_16", kategori: "Burung", namaProduk: "Gold Coin (Hijau Seaweed 450gr)", satuan: "pcs", hargaJual: 12000 },
+  { id: "burung_17", kategori: "Burung", namaProduk: "Gold Coin (Canary)", satuan: "pcs", hargaJual: 0 },
+  { id: "burung_18", kategori: "Burung", namaProduk: "Ebod Canary (Ebod)", satuan: "pcs", hargaJual: 0 },
+  { id: "burung_19", kategori: "Burung", namaProduk: "Chirpy (Besar)", satuan: "pcs", hargaJual: 0 },
+  { id: "burung_20", kategori: "Burung", namaProduk: "Chirpy (Kecil)", satuan: "pcs", hargaJual: 0 },
+  { id: "burung_21", kategori: "Burung", namaProduk: "Fancy (Besar)", satuan: "pcs", hargaJual: 0 },
+  { id: "burung_22", kategori: "Burung", namaProduk: "Fancy (Kecil 250gr)", satuan: "pcs", hargaJual: 0 },
+  { id: "burung_23", kategori: "Burung", namaProduk: "Ketan Hitam", satuan: "pcs", hargaJual: 0 },
+  { id: "burung_24", kategori: "Burung", namaProduk: "Milet Putih (1kg)", satuan: "kg", hargaJual: 0 },
+  { id: "burung_25", kategori: "Burung", namaProduk: "Milet Merah", satuan: "pcs", hargaJual: 0 },
+  { id: "burung_26", kategori: "Burung", namaProduk: "Kenari Seed (1kg)", satuan: "kg", hargaJual: 0 },
+  { id: "burung_27", kategori: "Burung", namaProduk: "Trucuk Pisang Ijo SM", satuan: "pcs", hargaJual: 0 },
+  { id: "burung_28", kategori: "Burung", namaProduk: "521 (521 Coklat)", satuan: "kg", hargaJual: 0 },
+  { id: "burung_29", kategori: "Burung", namaProduk: "521 (521 Hijau)", satuan: "kg", hargaJual: 0 },
+  { id: "ikan_1", kategori: "Ikan", namaProduk: "781 (-1)", satuan: "pcs", hargaJual: 16500 },
+  { id: "ikan_2", kategori: "Ikan", namaProduk: "781 (-2)", satuan: "pcs", hargaJual: 16000 },
+  { id: "ikan_3", kategori: "Ikan", namaProduk: "781 (-3)", satuan: "pcs", hargaJual: 15500 },
+  { id: "ikan_4", kategori: "Ikan", namaProduk: "782 (-2)", satuan: "pcs", hargaJual: 14500 },
+  { id: "ikan_5", kategori: "Ikan", namaProduk: "782 (-3)", satuan: "pcs", hargaJual: 14000 },
+  { id: "ikan_6", kategori: "Ikan", namaProduk: "782 (-4)", satuan: "pcs", hargaJual: 14000 },
+  { id: "ikan_7", kategori: "Ikan", namaProduk: "T78 (-2) kg", satuan: "pcs", hargaJual: 12500 },
+  { id: "ikan_8", kategori: "Ikan", namaProduk: "T78 (-3) kg", satuan: "pcs", hargaJual: 12000 },
+  { id: "ikan_9", kategori: "Ikan", namaProduk: "T78 (-4) kg", satuan: "pcs", hargaJual: 12000 },
+  { id: "ikan_10", kategori: "Ikan", namaProduk: "Hiu (-2)", satuan: "pcs", hargaJual: 8500 },
+  { id: "ikan_11", kategori: "Ikan", namaProduk: "Hiu (-3)", satuan: "pcs", hargaJual: 8500 },
+  { id: "ikan_12", kategori: "Ikan", namaProduk: "Hiu (-5)", satuan: "pcs", hargaJual: 8500 },
+  { id: "ikan_13", kategori: "Ikan", namaProduk: "Takari (100 gr)", satuan: "pcs", hargaJual: 4500 },
+  { id: "kucing_1", kategori: "Kucing", namaProduk: "Bolt (Ikan Ungu 800gr)", satuan: "pcs", hargaJual: 19000 },
+  { id: "kucing_2", kategori: "Kucing", namaProduk: "Bolt (Donat Kuning 800gr)", satuan: "pcs", hargaJual: 19000 },
+  { id: "kucing_3", kategori: "Kucing", namaProduk: "Bolt (Pink Bulat 800gr)", satuan: "pcs", hargaJual: 19000 },
+  { id: "kucing_4", kategori: "Kucing", namaProduk: "Bolt (Kitten Bolt 500gr)", satuan: "pcs", hargaJual: 13000 },
+  { id: "kucing_5", kategori: "Kucing", namaProduk: "Felibite (Felibite Ikan)", satuan: "pcs", hargaJual: 12000 },
+  { id: "kucing_6", kategori: "Kucing", namaProduk: "Felibite (Felibite Donat)", satuan: "pcs", hargaJual: 12000 },
+  { id: "kucing_7", kategori: "Kucing", namaProduk: "Felibite (Felibite Kitten Donat)", satuan: "pcs", hargaJual: 13000 },
+  { id: "kucing_8", kategori: "Kucing", namaProduk: "Excel (Adult Ikan 500gr)", satuan: "pcs", hargaJual: 11500 },
+  { id: "kucing_9", kategori: "Kucing", namaProduk: "Excel (Adult Donat)", satuan: "pcs", hargaJual: 11500 },
+  { id: "kucing_10", kategori: "Kucing", namaProduk: "Excel (Adult Segitiga Oren)", satuan: "pcs", hargaJual: 11500 },
+  { id: "kucing_11", kategori: "Kucing", namaProduk: "Excel (Kitten Pink 500gr)", satuan: "pcs", hargaJual: 13000 },
+  { id: "kucing_12", kategori: "Kucing", namaProduk: "Cat Choize (Hijau Adult 800gr)", satuan: "pcs", hargaJual: 18000 },
+  { id: "kucing_13", kategori: "Kucing", namaProduk: "Cat Choize (Oren Adult 800gr)", satuan: "pcs", hargaJual: 18000 },
+  { id: "kucing_14", kategori: "Kucing", namaProduk: "Cat Choize (Kitten Tuna Pink 1kg)", satuan: "pcs", hargaJual: 24500 },
+  { id: "kucing_15", kategori: "Kucing", namaProduk: "Cat Choize (Kitten Salmon Kuning 1kg)", satuan: "pcs", hargaJual: 24500 },
+  { id: "kucing_16", kategori: "Kucing", namaProduk: "Chester (800gr)", satuan: "pcs", hargaJual: 17000 },
+  { id: "kucing_17", kategori: "Kucing", namaProduk: "Whiskas Pouch (1 Dus 28 Pcs Junior)", satuan: "pcs", hargaJual: 6000 },
+  { id: "kucing_18", kategori: "Kucing", namaProduk: "Whiskas Pouch (1 Dus isi 28 Pcs Adult)", satuan: "pcs", hargaJual: 6000 },
+  { id: "kucing_19", kategori: "Kucing", namaProduk: "Life Cat (1 Dus Pouch 24pcs)", satuan: "pcs", hargaJual: 5000 },
+  { id: "kucing_20", kategori: "Kucing", namaProduk: "Life Cat (Kaleng Adult 400gr)", satuan: "pcs", hargaJual: 13500 },
+  { id: "kucing_21", kategori: "Kucing", namaProduk: "Life Cat (Kaleng Kitten 400gr)", satuan: "pcs", hargaJual: 13500 },
 ];
+
 
 // Inisialisasi Saat Dokumen Dimuat
 document.addEventListener("DOMContentLoaded", () => {
@@ -1523,28 +1579,54 @@ async function syncData() {
     return;
   }
 
-  // 1. Ambil Katalog Produk dari Google Sheets (normalisasi satuan karung -> kg, lainnya -> pcs)
+  // 1. Ambil Katalog Produk dari setiap sheet kategori (Ayam, Burung, Kucing, Ikan, Lainnya)
   try {
-    const res = await fetch(`${scriptUrl}?action=products`);
+    const res = await fetch(`${scriptUrl}?action=products&t=${Date.now()}`);
     const data = await res.json();
     if (data && data.success && Array.isArray(data.products) && data.products.length > 0) {
       const custom = JSON.parse(localStorage.getItem("petshop_custom_products") || "[]");
       const overrides = JSON.parse(localStorage.getItem("petshop_price_overrides") || "{}");
       
-      products = [...data.products, ...custom].map(p => {
-        const cleanedName = sanitizeProductName(p.namaProduk);
+      // Tata ulang setiap objek produk agar properti kategori, harga, dan nama konsisten 100%
+      const syncedProducts = data.products.map((p, idx) => {
+        const cleanedName = sanitizeProductName(p.namaProduk || p.nama || "Produk");
+        const rawKat = String(p.kategori || "Lainnya").trim();
+        // Normalisasi huruf kapital kategori (Ayam, Burung, Kucing, Ikan, Lainnya)
+        const formattedKategori = rawKat.charAt(0).toUpperCase() + rawKat.slice(1).toLowerCase();
         const normSatuan = normalizeSatuan(p.satuan, cleanedName);
-        let finalPrice = p.hargaJual;
-        if (overrides[p.id] !== undefined) {
+        
+        let finalPrice = Number(p.hargaJual) || 0;
+        if (overrides[p.id] !== undefined && Number(overrides[p.id]) > 0) {
           finalPrice = Number(overrides[p.id]);
         }
-        return { ...p, namaProduk: cleanedName, satuan: normSatuan, hargaJual: finalPrice };
+
+        return {
+          id: p.id || `${formattedKategori}_${idx + 1}`,
+          kategori: formattedKategori,
+          namaProduk: cleanedName,
+          satuan: normSatuan,
+          satuanAsli: p.satuanAsli || p.satuan || normSatuan,
+          hargaJual: finalPrice,
+          hargaBeli: Number(p.hargaBeli) || 0,
+          hargaBelumDiisi: Boolean(p.hargaBelumDiisi || finalPrice <= 0),
+          catatan: p.catatan || ""
+        };
       });
+
+      // Gabungkan produk custom lokal jika ada
+      const formattedCustom = custom.map(c => ({
+        ...c,
+        namaProduk: sanitizeProductName(c.namaProduk),
+        satuan: normalizeSatuan(c.satuan, c.namaProduk)
+      }));
+
+      products = [...syncedProducts, ...formattedCustom];
       renderProducts();
       renderCatalogManager();
+      console.log(`[Sync] Berhasil menyinkronkan ${syncedProducts.length} produk dari seluruh sheet kategori.`);
     }
   } catch (err) {
-    console.warn("Gagal sync katalog produk:", err);
+    console.warn("Gagal sync katalog produk dari spreadsheet:", err);
   }
 
   // 2. Ambil Saldo Kas & Riwayat Terakhir dari Google Sheets
