@@ -62,14 +62,25 @@ class PetShopRepository {
                 for (i in 0 until productsArray.length()) {
                     val pObj = productsArray.getJSONObject(i)
                     val catName = pObj.optString("kategori", "Lainnya")
-                    val nama = pObj.optString("namaProduk", "")
+                    val rawNama = pObj.optString("namaProduk", "")
+                    
+                    // Sanitasi nama produk: ganti Zak/zak dengan Karung/karung
+                    val nama = rawNama
+                        .replace(Regex("(?i)\\b1\\s*Zak\\b"), "1 Karung")
+                        .replace(Regex("(?i)\\bZak\\b"), "Karung")
+
                     val rawSatuan = pObj.optString("satuan", "pcs").trim().lowercase()
-                    val satuan = if (rawSatuan == "zak" || rawSatuan == "karung" || rawSatuan == "sak" || rawSatuan.contains("kg")) "kg" else "pcs"
-                    val satuanAsli = pObj.optString("satuanAsli", satuan)
+                    val isKarung = rawSatuan == "zak" || rawSatuan == "karung" || rawSatuan == "sak" ||
+                            nama.contains("karung", ignoreCase = true) || nama.contains("zak", ignoreCase = true)
+
+                    // Aturan: Yang karung dijual per kg, selain itu otomatis pcs
+                    val satuan = if (isKarung) "kg" else "pcs"
+                    val satuanAsli = if (isKarung) "karung" else "pcs"
                     val hargaJual = pObj.optDouble("hargaJual", 0.0)
                     val hargaBeli = pObj.optDouble("hargaBeli", 0.0)
                     val belumDiisi = pObj.optBoolean("hargaBelumDiisi", hargaJual <= 0)
                     val catatan = pObj.optString("catatan", "")
+                        .replace(Regex("(?i)\\bzak\\b"), "karung")
 
                     if (nama.isNotBlank()) {
                         list.add(

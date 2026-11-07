@@ -190,14 +190,38 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
         // 2. Filter produk yang telah dihapus
         val activeProducts = combined.filterNot { deletedIds.contains(it.id) }
 
-        // 3. Terapkan override nama/satuan/kategori/harga jika ada
+        // 3. Terapkan override nama/satuan/kategori/harga jika ada & sanitasi Zak -> Karung
         return activeProducts.map { prod ->
             var p = overrides[prod.id] ?: prod
+
+            // Sanitasi nama produk: Zak -> Karung
+            val cleanedName = p.namaProduk
+                .replace(Regex("(?i)\\b1\\s*Zak\\b"), "1 Karung")
+                .replace(Regex("(?i)\\bZak\\b"), "Karung")
+
+            val isKarung = p.satuan.equals("zak", ignoreCase = true) ||
+                    p.satuan.equals("karung", ignoreCase = true) ||
+                    p.satuan.equals("sak", ignoreCase = true) ||
+                    cleanedName.contains("karung", ignoreCase = true) ||
+                    cleanedName.contains("zak", ignoreCase = true)
+
+            val finalSatuan = if (isKarung) "kg" else "pcs"
+            val finalSatuanAsli = if (isKarung) "karung" else "pcs"
+
             val overridePrice = customPrices[p.id]
             if (overridePrice != null && overridePrice > 0.0) {
                 p = p.copy(
+                    namaProduk = cleanedName,
+                    satuan = finalSatuan,
+                    satuanAsli = finalSatuanAsli,
                     hargaJual = overridePrice,
                     hargaBelumDiisi = false
+                )
+            } else {
+                p = p.copy(
+                    namaProduk = cleanedName,
+                    satuan = finalSatuan,
+                    satuanAsli = finalSatuanAsli
                 )
             }
             p

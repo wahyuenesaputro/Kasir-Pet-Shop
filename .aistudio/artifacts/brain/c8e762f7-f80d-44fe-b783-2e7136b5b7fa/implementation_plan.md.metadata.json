@@ -1,6 +1,6 @@
 {
-  "summary": "Rencana implementasi dukungan penjualan eceran per kilogram (kg) dengan kuantitas desimal (0,5 kg, 1 kg, dll.) untuk produk pakan karungan/zak, serta pengaturan satuan pcs untuk produk kemasan lainnya pada kasir desktop, mobile web, dan aplikasi Android.",
-  "updatedAt": "2026-11-06T16:38:05.781172923Z",
-  "requestFeedback": true,
-  "userFacing": true
+  "summary":  "Rencana pembuatan template Spreadsheet barang katalog Pet Shop yang dipisah per kategori (Ayam, Burung, Kucing, Ikan, Lainnya), lengkap dengan script pembuat otomatis di Google Spreadsheet dan tombol unduh file CSV/XLSX dari aplikasi Kasir.",
+  "updatedAt":  "2026-11-07T13:31:12.665543992Z",
+  "requestFeedback":  true,
+  "userFacing":  true
 }

@@ -753,6 +753,26 @@
           </button>
         </div>
 
+        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3.5 space-y-2 text-xs text-emerald-950">
+          <h5 class="font-bold flex items-center space-x-1.5 text-emerald-900">
+            <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-700"></i>
+            <span>Template Spreadsheet Barang (Per Kategori):</span>
+          </h5>
+          <p class="text-[11px] text-emerald-800 leading-relaxed">
+            Disediakan sheet terpisah untuk <strong>Ayam</strong> (pakan karung dijual per kg), <strong>Burung</strong>, <strong>Kucing</strong>, dan <strong>Ikan</strong> lengkap dengan kolom Harga Beli & Jual.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-2 pt-1">
+            <button type="button" onclick="setupKatalogSpreadsheetAuto()" id="btn-auto-katalog" class="flex-1 py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] rounded-lg shadow-sm transition flex items-center justify-center space-x-1.5">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+              <span>Buat Sheet Kategori Otomatis</span>
+            </button>
+            <a href="katalog_petshop.csv" download="katalog_petshop.csv" class="py-2 px-3 border border-emerald-300 bg-white hover:bg-emerald-100 text-emerald-800 font-bold text-[11px] rounded-lg transition flex items-center justify-center space-x-1.5 text-center">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              <span>Unduh File CSV</span>
+            </a>
+          </div>
+        </div>
+
         <div class="bg-blue-50 border border-blue-200 rounded-xl p-3.5 space-y-2 text-xs text-blue-900">
           <h5 class="font-bold flex items-center space-x-1.5 text-blue-950">
             <i data-lucide="info" class="w-4 h-4 text-blue-700"></i>
