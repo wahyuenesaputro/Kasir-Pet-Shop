@@ -621,7 +621,11 @@
         <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wide block" id="edit-price-prod-cat">Kategori • Satuan</span>
         <h4 class="text-sm font-bold text-slate-900 mt-0.5 line-clamp-2" id="edit-price-prod-name">Nama Produk</h4>
         <div class="flex justify-between items-center text-xs mt-2 pt-2 border-t border-slate-200">
-          <span class="text-slate-500 font-medium">Harga Sekarang:</span>
+          <span class="text-slate-500 font-medium">Harga Modal (Beli):</span>
+          <span class="font-bold text-slate-600" id="edit-price-cost-disp">Rp 0</span>
+        </div>
+        <div class="flex justify-between items-center text-xs mt-1">
+          <span class="text-slate-500 font-medium">Harga Jual Sekarang:</span>
           <span class="font-black text-slate-800" id="edit-price-current-disp">Rp 0</span>
         </div>
       </div>
@@ -734,22 +738,34 @@
         </button>
       </div>
 
-      <!-- TAB 1: KONEKSI SPREADSHEET -->
+      <!-- TAB 1: KONEKSI SPREADSHEET (TERPISAH PRODUK & PENJUALAN) -->
       <div id="settings-view-sheets" class="space-y-4">
         <div class="space-y-1.5">
-          <label class="text-xs font-bold text-slate-700 block">URL Web App (APPS_SCRIPT_URL):</label>
-          <input type="text" id="setting-script-url" placeholder="https://script.google.com/macros/s/.../exec" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-600 font-mono">
-          <p class="text-[11px] text-slate-400">Didapat dari Deploy > Web App Google Apps Script Spreadsheet Anda.</p>
+          <label class="text-xs font-bold text-slate-800 flex items-center justify-between">
+            <span>1. URL Spreadsheet Katalog Produk:</span>
+            <span class="text-[10px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded font-semibold">Sheet: Ayam, Burung, Kucing, Ikan</span>
+          </label>
+          <input type="text" id="setting-product-script-url" placeholder="https://script.google.com/macros/s/.../exec" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-600 font-mono">
+          <p class="text-[11px] text-slate-400">Digunakan untuk mengambil data barang & mengupdate harga dari website desktop.</p>
+        </div>
+
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-slate-800 flex items-center justify-between">
+            <span>2. URL Spreadsheet Riwayat Penjualan / Kas:</span>
+            <span class="text-[10px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded font-semibold">Sheet: Penjualan (7 Kolom)</span>
+          </label>
+          <input type="text" id="setting-sales-script-url" placeholder="https://script.google.com/macros/s/.../exec" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-600 font-mono">
+          <p class="text-[11px] text-slate-400">Digunakan untuk mencatat mutasi kas penjualan & penyesuaian saldo kasir.</p>
         </div>
 
         <div class="flex space-x-2">
           <button onclick="saveSettings()" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center space-x-1.5">
             <i data-lucide="save" class="w-4 h-4"></i>
-            <span>Simpan URL</span>
+            <span>Simpan Kedua Link</span>
           </button>
           <button onclick="saveSettings(); syncData();" class="flex-1 py-2.5 border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold text-xs rounded-xl transition flex items-center justify-center space-x-1.5">
             <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-            <span>Simpan & Sinkron</span>
+            <span>Simpan & Sinkronkan</span>
           </button>
         </div>
 
@@ -760,6 +776,23 @@
           </h5>
           <p class="text-[11px] text-blue-800 leading-relaxed">
             Sheet <strong>Penjualan</strong> mencatat mutasi: <code>Tanggal | Jam | Keterangan | Masuk (+) | Keluar (-) | Saldo Kas Akhir | Metode</code>. Tiap penjualan dan penyesuaian saldo langsung tersinkron rapi.
+          </p>
+        </div>
+
+        <!-- PANDUAN DAN SALIN KODE GOOGLE APPS SCRIPT -->
+        <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-3.5 space-y-2 text-xs text-indigo-950">
+          <div class="flex items-center justify-between">
+            <h5 class="font-bold flex items-center space-x-1.5 text-indigo-900">
+              <i data-lucide="code-2" class="w-4 h-4 text-indigo-600"></i>
+              <span>Kode Google Apps Script (Code.gs)</span>
+            </h5>
+            <button onclick="copyAppsScriptCode()" id="btn-copy-apps-script" class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[11px] rounded-lg shadow-sm transition flex items-center space-x-1">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              <span id="btn-copy-apps-script-text">Salin Kode</span>
+            </button>
+          </div>
+          <p class="text-[11px] text-indigo-800 leading-relaxed">
+            Tempel kode ini ke <strong>Ekstensi &gt; Apps Script</strong> di spreadsheet Anda. Jalankan fungsi <code>isiDataProdukOtomatis()</code> untuk mengisi seluruh 29 data pakan burung harga resmi, ayam, kucing, ikan &amp; tabel kas dalam 1 klik!
           </p>
         </div>
 

@@ -137,6 +137,7 @@ object SampleCatalog {
             namaProduk = "Leopard (MD Halus)",
             satuan = "pcs",
             hargaJual = 8000.0,
+            hargaBeli = 6900.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -145,6 +146,7 @@ object SampleCatalog {
             namaProduk = "Leopard (MD Kasar)",
             satuan = "pcs",
             hargaJual = 8000.0,
+            hargaBeli = 6900.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -153,6 +155,7 @@ object SampleCatalog {
             namaProduk = "Leopard (Hijau Kasar)",
             satuan = "pcs",
             hargaJual = 8500.0,
+            hargaBeli = 7100.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -161,6 +164,7 @@ object SampleCatalog {
             namaProduk = "Topsong (Top Song Coklat)",
             satuan = "pcs",
             hargaJual = 12000.0,
+            hargaBeli = 10900.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -169,6 +173,7 @@ object SampleCatalog {
             namaProduk = "Topsong (Top Song Hijau)",
             satuan = "pcs",
             hargaJual = 12000.0,
+            hargaBeli = 11000.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -176,80 +181,90 @@ object SampleCatalog {
             kategori = "Burung",
             namaProduk = "SKM (SKM Halus)",
             satuan = "pcs",
-            hargaJual = 0.0,
-            hargaBelumDiisi = true
+            hargaJual = 4500.0,
+            hargaBeli = 3200.0,
+            hargaBelumDiisi = false
         ),
         Product(
             id = "burung_7",
             kategori = "Burung",
             namaProduk = "SKM (SKM Kasar)",
             satuan = "pcs",
-            hargaJual = 0.0,
-            hargaBelumDiisi = true
+            hargaJual = 4500.0,
+            hargaBeli = 3200.0,
+            hargaBelumDiisi = false
         ),
         Product(
             id = "burung_8",
             kategori = "Burung",
             namaProduk = "Kroto Sari (KSK)",
             satuan = "pcs",
-            hargaJual = 0.0,
-            hargaBelumDiisi = true
+            hargaJual = 3500.0,
+            hargaBeli = 2600.0,
+            hargaBelumDiisi = false
         ),
         Product(
             id = "burung_9",
             kategori = "Burung",
             namaProduk = "Kroto Sari (Krotosari Kasar)",
             satuan = "pcs",
-            hargaJual = 0.0,
-            hargaBelumDiisi = true
+            hargaJual = 3500.0,
+            hargaBeli = 2700.0,
+            hargaBelumDiisi = false
         ),
         Product(
             id = "burung_10",
             kategori = "Burung",
             namaProduk = "Alam Sakti (Love Bird)",
             satuan = "pcs",
-            hargaJual = 0.0,
-            hargaBelumDiisi = true
+            hargaJual = 10500.0,
+            hargaBeli = 9500.0,
+            hargaBelumDiisi = false
         ),
         Product(
             id = "burung_11",
             kategori = "Burung",
             namaProduk = "Alam Sakti (Kenari)",
             satuan = "pcs",
-            hargaJual = 0.0,
-            hargaBelumDiisi = true
+            hargaJual = 11500.0,
+            hargaBeli = 10400.0,
+            hargaBelumDiisi = false
         ),
         Product(
             id = "burung_12",
             kategori = "Burung",
             namaProduk = "Madura Koung (Madura Koung)",
             satuan = "pcs",
-            hargaJual = 0.0,
-            hargaBelumDiisi = true
+            hargaJual = 9500.0,
+            hargaBeli = 8600.0,
+            hargaBelumDiisi = false
         ),
         Product(
             id = "burung_13",
             kategori = "Burung",
             namaProduk = "Kutut Profit (Profit)",
             satuan = "pcs",
-            hargaJual = 0.0,
-            hargaBelumDiisi = true
+            hargaJual = 8500.0,
+            hargaBeli = 7300.0,
+            hargaBelumDiisi = false
         ),
         Product(
             id = "burung_14",
             kategori = "Burung",
             namaProduk = "Derkuku Comet (Comet Derkuku)",
             satuan = "pcs",
-            hargaJual = 0.0,
-            hargaBelumDiisi = true
+            hargaJual = 7500.0,
+            hargaBeli = 6500.0,
+            hargaBelumDiisi = false
         ),
         Product(
             id = "burung_15",
             kategori = "Burung",
             namaProduk = "Gold Coin (Kutut 250gr)",
             satuan = "pcs",
-            hargaJual = 0.0,
-            hargaBelumDiisi = true
+            hargaJual = 8500.0,
+            hargaBeli = 7600.0,
+            hargaBelumDiisi = false
         ),
         Product(
             id = "burung_16",
@@ -257,6 +272,7 @@ object SampleCatalog {
             namaProduk = "Gold Coin (Hijau Seaweed 450gr)",
             satuan = "pcs",
             hargaJual = 12000.0,
+            hargaBeli = 11100.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -264,104 +280,117 @@ object SampleCatalog {
             kategori = "Burung",
             namaProduk = "Gold Coin (Canary)",
             satuan = "pcs",
-            hargaJual = 0.0,
-            hargaBelumDiisi = true
+            hargaJual = 10000.0,
+            hargaBeli = 8700.0,
+            hargaBelumDiisi = false
         ),
         Product(
             id = "burung_18",
             kategori = "Burung",
             namaProduk = "Ebod Canary (Ebod)",
             satuan = "pcs",
-            hargaJual = 0.0,
-            hargaBelumDiisi = true
+            hargaJual = 9000.0,
+            hargaBeli = 8100.0,
+            hargaBelumDiisi = false
         ),
         Product(
             id = "burung_19",
             kategori = "Burung",
             namaProduk = "Chirpy (Besar)",
             satuan = "pcs",
-            hargaJual = 0.0,
-            hargaBelumDiisi = true
+            hargaJual = 10000.0,
+            hargaBeli = 9000.0,
+            hargaBelumDiisi = false
         ),
         Product(
             id = "burung_20",
             kategori = "Burung",
             namaProduk = "Chirpy (Kecil)",
             satuan = "pcs",
-            hargaJual = 0.0,
-            hargaBelumDiisi = true
+            hargaJual = 7000.0,
+            hargaBeli = 5900.0,
+            hargaBelumDiisi = false
         ),
         Product(
             id = "burung_21",
             kategori = "Burung",
             namaProduk = "Fancy (Besar)",
             satuan = "pcs",
-            hargaJual = 0.0,
-            hargaBelumDiisi = true
+            hargaJual = 14500.0,
+            hargaBeli = 13400.0,
+            hargaBelumDiisi = false
         ),
         Product(
             id = "burung_22",
             kategori = "Burung",
             namaProduk = "Fancy (Kecil 250gr)",
             satuan = "pcs",
-            hargaJual = 0.0,
-            hargaBelumDiisi = true
+            hargaJual = 8000.0,
+            hargaBeli = 6900.0,
+            hargaBelumDiisi = false
         ),
         Product(
             id = "burung_23",
             kategori = "Burung",
             namaProduk = "Ketan Hitam",
             satuan = "pcs",
-            hargaJual = 0.0,
-            hargaBelumDiisi = true
+            hargaJual = 8500.0,
+            hargaBeli = 7800.0,
+            hargaBelumDiisi = false
         ),
         Product(
             id = "burung_24",
             kategori = "Burung",
             namaProduk = "Milet Putih (1kg)",
             satuan = "kg",
-            hargaJual = 0.0,
-            hargaBelumDiisi = true
+            hargaJual = 14500.0,
+            hargaBeli = 13800.0,
+            hargaBelumDiisi = false
         ),
         Product(
             id = "burung_25",
             kategori = "Burung",
             namaProduk = "Milet Merah",
             satuan = "pcs",
-            hargaJual = 0.0,
-            hargaBelumDiisi = true
+            hargaJual = 14500.0,
+            hargaBeli = 13500.0,
+            hargaBelumDiisi = false
         ),
         Product(
             id = "burung_26",
             kategori = "Burung",
             namaProduk = "Kenari Seed (1kg)",
             satuan = "kg",
-            hargaJual = 0.0,
-            hargaBelumDiisi = true
+            hargaJual = 15500.0,
+            hargaBeli = 14800.0,
+            hargaBelumDiisi = false
         ),
         Product(
             id = "burung_27",
             kategori = "Burung",
             namaProduk = "Trucuk Pisang Ijo SM",
             satuan = "pcs",
-            hargaJual = 0.0,
-            hargaBelumDiisi = true
+            hargaJual = 4500.0,
+            hargaBeli = 2700.0,
+            hargaBelumDiisi = false
         ),
         Product(
             id = "burung_28",
             kategori = "Burung",
             namaProduk = "521 (521 Coklat)",
             satuan = "kg",
-            hargaJual = 0.0,
-            hargaBelumDiisi = true
+            hargaJual = 8500.0,
+            hargaBeli = 7700.0,
+            hargaBelumDiisi = false
         ),
         Product(
             id = "burung_29",
             kategori = "Burung",
             namaProduk = "521 (521 Hijau)",
             satuan = "kg",
-            hargaJual = 0.0,
-            hargaBelumDiisi = true
+            hargaJual = 8500.0,
+            hargaBeli = 7900.0,
+            hargaBelumDiisi = false
         ),
 
         // ====================================================================

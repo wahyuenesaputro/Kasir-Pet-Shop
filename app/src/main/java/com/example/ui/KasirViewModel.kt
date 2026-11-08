@@ -38,6 +38,8 @@ data class KasirUiState(
     val currentBalance: Double = 0.0,
     val isAdjustBalanceDialogOpen: Boolean = false,
     val appsScriptUrl: String = "",
+    val productScriptUrl: String = "",
+    val salesScriptUrl: String = "",
     val todaySummary: TodaySalesSummary = TodaySalesSummary(),
     val recentTransactions: List<RecentTransactionSummary> = emptyList(),
     val isSettingsOpen: Boolean = false,
@@ -60,6 +62,11 @@ data class KasirUiState(
     val qrisStaticBasePayload: String = "",
     val isDynamicQrisModalOpen: Boolean = false
 ) {
+    val effectiveProductUrl: String
+        get() = productScriptUrl.ifBlank { salesScriptUrl.ifBlank { appsScriptUrl } }
+
+    val effectiveSalesUrl: String
+        get() = salesScriptUrl.ifBlank { productScriptUrl.ifBlank { appsScriptUrl } }
     val cartTotal: Double
         get() = cart.sumOf { it.subtotal }
 
@@ -165,6 +172,8 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
         KasirUiState(
             products = applyPriceOverrides(SampleCatalog.defaultProducts),
             appsScriptUrl = prefs.appsScriptUrl,
+            productScriptUrl = prefs.productScriptUrl,
+            salesScriptUrl = prefs.salesScriptUrl,
             currentBalance = prefs.currentBalance,
             qrisMerchantName = prefs.qrisMerchantName,
             qrisNmid = prefs.qrisNmid,
@@ -308,7 +317,7 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
         val name = targetProd?.namaProduk ?: "Produk"
 
         // Sinkronkan ke Google Spreadsheet secara background
-        val scriptUrl = _uiState.value.appsScriptUrl
+        val scriptUrl = _uiState.value.effectiveProductUrl
         if (targetProd != null && scriptUrl.isNotBlank()) {
             viewModelScope.launch {
                 repository.updateProductPrice(scriptUrl, targetProd, newSellingPrice)
@@ -404,7 +413,7 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
         prefs.saveCustomCreatedProducts(currentCreated)
 
         // Sinkronkan produk baru ke Google Spreadsheet
-        val scriptUrl = _uiState.value.appsScriptUrl
+        val scriptUrl = _uiState.value.effectiveProductUrl
         if (scriptUrl.isNotBlank()) {
             viewModelScope.launch {
                 repository.addProduct(scriptUrl, newProduct)
@@ -463,7 +472,7 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         // Sinkronkan ke Google Spreadsheet
-        val scriptUrl = _uiState.value.appsScriptUrl
+        val scriptUrl = _uiState.value.effectiveProductUrl
         if (scriptUrl.isNotBlank()) {
             viewModelScope.launch {
                 repository.updateProductPrice(scriptUrl, updated, newPrice)
@@ -567,11 +576,29 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
         _uiState.update { it.copy(isGuideOpen = false) }
     }
 
-    fun updateAppsScriptUrl(newUrl: String) {
-        prefs.appsScriptUrl = newUrl
-        _uiState.update { it.copy(appsScriptUrl = newUrl.trim()) }
+    fun saveDualUrls(productUrl: String, salesUrl: String) {
+        val pUrl = productUrl.trim()
+        val sUrl = salesUrl.trim()
+        prefs.productScriptUrl = pUrl
+        prefs.salesScriptUrl = sUrl
+        val primary = pUrl.ifBlank { sUrl }
+        if (primary.isNotBlank()) {
+            prefs.appsScriptUrl = primary
+        }
+        _uiState.update {
+            it.copy(
+                productScriptUrl = pUrl,
+                salesScriptUrl = sUrl,
+                appsScriptUrl = primary,
+                successMessage = "Pengaturan link Spreadsheet berhasil disimpan!"
+            )
+        }
         loadProducts()
         loadRecent()
+    }
+
+    fun updateAppsScriptUrl(newUrl: String) {
+        saveDualUrls(newUrl, newUrl)
     }
 
     fun dismissReceipt() {
@@ -587,7 +614,7 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
             if (!silent) {
                 _uiState.update { it.copy(isLoadingProducts = true, errorMessage = null) }
             }
-            val currentUrl = _uiState.value.appsScriptUrl
+            val currentUrl = _uiState.value.effectiveProductUrl
             val result = repository.fetchProducts(currentUrl)
 
             result.fold(
@@ -617,7 +644,7 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
 
     fun loadRecent() {
         viewModelScope.launch {
-            val currentUrl = _uiState.value.appsScriptUrl
+            val currentUrl = _uiState.value.effectiveSalesUrl
             if (currentUrl.isBlank()) return@launch
 
             _uiState.update { it.copy(isLoadingRecent = true) }
@@ -700,7 +727,7 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
                 )
             }
 
-            val currentUrl = _uiState.value.appsScriptUrl
+            val currentUrl = _uiState.value.effectiveSalesUrl
             if (currentUrl.isBlank()) {
                 val newRecent = toRecentSummary(sale)
                 _uiState.update { current ->
@@ -861,7 +888,7 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
         prefs.currentBalance = newBalance
         _uiState.update { it.copy(currentBalance = newBalance, isAdjustBalanceDialogOpen = false) }
 
-        val currentUrl = _uiState.value.appsScriptUrl
+        val currentUrl = _uiState.value.effectiveSalesUrl
         if (currentUrl.isNotBlank()) {
             viewModelScope.launch {
                 val res = repository.adjustBalance(currentUrl, newBalance, mutationType, amount, reason)

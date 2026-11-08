@@ -1,6 +1,6 @@
 {
-  "summary":  "Rencana arsitektur penyimpanan pusat data di Google Spreadsheet dan implementasi sinkronisasi 2 arah (Two-Way Sync) produk, harga, dan kategori antara Google Sheets, Web POS, dan Android.",
-  "updatedAt":  "2026-11-07T15:27:04.189618283Z",
+  "summary":  "Rencana implementasi integrasi katalog harga terbaru (29 barang), pemisahan link Google Spreadsheet produk vs riwayat penjualan, dan sinkronisasi update harga dari website desktop.",
+  "updatedAt":  "2026-11-08T12:21:23.652502927Z",
   "requestFeedback":  true,
   "userFacing":  true
 }

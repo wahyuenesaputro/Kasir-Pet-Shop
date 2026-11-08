@@ -334,10 +334,13 @@ fun KasirScreen(
     // Dialog Pengaturan Spreadsheet & Kelola Saldo
     if (uiState.isSettingsOpen) {
         SettingsDialog(
+            currentProductUrl = uiState.productScriptUrl,
+            currentSalesUrl = uiState.salesScriptUrl,
             currentUrl = uiState.appsScriptUrl,
             currentBalance = uiState.currentBalance,
             unpricedCount = uiState.unpricedProductsCount,
             initialTab = 0,
+            onSaveDualUrls = { pUrl, sUrl -> viewModel.saveDualUrls(pUrl, sUrl) },
             onSaveUrl = { newUrl -> viewModel.updateAppsScriptUrl(newUrl) },
             onSyncNow = { viewModel.loadProducts(); viewModel.loadRecent() },
             onOpenPriceManagement = { currentMainTab = 2 },
@@ -351,10 +354,13 @@ fun KasirScreen(
     // Dialog Khusus Penyesuaian Saldo Kas Toko (Membuka Tab Atur Saldo)
     if (uiState.isAdjustBalanceDialogOpen) {
         SettingsDialog(
+            currentProductUrl = uiState.productScriptUrl,
+            currentSalesUrl = uiState.salesScriptUrl,
             currentUrl = uiState.appsScriptUrl,
             currentBalance = uiState.currentBalance,
             unpricedCount = uiState.unpricedProductsCount,
             initialTab = 1,
+            onSaveDualUrls = { pUrl, sUrl -> viewModel.saveDualUrls(pUrl, sUrl) },
             onSaveUrl = { newUrl -> viewModel.updateAppsScriptUrl(newUrl) },
             onSyncNow = { viewModel.loadProducts(); viewModel.loadRecent() },
             onOpenPriceManagement = { currentMainTab = 2 },

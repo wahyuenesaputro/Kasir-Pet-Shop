@@ -72,11 +72,14 @@ import com.example.model.formatRupiah
 
 @Composable
 fun SettingsDialog(
-    currentUrl: String,
+    currentProductUrl: String = "",
+    currentSalesUrl: String = "",
+    currentUrl: String = "",
     currentBalance: Double = 0.0,
     unpricedCount: Int = 0,
     initialTab: Int = 0,
-    onSaveUrl: (String) -> Unit,
+    onSaveDualUrls: (productUrl: String, salesUrl: String) -> Unit = { _, _ -> },
+    onSaveUrl: (String) -> Unit = {},
     onSyncNow: () -> Unit,
     onOpenPriceManagement: () -> Unit,
     onAdjustBalance: (newBalance: Double, mutationType: String, amount: Double, reason: String) -> Unit = { _, _, _, _ -> },
@@ -85,8 +88,11 @@ fun SettingsDialog(
     val context = LocalContext.current
     var selectedTab by remember { mutableIntStateOf(initialTab.coerceIn(0, 1)) }
     
-    // Tab 1 (Spreadsheet) States
-    var inputUrl by remember { mutableStateOf(currentUrl) }
+    // Tab 1 (Spreadsheet) States - Mendukung 2 URL terpisah (Produk & Penjualan/Kas)
+    val initialEffectiveProduct = currentProductUrl.ifBlank { currentUrl }
+    val initialEffectiveSales = currentSalesUrl.ifBlank { currentUrl }
+    var inputProductUrl by remember { mutableStateOf(initialEffectiveProduct) }
+    var inputSalesUrl by remember { mutableStateOf(initialEffectiveSales) }
 
     // Tab 2 (Kelola Saldo Kas) States
     // mutationType: "add" (Tambah Kas), "withdraw" (Tarik Kas), "set" (Setel Langsung)
@@ -97,6 +103,8 @@ fun SettingsDialog(
 
     val quickAddAmounts = listOf(20000L, 50000L, 100000L, 200000L, 500000L)
     val quickWithdrawAmounts = listOf(10000L, 20000L, 50000L, 100000L, 250000L)
+
+    val isConnected = inputProductUrl.isNotBlank() || inputSalesUrl.isNotBlank() || currentUrl.isNotBlank()
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -208,14 +216,14 @@ fun SettingsDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // ==============================================================
-                // HALAMAN / TAB 0: KONEKSI GOOGLE SPREADSHEET
+                // HALAMAN / TAB 0: KONEKSI GOOGLE SPREADSHEET (DUAL URL)
                 // ==============================================================
                 if (selectedTab == 0) {
                     // Status Koneksi Card
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(
-                            containerColor = if (currentUrl.isNotBlank()) {
+                            containerColor = if (isConnected) {
                                 Color(0xFF10B981).copy(alpha = 0.12f)
                             } else {
                                 MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.4f)
@@ -224,7 +232,7 @@ fun SettingsDialog(
                         shape = RoundedCornerShape(14.dp),
                         border = BorderStroke(
                             1.dp,
-                            if (currentUrl.isNotBlank()) Color(0xFF10B981).copy(alpha = 0.4f) else MaterialTheme.colorScheme.error.copy(alpha = 0.4f)
+                            if (isConnected) Color(0xFF10B981).copy(alpha = 0.4f) else MaterialTheme.colorScheme.error.copy(alpha = 0.4f)
                         )
                     ) {
                         Row(
@@ -234,21 +242,27 @@ fun SettingsDialog(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
-                                imageVector = if (currentUrl.isNotBlank()) Icons.Default.CheckCircle else Icons.Default.HelpOutline,
+                                imageVector = if (isConnected) Icons.Default.CheckCircle else Icons.Default.HelpOutline,
                                 contentDescription = null,
-                                tint = if (currentUrl.isNotBlank()) Color(0xFF059669) else MaterialTheme.colorScheme.error,
+                                tint = if (isConnected) Color(0xFF059669) else MaterialTheme.colorScheme.error,
                                 modifier = Modifier.size(24.dp)
                             )
                             Spacer(modifier = Modifier.width(10.dp))
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = if (currentUrl.isNotBlank()) "Terhubung ke Google Spreadsheet" else "Belum Terhubung ke Spreadsheet",
+                                    text = if (isConnected) "Terhubung ke Google Spreadsheet" else "Belum Terhubung ke Spreadsheet",
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 13.sp,
-                                    color = if (currentUrl.isNotBlank()) Color(0xFF065F46) else MaterialTheme.colorScheme.error
+                                    color = if (isConnected) Color(0xFF065F46) else MaterialTheme.colorScheme.error
                                 )
                                 Text(
-                                    text = if (currentUrl.isNotBlank()) "Katalog, mutasi saldo, & riwayat tersinkron otomatis." else "Masukkan URL Web App Apps Script di bawah untuk menyambungkan.",
+                                    text = if (inputProductUrl.isNotBlank() && inputSalesUrl.isNotBlank() && inputProductUrl != inputSalesUrl) {
+                                        "Mode Dual Link Aktif: Link Produk & Link Penjualan terpisah."
+                                    } else if (isConnected) {
+                                        "Katalog produk & riwayat kasir tersinkron otomatis."
+                                    } else {
+                                        "Masukkan link Google Apps Script di bawah untuk menyambungkan."
+                                    },
                                     fontSize = 11.sp,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -258,32 +272,71 @@ fun SettingsDialog(
 
                     Spacer(modifier = Modifier.height(14.dp))
 
+                    // INPUT 1: URL SPREADSHEET PRODUK
                     Text(
-                        text = "URL Web App Google Apps Script",
+                        text = "1. URL Spreadsheet Katalog Produk",
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "Membaca data barang (Ayam, Burung, Kucing, Ikan), update harga riil/beli/jual, & tambah produk baru.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(6.dp))
 
                     OutlinedTextField(
-                        value = inputUrl,
-                        onValueChange = { inputUrl = it.trim() },
-                        label = { Text("URL Web App (APPS_SCRIPT_URL)") },
+                        value = inputProductUrl,
+                        onValueChange = { inputProductUrl = it.trim() },
+                        label = { Text("Link Spreadsheet Produk") },
                         placeholder = { Text("https://script.google.com/macros/s/.../exec") },
                         singleLine = true,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .testTag("apps_script_url_input"),
+                            .testTag("product_script_url_input"),
                         trailingIcon = {
-                            if (inputUrl.isNotBlank()) {
-                                IconButton(onClick = { inputUrl = "" }) {
+                            if (inputProductUrl.isNotBlank()) {
+                                IconButton(onClick = { inputProductUrl = "" }) {
                                     Icon(Icons.Default.Close, contentDescription = "Hapus")
                                 }
                             }
                         }
                     )
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    // INPUT 2: URL SPREADSHEET RIWAYAT PENJUALAN & KAS
+                    Text(
+                        text = "2. URL Spreadsheet Riwayat Penjualan & Kas",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "Mencatat struk transaksi (Sheet Penjualan 7 kolom), mutasi saldo kasir (masuk/keluar/set), & omset harian.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    OutlinedTextField(
+                        value = inputSalesUrl,
+                        onValueChange = { inputSalesUrl = it.trim() },
+                        label = { Text("Link Spreadsheet Riwayat Penjualan & Kas") },
+                        placeholder = { Text("https://script.google.com/macros/s/.../exec") },
+                        singleLine = true,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("sales_script_url_input"),
+                        trailingIcon = {
+                            if (inputSalesUrl.isNotBlank()) {
+                                IconButton(onClick = { inputSalesUrl = "" }) {
+                                    Icon(Icons.Default.Close, contentDescription = "Hapus")
+                                }
+                            }
+                        }
+                    )
+
+                    Spacer(modifier = Modifier.height(14.dp))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -291,8 +344,11 @@ fun SettingsDialog(
                     ) {
                         Button(
                             onClick = {
-                                onSaveUrl(inputUrl)
-                                Toast.makeText(context, "URL berhasil disimpan!", Toast.LENGTH_SHORT).show()
+                                val effectiveP = inputProductUrl.ifBlank { inputSalesUrl }
+                                val effectiveS = inputSalesUrl.ifBlank { inputProductUrl }
+                                onSaveDualUrls(inputProductUrl, inputSalesUrl)
+                                onSaveUrl(effectiveP)
+                                Toast.makeText(context, "URL Spreadsheet berhasil disimpan!", Toast.LENGTH_SHORT).show()
                             },
                             modifier = Modifier
                                 .weight(1f)
@@ -308,9 +364,12 @@ fun SettingsDialog(
 
                         OutlinedButton(
                             onClick = {
-                                onSaveUrl(inputUrl)
+                                val effectiveP = inputProductUrl.ifBlank { inputSalesUrl }
+                                val effectiveS = inputSalesUrl.ifBlank { inputProductUrl }
+                                onSaveDualUrls(inputProductUrl, inputSalesUrl)
+                                onSaveUrl(effectiveP)
                                 onSyncNow()
-                                Toast.makeText(context, "Menyinkronkan data...", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "Menyinkronkan kedua spreadsheet...", Toast.LENGTH_SHORT).show()
                             },
                             modifier = Modifier
                                 .weight(1f)

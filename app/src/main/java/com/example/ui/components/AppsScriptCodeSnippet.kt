@@ -48,6 +48,9 @@ function doGet(e) {
   } else if (action === "setup" || action === "init" || action === "buat_saldo") {
     var resultMsg = buatKolomSaldoOtomatis();
     return jsonResponse({ success: true, message: resultMsg });
+  } else if (action === "setup_produk" || action === "isi_produk" || action === "isi_database") {
+    var resultMsg = isiDataProdukOtomatis();
+    return jsonResponse({ success: true, message: resultMsg });
   } else {
     return jsonResponse({ success: false, message: "Action tidak dikenal: " + action });
   }
@@ -257,6 +260,137 @@ function buatKolomSaldoOtomatis() {
   sheet.autoResizeColumns(1, 7);
 
   return "Berhasil membersihkan kolom lama H-O dan merapikan 7 kolom mutasi kas murni!";
+}
+
+function isiDataProdukOtomatis() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  
+  // 1. Buat sheet Penjualan (7 Kolom Mutasi Kas)
+  buatKolomSaldoOtomatis();
+
+  // 2. Data 29 Produk Burung Resmi (Beserta Harga Modal & Jual)
+  var dataBurung = [
+    [1, "SKM (SKM Halus)", "pcs", 3200, 4500, ""],
+    [2, "SKM (SKM Kasar)", "pcs", 3200, 4500, ""],
+    [3, "Kroto Sari (KSK)", "pcs", 2600, 3500, ""],
+    [4, "Kroto Sari (Krotosari Kasar)", "pcs", 2700, 3500, ""],
+    [5, "Alam Sakti (Love Bird)", "pcs", 9500, 10500, ""],
+    [6, "Alam Sakti (Kenari)", "pcs", 10400, 11500, ""],
+    [7, "Topsong (Top Song Coklat)", "pcs", 10900, 12000, ""],
+    [8, "Topsong (Top Song Hijau)", "pcs", 11000, 12000, ""],
+    [9, "Leopard (Kuning Kasar)", "pcs", 7100, 8500, ""],
+    [10, "Leopard (Hijau Kasar)", "pcs", 7100, 8500, ""],
+    [11, "Chirpy (Besar)", "pcs", 7600, 8500, ""],
+    [12, "Madura Koung (Madura Koung)", "pcs", 8600, 9500, ""],
+    [13, "Kutut Profit (Profit)", "pcs", 7300, 8500, ""],
+    [14, "Derkuku Comet (Comet Derkuku)", "pcs", 6500, 7500, ""],
+    [15, "Gold Coin (Kutut 250gr)", "pcs", 7600, 8500, ""],
+    [16, "Gold Coin (Hijau Seaweed 450gr)", "pcs", 11100, 12000, ""],
+    [17, "Gold Coin (Canary)", "pcs", 8700, 10000, ""],
+    [18, "Ebod Canary (Ebod)", "pcs", 8100, 9000, ""],
+    [19, "Fancy (9 Bintang Anti Stress)", "pcs", 6500, 8000, ""],
+    [20, "Fancy (Love Bird)", "pcs", 13000, 14500, ""],
+    [21, "Fancy (Bintang Seaweed/Gold)", "pcs", 12500, 14500, ""],
+    [22, "Milet Racik Lovebird", "pcs", 8000, 10000, ""],
+    [23, "Milet Putih Kiloan", "kg", 13000, 14500, ""],
+    [24, "Milet Merah Kiloan", "kg", 13000, 14500, ""],
+    [25, "Bintang Kebumen (Halus)", "pcs", 7500, 9000, ""],
+    [26, "Phoenix Perkutut", "pcs", 11000, 12500, ""],
+    [27, "Canary Post (Biji Sawi)", "kg", 14000, 16000, ""],
+    [28, "Kwaci Hitam Kiloan", "kg", 18000, 22000, ""],
+    [29, "Jagung Kristal Merah", "kg", 8500, 10000, ""]
+  ];
+  isiSheetKategori(ss, "Burung", dataBurung);
+
+  // 3. Data Produk Ayam
+  var dataAyam = [
+    [1, "511 (1 Karung)", "kg", 10700, 11500, "Dijual per kg (dari karung)"],
+    [2, "511 (511 K)", "kg", 13500, 14500, ""],
+    [3, "591 (591k)", "kg", 13500, 14500, ""],
+    [4, "592 (592k)", "kg", 13500, 14500, ""],
+    [5, "594 (594k)", "kg", 13500, 14500, ""],
+    [6, "BR-1 Super", "kg", 11000, 12000, ""],
+    [7, "BR-611", "kg", 9000, 10000, ""],
+    [8, "Buras (1 Karung)", "kg", 6200, 7000, ""],
+    [9, "EH 610 (1 Karung)", "kg", 8500, 9500, ""],
+    [10, "Jagung (1 Karung Meniran)", "kg", 9500, 10500, ""],
+    [11, "Jagung (1 Karung Kasar)", "kg", 9500, 10500, ""],
+    [12, "Konsentrat 144", "kg", 12500, 13500, ""],
+    [13, "Katul Super", "kg", 4500, 5500, ""],
+    [14, "Polard Gandum", "kg", 6000, 7000, ""],
+    [15, "Kupang Halus", "kg", 3000, 4000, ""]
+  ];
+  isiSheetKategori(ss, "Ayam", dataAyam);
+
+  // 4. Data Produk Kucing
+  var dataKucing = [
+    [1, "Bolt Ikan Tuna (Kiloan)", "kg", 21000, 24000, ""],
+    [2, "Bolt Salmon (Kiloan)", "kg", 22000, 25000, ""],
+    [3, "Bolt Kitten Salmon", "kg", 23000, 26000, ""],
+    [4, "Me-O Adult Seafood", "kg", 32000, 36000, ""],
+    [5, "Me-O Adult Tuna", "kg", 32000, 36000, ""],
+    [6, "Me-O Kitten Ocean Fish", "kg", 34000, 38000, ""],
+    [7, "Whiskas Adult Tuna", "kg", 33000, 37000, ""],
+    [8, "Whiskas Junior Ocean Fish", "kg", 35000, 39000, ""],
+    [9, "Cat Choize Tuna", "kg", 18500, 21000, ""],
+    [10, "Cat Choize Salmon", "kg", 19000, 21500, ""],
+    [11, "Cat Choize Kitten", "kg", 20500, 23000, ""],
+    [12, "Ori Cat Kitten", "kg", 17500, 20000, ""],
+    [13, "Ori Cat Adult", "kg", 17000, 19500, ""],
+    [14, "Life Cat Pouch Tuna 85gr", "pcs", 4500, 6000, ""],
+    [15, "Life Cat Pouch Salmon 85gr", "pcs", 4500, 6000, ""],
+    [16, "Whiskas Pouch Tuna 85gr", "pcs", 6500, 8000, ""],
+    [17, "Pasir Kucing Gumpal 5L", "pcs", 22000, 27000, ""],
+    [18, "Pasir Kucing Gumpal 10L", "pcs", 42000, 50000, ""]
+  ];
+  isiSheetKategori(ss, "Kucing", dataKucing);
+
+  // 5. Data Produk Ikan
+  var dataIkan = [
+    [1, "Takari Hijau 100gr", "pcs", 5000, 6500, ""],
+    [2, "Takari Merah 100gr", "pcs", 5000, 6500, ""],
+    [3, "Takari 250gr", "pcs", 11000, 13500, ""],
+    [4, "Takari 500gr", "pcs", 20000, 24000, ""],
+    [5, "Akari Premium Red 100gr", "pcs", 13000, 16000, ""],
+    [6, "Akari Premium Maxi 100gr", "pcs", 13000, 16000, ""],
+    [7, "Sanyu Turtle Food 100gr", "pcs", 10000, 13000, ""],
+    [8, "Pelet Lele 781-1 Kiloan", "kg", 12000, 14000, ""],
+    [9, "Pelet Lele 781-2 Kiloan", "kg", 11500, 13500, ""],
+    [10, "Pelet Lele -1 Kiloan", "kg", 11000, 13000, ""],
+    [11, "Pelet Nila LP-1 Kiloan", "kg", 11500, 13500, ""],
+    [12, "Pelet Nila LP-2 Kiloan", "kg", 11000, 13000, ""],
+    [13, "Pelet Apung Feng-Li 0", "kg", 17000, 20000, ""],
+    [14, "Pelet Apung Feng-Li 1", "kg", 16000, 19000, ""],
+    [15, "Pelet Koi CP 1kg", "pcs", 22000, 26000, ""],
+    [16, "Pelet Mas Koki 100gr", "pcs", 6000, 8000, ""]
+  ];
+  isiSheetKategori(ss, "Ikan", dataIkan);
+
+  return "Berhasil mengisi seluruh data 29 pakan burung harga resmi, ayam, kucing, ikan, dan sheet Penjualan 7 kolom!";
+}
+
+function isiSheetKategori(ss, sheetName, items) {
+  var sheet = ss.getSheetByName(sheetName);
+  if (!sheet) {
+    sheet = ss.insertSheet(sheetName);
+  } else {
+    sheet.clear();
+  }
+
+  var headers = ["NO", "NAMA BARANG", "SATUAN", "HARGA BELI", "HARGA JUAL", "KETERANGAN"];
+  sheet.appendRow(headers);
+  formatHeaderRow(sheet, 6);
+  sheet.setFrozenRows(1);
+
+  for (var i = 0; i < items.length; i++) {
+    sheet.appendRow(items[i]);
+  }
+
+  var lastRow = sheet.getLastRow();
+  if (lastRow > 1) {
+    sheet.getRange(2, 4, lastRow - 1, 2).setNumberFormat('"Rp"#,##0');
+  }
+  sheet.autoResizeColumns(1, 6);
 }
 
 function ensureSalesSheetWithHeaders(ss) {

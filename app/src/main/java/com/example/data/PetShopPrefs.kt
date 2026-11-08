@@ -11,28 +11,57 @@ class PetShopPrefs(context: Context) {
 
     companion object {
         private const val KEY_APPS_SCRIPT_URL = "apps_script_url"
+        private const val KEY_PRODUCT_SCRIPT_URL = "product_script_url"
+        private const val KEY_SALES_SCRIPT_URL = "sales_script_url"
         private const val PREFIX_CUSTOM_PRICE = "custom_price_"
         private const val KEY_CUSTOM_PRODUCTS_JSON = "custom_created_products_json"
         private const val KEY_DELETED_PRODUCT_IDS = "deleted_product_ids_set"
         private const val KEY_PRODUCT_OVERRIDES_JSON = "product_overrides_json"
         private const val KEY_CURRENT_BALANCE = "current_cash_balance"
-        const val DEFAULT_PLACEHOLDER_URL = "https://script.google.com/macros/s/AKfycbxcTpjehRlmfjmTll9V3LYOW79wP5X1WwznkwMn_VlFd9-0Szp1p4ize5bxPTK5Iplp/exec"
-        const val DEFAULT_REAL_URL = "https://script.google.com/macros/s/AKfycbxcTpjehRlmfjmTll9V3LYOW79wP5X1WwznkwMn_VlFd9-0Szp1p4ize5bxPTK5Iplp/exec"
+        const val DEFAULT_PLACEHOLDER_URL = "https://script.google.com/macros/s/AKfycbxclmpSwhWxOq0KKWNwUPHd5hYtjs3Q_fo3N1gvaZOtBdQ4FPyc3adQBQ77QvfUVGXQ/exec"
+        const val DEFAULT_REAL_URL = "https://script.google.com/macros/s/AKfycbxclmpSwhWxOq0KKWNwUPHd5hYtjs3Q_fo3N1gvaZOtBdQ4FPyc3adQBQ77QvfUVGXQ/exec"
     }
 
     var currentBalance: Double
         get() = prefs.getFloat(KEY_CURRENT_BALANCE, 0f).toDouble()
         set(value) = prefs.edit().putFloat(KEY_CURRENT_BALANCE, value.toFloat()).apply()
 
-    var appsScriptUrl: String
+    private val effectiveLegacyUrl: String
         get() {
             val saved = prefs.getString(KEY_APPS_SCRIPT_URL, "") ?: ""
-            return if (saved.isNotBlank() && !saved.contains("CONTOH_ID") && !saved.contains("AKfycbzPytd") && !saved.contains("AKfycbxuIhr")) saved else DEFAULT_REAL_URL
+            return if (saved.isNotBlank() && !saved.contains("CONTOH_ID") && !saved.contains("AKfycbzPytd") && !saved.contains("AKfycbxuIhr") && !saved.contains("AKfycbxcTpjehRlmfjmTll9V3LYOW79wP5X1WwznkwMn_VlFd9-0Szp1p4ize5bxPTK5Iplp")) saved else DEFAULT_REAL_URL
         }
-        set(value) = prefs.edit().putString(KEY_APPS_SCRIPT_URL, value.trim()).apply()
+
+    var productScriptUrl: String
+        get() {
+            val saved = prefs.getString(KEY_PRODUCT_SCRIPT_URL, "") ?: ""
+            return if (saved.isNotBlank() && !saved.contains("CONTOH_ID") && !saved.contains("AKfycbzPytd") && !saved.contains("AKfycbxuIhr") && !saved.contains("AKfycbxcTpjehRlmfjmTll9V3LYOW79wP5X1WwznkwMn_VlFd9-0Szp1p4ize5bxPTK5Iplp")) saved else effectiveLegacyUrl
+        }
+        set(value) = prefs.edit().putString(KEY_PRODUCT_SCRIPT_URL, value.trim()).apply()
+
+    var salesScriptUrl: String
+        get() {
+            val saved = prefs.getString(KEY_SALES_SCRIPT_URL, "") ?: ""
+            return if (saved.isNotBlank() && !saved.contains("CONTOH_ID") && !saved.contains("AKfycbzPytd") && !saved.contains("AKfycbxuIhr") && !saved.contains("AKfycbxcTpjehRlmfjmTll9V3LYOW79wP5X1WwznkwMn_VlFd9-0Szp1p4ize5bxPTK5Iplp")) saved else effectiveLegacyUrl
+        }
+        set(value) = prefs.edit().putString(KEY_SALES_SCRIPT_URL, value.trim()).apply()
+
+    var appsScriptUrl: String
+        get() = effectiveProductUrl
+        set(value) {
+            prefs.edit().putString(KEY_APPS_SCRIPT_URL, value.trim()).apply()
+            productScriptUrl = value.trim()
+            salesScriptUrl = value.trim()
+        }
+
+    val effectiveProductUrl: String
+        get() = productScriptUrl.ifBlank { salesScriptUrl.ifBlank { DEFAULT_REAL_URL } }
+
+    val effectiveSalesUrl: String
+        get() = salesScriptUrl.ifBlank { productScriptUrl.ifBlank { DEFAULT_REAL_URL } }
 
     val isConfigured: Boolean
-        get() = appsScriptUrl.isNotBlank() && appsScriptUrl.startsWith("https://script.google.com")
+        get() = effectiveProductUrl.isNotBlank() && effectiveProductUrl.startsWith("https://script.google.com")
 
     fun setCustomPrice(productId: String, price: Double) {
         prefs.edit().putFloat("$PREFIX_CUSTOM_PRICE$productId", price.toFloat()).apply()
