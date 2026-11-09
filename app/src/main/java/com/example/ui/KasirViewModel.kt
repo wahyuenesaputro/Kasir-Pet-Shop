@@ -531,6 +531,13 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
                 successMessage = "Produk '${target.namaProduk}' telah dihapus dari katalog."
             )
         }
+
+        val scriptUrl = _uiState.value.effectiveProductUrl
+        if (scriptUrl.isNotBlank()) {
+            viewModelScope.launch {
+                repository.deleteProduct(scriptUrl, target)
+            }
+        }
     }
 
     fun removeFromCart(productId: String) {

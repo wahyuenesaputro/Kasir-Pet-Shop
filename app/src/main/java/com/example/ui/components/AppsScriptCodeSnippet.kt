@@ -43,6 +43,9 @@ function doGet(e) {
   } else if (action === "add_product") {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     return jsonResponse(addProductToSheets(ss, e.parameter || {}));
+  } else if (action === "delete_product" || action === "hapus_produk") {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    return jsonResponse(deleteProductFromSheets(ss, e.parameter || {}));
   } else if (action === "recent" || action === "balance" || action === "get_balance") {
     return getRecentSalesJson();
   } else if (action === "setup" || action === "init" || action === "buat_saldo") {
@@ -80,6 +83,12 @@ function doPost(e) {
     if (requestData.action === "add_product" || requestData.action === "tambah_produk") {
       var addRes = addProductToSheets(ss, requestData);
       return jsonResponse(addRes);
+    }
+
+    // 0C. Aksi Hapus Produk dari Tab Kategori Spreadsheet
+    if (requestData.action === "delete_product" || requestData.action === "hapus_produk") {
+      var delRes = deleteProductFromSheets(ss, requestData);
+      return jsonResponse(delRes);
     }
 
     var salesSheet = ensureSalesSheetWithHeaders(ss);
@@ -828,6 +837,86 @@ function addProductToSheets(ss, data) {
     satuan: unit,
     hargaJual: price
   };
+}
+
+function deleteProductFromSheets(ss, data) {
+  var targetName = String(data.namaProduk || data.nama || "").trim();
+  var targetCat = String(data.kategori || data.category || "").trim();
+  var productId = String(data.id || data.productId || "").trim();
+
+  if (!targetName && !productId) {
+    return { success: false, message: "Nama produk atau ID harus diisi untuk menghapus" };
+  }
+
+  var sheetsToSearch = [];
+  if (targetCat) {
+    var s = ss.getSheetByName(targetCat);
+    if (s) sheetsToSearch.push(s);
+  }
+  if (sheetsToSearch.length === 0) {
+    var allSheets = ss.getSheets();
+    for (var i = 0; i < allSheets.length; i++) {
+      var sh = allSheets[i];
+      var n = sh.getName();
+      if (n !== "Penjualan" && n !== "Rekap" && n !== "Summary") {
+        sheetsToSearch.push(sh);
+      }
+    }
+  }
+
+  var deleted = false;
+  var deletedFrom = "";
+  var deletedRow = -1;
+
+  for (var sIdx = 0; sIdx < sheetsToSearch.length; sIdx++) {
+    var sheet = sheetsToSearch[sIdx];
+    var catName = sheet.getName();
+    var values = sheet.getDataRange().getValues();
+    if (!values || values.length < 2) continue;
+
+    var headerRow = values[0];
+    var colMap = {};
+    for (var c = 0; c < headerRow.length; c++) {
+      colMap[String(headerRow[c]).trim().toLowerCase()] = c;
+    }
+
+    var idxNama = findColumnIndex(colMap, ["nama produk", "nama barang", "produk", "barang"]);
+    if (idxNama < 0) continue;
+
+    for (var r = values.length - 1; r >= 1; r--) {
+      var rowName = String(values[r][idxNama] || "").trim();
+      var cleanTarget = sanitizeNameForMatch(targetName);
+      var cleanRow = sanitizeNameForMatch(rowName);
+
+      var isMatch = (cleanRow && cleanTarget && cleanRow === cleanTarget) ||
+                    (productId && productId.toLowerCase() === (catName + "_" + r).toLowerCase());
+
+      if (isMatch) {
+        sheet.deleteRow(r + 1);
+        deleted = true;
+        deletedFrom = catName;
+        deletedRow = r + 1;
+        break;
+      }
+    }
+
+    if (deleted) break;
+  }
+
+  if (deleted) {
+    return {
+      success: true,
+      message: "Produk '" + targetName + "' berhasil dihapus dari tab " + deletedFrom + " (baris " + deletedRow + ")",
+      kategori: deletedFrom,
+      namaProduk: targetName
+    };
+  } else {
+    return {
+      success: true,
+      message: "Produk '" + targetName + "' dihapus dari katalog",
+      namaProduk: targetName
+    };
+  }
 }
 
 function sanitizeNameForMatch(str) {

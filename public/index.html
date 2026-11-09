@@ -90,6 +90,12 @@
           </div>
         </div>
 
+        <!-- Tombol Tambah Produk Cepat di Header -->
+        <button onclick="openAddProductModal()" class="hidden md:flex items-center space-x-1.5 py-1.5 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-sm" title="Tambah Produk Baru ke Katalog & Spreadsheet">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <span>+ Tambah Produk</span>
+        </button>
+
         <!-- Pengaturan General -->
         <button onclick="openSettingsModal()" class="p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-xl transition border border-transparent hover:border-slate-200" title="Pengaturan & Koneksi Spreadsheet">
           <i data-lucide="settings" class="w-5 h-5"></i>
@@ -137,9 +143,15 @@
             </span>
           </div>
 
-          <!-- Kategori Filter Chips -->
-          <div class="flex space-x-2 overflow-x-auto no-scrollbar py-1" id="category-chips">
-            <!-- Rendered via JS -->
+          <!-- Kategori Filter Chips & Tombol Tambah Cepat -->
+          <div class="flex items-center justify-between gap-2 overflow-x-auto no-scrollbar py-1">
+            <div class="flex space-x-2 flex-1" id="category-chips">
+              <!-- Rendered via JS -->
+            </div>
+            <button onclick="openAddProductModal()" class="flex-shrink-0 py-1.5 px-3 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs rounded-xl transition flex items-center space-x-1 border border-blue-200" title="Tambah Produk Baru ke Katalog">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span>+ Produk</span>
+            </button>
           </div>
 
           <!-- Grid Produk (2 kolom di mobile, 3 di tablet, 4 di layar lebar) -->
@@ -259,6 +271,10 @@
           <p class="text-xs text-slate-500 mt-1">Ubah harga jual produk dengan cepat. Perubahan seketika aktif pada kasir desktop & mobile.</p>
         </div>
         <div class="flex items-center space-x-2">
+          <button onclick="exportAllProductsToSheets()" class="py-1.5 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold transition flex items-center space-x-1.5" title="Kirim Seluruh Data Produk ke Google Sheets">
+            <i data-lucide="upload-cloud" class="w-4 h-4"></i>
+            <span>Isi Semua ke Sheets</span>
+          </button>
           <span class="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-xl" id="katalog-total-badge">
             0 Produk
           </span>
@@ -647,14 +663,20 @@
         </div>
       </div>
 
-      <div class="flex space-x-2 pt-1">
-        <button type="button" onclick="closeQuickEditPriceModal()" class="flex-1 py-2.5 px-3 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl transition">
-          Batal
+      <div class="flex items-center justify-between pt-1 gap-2">
+        <button type="button" onclick="deleteCurrentEditProduct()" class="py-2.5 px-3 bg-red-50 hover:bg-red-600 text-red-600 hover:text-white font-bold text-xs rounded-xl transition flex items-center space-x-1 border border-red-200 hover:border-transparent" title="Hapus produk ini dari katalog & spreadsheet">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          <span>Hapus</span>
         </button>
-        <button type="button" onclick="saveQuickPrice()" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center space-x-1.5">
-          <i data-lucide="check" class="w-4 h-4"></i>
-          <span>Simpan Harga</span>
-        </button>
+        <div class="flex space-x-2 flex-1 justify-end">
+          <button type="button" onclick="closeQuickEditPriceModal()" class="py-2.5 px-3 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl transition">
+            Batal
+          </button>
+          <button type="button" onclick="saveQuickPrice()" class="py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center space-x-1.5">
+            <i data-lucide="check" class="w-4 h-4"></i>
+            <span>Simpan Harga</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -695,6 +717,12 @@
         <span id="err-new-prod-unit" class="text-xs text-red-500 font-medium mt-1 block hidden">Satuan produk wajib diisi</span>
       </div>
 
+      <!-- Harga Modal / Beli -->
+      <div>
+        <label class="text-xs font-bold text-slate-700 block mb-1">Harga Modal / Beli (Rp) <span class="text-slate-400 font-normal">(opsional)</span></label>
+        <input type="number" id="new-prod-cost" placeholder="Contoh: 10000" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600">
+      </div>
+
       <!-- Harga Jual -->
       <div>
         <label class="text-xs font-bold text-slate-700 block mb-1">Harga Jual (Rp) *</label>
@@ -706,8 +734,9 @@
         <button onclick="closeAddProductModal()" class="py-2 px-4 rounded-xl border border-slate-200 text-slate-600 text-xs font-semibold hover:bg-slate-50 transition">
           Batal
         </button>
-        <button onclick="saveNewProduct()" class="py-2 px-5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow transition">
-          Simpan ke Katalog
+        <button onclick="saveNewProduct()" class="py-2 px-5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow transition flex items-center space-x-1.5">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <span>Simpan &amp; Sinkronkan</span>
         </button>
       </div>
     </div>

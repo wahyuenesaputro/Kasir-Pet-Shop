@@ -228,8 +228,11 @@ function setupKeyboardShortcuts() {
 function loadStoredProducts() {
   const custom = JSON.parse(localStorage.getItem("petshop_custom_products") || "[]");
   const overrides = JSON.parse(localStorage.getItem("petshop_price_overrides") || "{}");
+  const deletedIds = JSON.parse(localStorage.getItem("petshop_deleted_product_ids") || "[]");
   
-  products = [...defaultCatalog, ...custom].map(p => {
+  const all = [...defaultCatalog, ...custom].filter(p => !deletedIds.includes(p.id));
+  
+  products = all.map(p => {
     const cleanedName = sanitizeProductName(p.namaProduk);
     const normSatuan = normalizeSatuan(p.satuan, cleanedName);
     let finalPrice = p.hargaJual;
@@ -481,10 +484,15 @@ function renderCatalogManager() {
             <span class="text-[10px] text-slate-400">/${p.satuan}</span>
           </div>
 
-          <button onclick="openEditPriceModal('${p.id}')" class="py-2 px-3.5 bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white font-bold text-xs rounded-xl transition flex items-center space-x-1.5 shadow-sm border border-blue-200 hover:border-transparent">
-            <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-            <span>Ubah Harga</span>
-          </button>
+          <div class="flex items-center space-x-1.5">
+            <button onclick="openEditPriceModal('${p.id}')" class="py-1.5 px-3 bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white font-bold text-xs rounded-xl transition flex items-center space-x-1 border border-blue-200 hover:border-transparent">
+              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+              <span>Ubah</span>
+            </button>
+            <button onclick="confirmDeleteProduct('${p.id}')" class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition border border-transparent hover:border-red-200" title="Hapus Produk dari Katalog & Spreadsheet">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
         </div>
       </div>
     `;
@@ -522,6 +530,127 @@ function openEditPriceModal(productId) {
 
 function closeQuickEditPriceModal() {
   document.getElementById("quick-edit-price-modal").classList.add("hidden");
+}
+
+function deleteCurrentEditProduct() {
+  const pId = document.getElementById("edit-price-prod-id").value;
+  if (!pId) return;
+  confirmDeleteProduct(pId);
+}
+
+function confirmDeleteProduct(productId) {
+  const p = products.find(x => x.id === productId);
+  if (!p) return;
+
+  const confirmed = confirm(`Apakah Anda yakin ingin menghapus produk "${p.namaProduk}" (${p.kategori}) dari katalog dan spreadsheet?`);
+  if (!confirmed) return;
+
+  deleteProduct(productId);
+}
+
+function deleteProduct(productId) {
+  const p = products.find(x => x.id === productId);
+  if (!p) return;
+
+  const prodName = p.namaProduk;
+  const prodCat = p.kategori;
+
+  // 1. Catat ID produk di petshop_deleted_product_ids
+  const deletedIds = JSON.parse(localStorage.getItem("petshop_deleted_product_ids") || "[]");
+  if (!deletedIds.includes(productId)) {
+    deletedIds.push(productId);
+    localStorage.setItem("petshop_deleted_product_ids", JSON.stringify(deletedIds));
+  }
+
+  // 2. Hapus dari custom products jika ada
+  let custom = JSON.parse(localStorage.getItem("petshop_custom_products") || "[]");
+  custom = custom.filter(x => x.id !== productId);
+  localStorage.setItem("petshop_custom_products", JSON.stringify(custom));
+
+  // 3. Hapus dari state produk saat ini
+  products = products.filter(x => x.id !== productId);
+
+  // 4. Hapus dari keranjang jika ada
+  if (cart[productId]) {
+    delete cart[productId];
+    updateCartUI();
+  }
+
+  // 5. Tutup modal edit jika sedang terbuka
+  const editModal = document.getElementById("quick-edit-price-modal");
+  if (editModal && !editModal.classList.contains("hidden")) {
+    closeQuickEditPriceModal();
+  }
+
+  // 6. Re-render tampilan
+  renderProducts();
+  renderCatalogManager();
+  updateDashboard();
+
+  // 7. Kirim permintaan hapus ke Google Spreadsheet
+  const prodUrl = getProductUrl();
+  if (prodUrl) {
+    const syncBadge = document.getElementById("header-sync-badge");
+    if (syncBadge) {
+      syncBadge.classList.remove("hidden");
+      syncBadge.innerText = "Menghapus dari Sheets...";
+    }
+
+    try {
+      // POST
+      fetch(prodUrl, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify({
+          action: "delete_product",
+          id: productId,
+          namaProduk: prodName,
+          kategori: prodCat
+        })
+      });
+
+      // GET fallback untuk Google 302 redirect
+      const getUrl = `${prodUrl}${prodUrl.includes('?') ? '&' : '?'}action=delete_product&id=${encodeURIComponent(productId)}&namaProduk=${encodeURIComponent(prodName)}&kategori=${encodeURIComponent(prodCat)}&t=${Date.now()}`;
+      fetch(getUrl, { mode: "no-cors" }).then(() => {
+        if (syncBadge) {
+          syncBadge.innerText = "Produk Dihapus!";
+          setTimeout(() => syncBadge.classList.add("hidden"), 3000);
+        }
+      });
+    } catch (e) {
+      console.warn("Gagal dispatch delete_product:", e);
+    }
+  }
+
+  alert(`Produk "${prodName}" berhasil dihapus dari katalog dan spreadsheet!`);
+}
+
+function exportAllProductsToSheets() {
+  const prodUrl = getProductUrl();
+  if (!prodUrl) {
+    alert("Silakan masukkan URL Spreadsheet terlebih dahulu di menu Pengaturan!");
+    return;
+  }
+
+  const syncBadge = document.getElementById("header-sync-badge");
+  if (syncBadge) {
+    syncBadge.classList.remove("hidden");
+    syncBadge.innerText = "Mengisi Sheets...";
+  }
+
+  try {
+    const triggerUrl = `${prodUrl}${prodUrl.includes('?') ? '&' : '?'}action=setup_produk&t=${Date.now()}`;
+    fetch(triggerUrl, { mode: "no-cors" }).then(() => {
+      if (syncBadge) {
+        syncBadge.innerText = "Sheets Terisi Lengkap!";
+        setTimeout(() => syncBadge.classList.add("hidden"), 3500);
+      }
+      alert("Permintaan pengisian tab Burung, Ayam, Kucing, Ikan, dan Penjualan telah dikirim ke Google Spreadsheet Anda!\\n\\nSilakan periksa Google Spreadsheet Anda, semua tab kategori produk akan otomatis dibuat.");
+    });
+  } catch (e) {
+    alert("Gagal mengirim perintah ke Spreadsheet: " + e.message);
+  }
 }
 
 function renderEditPriceQuickChips(basePrice) {
@@ -1795,6 +1924,9 @@ function doGet(e) {
   } else if (action === "add_product") {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     return jsonResponse(addProductToSheets(ss, e.parameter || {}));
+  } else if (action === "delete_product" || action === "hapus_produk") {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    return jsonResponse(deleteProductFromSheets(ss, e.parameter || {}));
   } else if (action === "recent" || action === "balance" || action === "get_balance") {
     return getRecentSalesJson();
   } else if (action === "setup" || action === "init" || action === "buat_saldo") {
@@ -1828,6 +1960,10 @@ function doPost(e) {
 
     if (requestData.action === "add_product" || requestData.action === "tambah_produk") {
       return jsonResponse(addProductToSheets(ss, requestData));
+    }
+
+    if (requestData.action === "delete_product" || requestData.action === "hapus_produk") {
+      return jsonResponse(deleteProductFromSheets(ss, requestData));
     }
 
     var salesSheet = ensureSalesSheetWithHeaders(ss);
@@ -2294,6 +2430,43 @@ function addProductToSheets(ss, data) {
   sheet.autoResizeColumns(1, 6);
 
   return { success: true, message: "Produk '" + name + "' berhasil ditambahkan ke tab " + cat, kategori: cat, namaProduk: name, hargaJual: price };
+}
+
+function deleteProductFromSheets(ss, data) {
+  var targetName = String(data.namaProduk || data.nama || "").trim();
+  var targetCat = String(data.kategori || data.category || "").trim();
+  var productId = String(data.id || data.productId || "").trim();
+  if (!targetName && !productId) return { success: false, message: "Nama produk atau ID harus diisi" };
+
+  var categories = ["Ayam", "Burung", "Kucing", "Ikan", "Lainnya"];
+  if (targetCat) {
+    var formattedCat = targetCat.charAt(0).toUpperCase() + targetCat.slice(1).toLowerCase();
+    categories = [formattedCat].concat(categories.filter(function(c) { return c.toLowerCase() !== formattedCat.toLowerCase(); }));
+  }
+
+  for (var i = 0; i < categories.length; i++) {
+    var catName = categories[i];
+    var sheet = ss.getSheetByName(catName);
+    if (!sheet) continue;
+    var values = sheet.getDataRange().getValues();
+    if (!values || values.length < 2) continue;
+    var colMap = {};
+    for (var c = 0; c < values[0].length; c++) { colMap[String(values[0][c]).trim().toLowerCase()] = c; }
+    var idxNama = findColumnIndex(colMap, ["nama produk", "nama barang", "produk"]);
+    if (idxNama < 0) continue;
+
+    for (var r = values.length - 1; r >= 1; r--) {
+      var rowName = String(values[r][idxNama] || "").trim();
+      var cleanTarget = String(targetName || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+      var cleanRow = String(rowName || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+      if ((cleanRow && cleanTarget && cleanRow === cleanTarget) || (productId && productId.toLowerCase() === (catName + "_" + r).toLowerCase())) {
+        sheet.deleteRow(r + 1);
+        return { success: true, message: "Produk '" + targetName + "' berhasil dihapus dari tab " + catName, kategori: catName, namaProduk: targetName };
+      }
+    }
+  }
+
+  return { success: true, message: "Produk '" + targetName + "' dihapus dari katalog", namaProduk: targetName };
 }`;
 
   if (navigator.clipboard && navigator.clipboard.writeText) {
