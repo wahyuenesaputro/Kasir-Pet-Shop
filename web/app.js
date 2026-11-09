@@ -130,6 +130,18 @@ const defaultCatalog = [
   { id: "kucing_19", kategori: "Kucing", namaProduk: "Life Cat (1 Dus Pouch 24pcs)", satuan: "pcs", hargaJual: 5000 },
   { id: "kucing_20", kategori: "Kucing", namaProduk: "Life Cat (Kaleng Adult 400gr)", satuan: "pcs", hargaJual: 13500 },
   { id: "kucing_21", kategori: "Kucing", namaProduk: "Life Cat (Kaleng Kitten 400gr)", satuan: "pcs", hargaJual: 13500 },
+  { id: "obat_1", kategori: "Obat", namaProduk: "Vita Tetra Chlor (Kapsul isi 10)", satuan: "pcs", hargaBeli: 4500, hargaJual: 6000 },
+  { id: "obat_2", kategori: "Obat", namaProduk: "Koleridin (Kapsul isi 10)", satuan: "pcs", hargaBeli: 4000, hargaJual: 5500 },
+  { id: "obat_3", kategori: "Obat", namaProduk: "Vita Stress (Sachet 10gr)", satuan: "pcs", hargaBeli: 3500, hargaJual: 5000 },
+  { id: "obat_4", kategori: "Obat", namaProduk: "Super N (15 ml)", satuan: "pcs", hargaBeli: 16000, hargaJual: 20000 },
+  { id: "obat_5", kategori: "Obat", namaProduk: "Biodin Spray Antiseptik (100 ml)", satuan: "pcs", hargaBeli: 22000, hargaJual: 28000 },
+  { id: "obat_6", kategori: "Obat", namaProduk: "Scabies Cream / Salep Jamur Kucing", satuan: "pcs", hargaBeli: 12000, hargaJual: 16000 },
+  { id: "obat_7", kategori: "Obat", namaProduk: "Detick Obat Kutu Kucing (1-10kg)", satuan: "pcs", hargaBeli: 15000, hargaJual: 22000 },
+  { id: "obat_8", kategori: "Obat", namaProduk: "Albenworm Obat Cacing Kucing", satuan: "pcs", hargaBeli: 14000, hargaJual: 18000 },
+  { id: "obat_9", kategori: "Obat", namaProduk: "Minyak Ikan / Fish Oil (Botol 50 butir)", satuan: "pcs", hargaBeli: 8000, hargaJual: 12000 },
+  { id: "obat_10", kategori: "Obat", namaProduk: "Gendol / Tetraclor Cair Ternak (100 ml)", satuan: "pcs", hargaBeli: 10000, hargaJual: 14000 },
+  { id: "obat_11", kategori: "Obat", namaProduk: "Doxyvet Serbuk (Sachet 5gr)", satuan: "pcs", hargaBeli: 4000, hargaJual: 6000 },
+  { id: "obat_12", kategori: "Obat", namaProduk: "Obat Kutu Serbuk Asuntol (100gr)", satuan: "pcs", hargaBeli: 11000, hargaJual: 15000 }
 ];
 
 
@@ -302,7 +314,8 @@ function renderCategories() {
     { id: "Ayam", label: "🐔 Ayam" },
     { id: "Burung", label: "🐦 Burung" },
     { id: "Kucing", label: "🐱 Kucing" },
-    { id: "Ikan", label: "🐟 Ikan" }
+    { id: "Ikan", label: "🐟 Ikan" },
+    { id: "Obat", label: "💊 Obat" }
   ];
 
   const container = document.getElementById("category-chips");
@@ -360,6 +373,7 @@ function renderProducts() {
     if (p.kategori === "Burung") catIcon = "feather";
     if (p.kategori === "Kucing") catIcon = "cat";
     if (p.kategori === "Ikan") catIcon = "fish";
+    if (p.kategori === "Obat") catIcon = "pill";
 
     return `
       <div class="bg-white rounded-2xl p-3 sm:p-3.5 border ${qty > 0 ? 'border-blue-500 ring-2 ring-blue-100 shadow-md' : 'border-slate-200 hover:border-slate-300'} shadow-sm flex flex-col justify-between transition relative overflow-hidden group">
@@ -405,7 +419,8 @@ function renderCatalogCategories() {
     { id: "Ayam", label: "🐔 Ayam" },
     { id: "Burung", label: "🐦 Burung" },
     { id: "Kucing", label: "🐱 Kucing" },
-    { id: "Ikan", label: "🐟 Ikan" }
+    { id: "Ikan", label: "🐟 Ikan" },
+    { id: "Obat", label: "💊 Obat" }
   ];
 
   const container = document.getElementById("katalog-category-chips");
@@ -461,6 +476,7 @@ function renderCatalogManager() {
     if (p.kategori === "Burung") catIcon = "feather";
     if (p.kategori === "Kucing") catIcon = "cat";
     if (p.kategori === "Ikan") catIcon = "fish";
+    if (p.kategori === "Obat") catIcon = "pill";
     const isKg = p.satuan === "kg";
 
     return `
@@ -2162,7 +2178,23 @@ function isiDataProdukOtomatis() {
   ];
   isiSheetKategori(ss, "Ikan", dataIkan);
 
-  return "Berhasil mengisi seluruh data 29 pakan burung harga resmi, ayam, kucing, ikan, dan sheet Penjualan 7 kolom!";
+  var dataObat = [
+    [1, "Vita Tetra Chlor (Kapsul isi 10)", "pcs", 4500, 6000, "Obat ngorok & snot unggas"],
+    [2, "Koleridin (Kapsul isi 10)", "pcs", 4000, 5500, "Obat kolera & berak hijau"],
+    [3, "Vita Stress (Sachet 10gr)", "pcs", 3500, 5000, "Vitamin anti stres ayam & burung"],
+    [4, "Super N (15 ml)", "pcs", 16000, 20000, "Obat infeksi pernapasan burung"],
+    [5, "Biodin Spray Antiseptik (100 ml)", "pcs", 22000, 28000, "Obat luka, jamur, korep hewan"],
+    [6, "Scabies Cream / Salep Jamur Kucing", "pcs", 12000, 16000, "Obat jamur & scabies kucing"],
+    [7, "Detick Obat Kutu Kucing (1-10kg)", "pcs", 15000, 22000, "Obat tetes kutu kucing"],
+    [8, "Albenworm Obat Cacing Kucing", "pcs", 14000, 18000, "Obat cacing tablet kucing"],
+    [9, "Minyak Ikan / Fish Oil (Botol 50 butir)", "pcs", 8000, 12000, "Suplemen bulu & nafsu makan"],
+    [10, "Gendol / Tetraclor Cair Ternak (100 ml)", "pcs", 10000, 14000, "Obat pencernaan ternak"],
+    [11, "Doxyvet Serbuk (Sachet 5gr)", "pcs", 4000, 6000, "Antibiotik batuk ngorok ternak"],
+    [12, "Obat Kutu Serbuk Asuntol (100gr)", "pcs", 11000, 15000, "Bedak anti kutu ayam & unggas"]
+  ];
+  isiSheetKategori(ss, "Obat", dataObat);
+
+  return "Berhasil mengisi seluruh data 29 pakan burung harga resmi, ayam, kucing, ikan, obat, dan sheet Penjualan 7 kolom!";
 }
 
 function isiSheetKategori(ss, sheetName, items) {
@@ -2289,7 +2321,7 @@ function getRecentSalesJson() {
 function getProductsJson() {
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var categories = ["Ayam", "Burung", "Kucing", "Ikan", "Lainnya"];
+    var categories = ["Ayam", "Burung", "Kucing", "Ikan", "Obat", "Lainnya"];
     var allProducts = [];
 
     categories.forEach(function(catName) {
@@ -2372,7 +2404,7 @@ function updateProductPriceInSheets(ss, data) {
   var newPrice = Number(data.hargaJual || data.harga || data.newPrice) || 0;
   var productId = String(data.id || data.productId || "").trim();
 
-  var categories = ["Ayam", "Burung", "Kucing", "Ikan", "Lainnya"];
+  var categories = ["Ayam", "Burung", "Kucing", "Ikan", "Obat", "Lainnya"];
   if (targetCat) {
     var formattedCat = targetCat.charAt(0).toUpperCase() + targetCat.slice(1).toLowerCase();
     categories = [formattedCat].concat(categories.filter(function(c) { return c.toLowerCase() !== formattedCat.toLowerCase(); }));
@@ -2438,7 +2470,7 @@ function deleteProductFromSheets(ss, data) {
   var productId = String(data.id || data.productId || "").trim();
   if (!targetName && !productId) return { success: false, message: "Nama produk atau ID harus diisi" };
 
-  var categories = ["Ayam", "Burung", "Kucing", "Ikan", "Lainnya"];
+  var categories = ["Ayam", "Burung", "Kucing", "Ikan", "Obat", "Lainnya"];
   if (targetCat) {
     var formattedCat = targetCat.charAt(0).toUpperCase() + targetCat.slice(1).toLowerCase();
     categories = [formattedCat].concat(categories.filter(function(c) { return c.toLowerCase() !== formattedCat.toLowerCase(); }));

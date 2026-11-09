@@ -106,7 +106,8 @@ fun KasirScreen(
         Pair("Burung", "🐦 Burung"),
         Pair("Ayam", "🐔 Ayam"),
         Pair("Kucing", "🐱 Kucing"),
-        Pair("Ikan", "🐟 Ikan")
+        Pair("Ikan", "🐟 Ikan"),
+        Pair("Obat", "💊 Obat")
     )
 
     LaunchedEffect(uiState.successMessage) {

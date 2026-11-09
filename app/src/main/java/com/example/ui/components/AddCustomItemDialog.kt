@@ -60,7 +60,7 @@ fun AddCustomItemDialog(
     var priceError by remember { mutableStateOf<String?>(null) }
 
     val commonUnits = listOf("pcs", "bungkus", "kg", "ons", "ekor", "botol", "sachet")
-    val categories = listOf("Burung", "Ayam", "Kucing", "Ikan", "Lainnya")
+    val categories = listOf("Burung", "Ayam", "Kucing", "Ikan", "Obat", "Lainnya")
 
     Dialog(
         onDismissRequest = onDismiss,

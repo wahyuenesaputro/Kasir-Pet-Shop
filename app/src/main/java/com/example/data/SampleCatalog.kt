@@ -671,6 +671,118 @@ object SampleCatalog {
             satuan = "pcs",
             hargaJual = 13500.0,
             hargaBelumDiisi = false
+        ),
+
+        // ====================================================================
+        // === Kategori: Obat 💊 (12 Produk) ==================================
+        // ====================================================================
+        Product(
+            id = "obat_1",
+            kategori = "Obat",
+            namaProduk = "Vita Tetra Chlor (Kapsul isi 10)",
+            satuan = "pcs",
+            hargaBeli = 4500.0,
+            hargaJual = 6000.0,
+            hargaBelumDiisi = false
+        ),
+        Product(
+            id = "obat_2",
+            kategori = "Obat",
+            namaProduk = "Koleridin (Kapsul isi 10)",
+            satuan = "pcs",
+            hargaBeli = 4000.0,
+            hargaJual = 5500.0,
+            hargaBelumDiisi = false
+        ),
+        Product(
+            id = "obat_3",
+            kategori = "Obat",
+            namaProduk = "Vita Stress (Sachet 10gr)",
+            satuan = "pcs",
+            hargaBeli = 3500.0,
+            hargaJual = 5000.0,
+            hargaBelumDiisi = false
+        ),
+        Product(
+            id = "obat_4",
+            kategori = "Obat",
+            namaProduk = "Super N (15 ml)",
+            satuan = "pcs",
+            hargaBeli = 16000.0,
+            hargaJual = 20000.0,
+            hargaBelumDiisi = false
+        ),
+        Product(
+            id = "obat_5",
+            kategori = "Obat",
+            namaProduk = "Biodin Spray Antiseptik (100 ml)",
+            satuan = "pcs",
+            hargaBeli = 22000.0,
+            hargaJual = 28000.0,
+            hargaBelumDiisi = false
+        ),
+        Product(
+            id = "obat_6",
+            kategori = "Obat",
+            namaProduk = "Scabies Cream / Salep Jamur Kucing",
+            satuan = "pcs",
+            hargaBeli = 12000.0,
+            hargaJual = 16000.0,
+            hargaBelumDiisi = false
+        ),
+        Product(
+            id = "obat_7",
+            kategori = "Obat",
+            namaProduk = "Detick Obat Kutu Kucing (1-10kg)",
+            satuan = "pcs",
+            hargaBeli = 15000.0,
+            hargaJual = 22000.0,
+            hargaBelumDiisi = false
+        ),
+        Product(
+            id = "obat_8",
+            kategori = "Obat",
+            namaProduk = "Albenworm Obat Cacing Kucing",
+            satuan = "pcs",
+            hargaBeli = 14000.0,
+            hargaJual = 18000.0,
+            hargaBelumDiisi = false
+        ),
+        Product(
+            id = "obat_9",
+            kategori = "Obat",
+            namaProduk = "Minyak Ikan / Fish Oil (Botol 50 butir)",
+            satuan = "pcs",
+            hargaBeli = 8000.0,
+            hargaJual = 12000.0,
+            hargaBelumDiisi = false
+        ),
+        Product(
+            id = "obat_10",
+            kategori = "Obat",
+            namaProduk = "Gendol / Tetraclor Cair Ternak (100 ml)",
+            satuan = "pcs",
+            hargaBeli = 10000.0,
+            hargaJual = 14000.0,
+            hargaBelumDiisi = false
+        ),
+        Product(
+            id = "obat_11",
+            kategori = "Obat",
+            namaProduk = "Doxyvet Serbuk (Sachet 5gr)",
+            satuan = "pcs",
+            hargaBeli = 4000.0,
+            hargaJual = 6000.0,
+            hargaBelumDiisi = false
+        ),
+        Product(
+            id = "obat_12",
+            kategori = "Obat",
+            namaProduk = "Obat Kutu Serbuk Asuntol (100gr)",
+            satuan = "pcs",
+            hargaBeli = 11000.0,
+            hargaJual = 15000.0,
+            hargaBelumDiisi = false
         )
     )
 }

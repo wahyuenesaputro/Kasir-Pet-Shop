@@ -75,6 +75,7 @@ fun getCategoryConfig(category: String): CategoryAvatarConfig {
         "burung" -> CategoryAvatarConfig("🐦", BirdColor, BirdColorContainer)
         "kucing" -> CategoryAvatarConfig("🐱", CatColor, CatColorContainer)
         "ikan" -> CategoryAvatarConfig("🐟", FishColor, FishColorContainer)
+        "obat" -> CategoryAvatarConfig("💊", Color(0xFFE11D48), Color(0xFFFFE4E6))
         else -> CategoryAvatarConfig("📦", GeneralColor, GeneralColorContainer)
     }
 }

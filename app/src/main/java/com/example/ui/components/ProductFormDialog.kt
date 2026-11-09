@@ -73,7 +73,7 @@ fun ProductFormDialog(
     var unitErrorMessage by remember { mutableStateOf<String?>(null) }
     var priceErrorMessage by remember { mutableStateOf<String?>(null) }
 
-    val categories = listOf("Ayam", "Burung", "Ikan", "Kucing", "Lainnya")
+    val categories = listOf("Ayam", "Burung", "Ikan", "Kucing", "Obat", "Lainnya")
     val popularUnits = listOf("pcs", "kg", "karung", "dus", "bungkus", "botol")
     val quickPrices = listOf(3000, 5000, 8000, 10000, 12000, 15000, 20000)
 

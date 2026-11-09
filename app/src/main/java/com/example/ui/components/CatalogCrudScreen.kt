@@ -67,7 +67,7 @@ fun CatalogCrudScreen(
     var filterCategory by remember { mutableStateOf("Semua") }
     var searchQuery by remember { mutableStateOf("") }
 
-    val categories = listOf("Semua", "Ayam", "Burung", "Ikan", "Kucing", "Lainnya")
+    val categories = listOf("Semua", "Ayam", "Burung", "Ikan", "Kucing", "Obat", "Lainnya")
 
     val filteredList = products.filter { p ->
         val matchCat = filterCategory == "Semua" || p.kategori.equals(filterCategory, ignoreCase = true)

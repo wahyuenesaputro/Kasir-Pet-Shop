@@ -153,7 +153,7 @@ fun PriceManagementScreen(
                 .horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            listOf("Semua", "Burung", "Ayam", "Kucing", "Ikan").forEach { cat ->
+            listOf("Semua", "Burung", "Ayam", "Kucing", "Ikan", "Obat").forEach { cat ->
                 val isSelected = filterCategory == cat
                 Surface(
                     shape = RoundedCornerShape(10.dp),
