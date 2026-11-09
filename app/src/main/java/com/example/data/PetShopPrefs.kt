@@ -18,31 +18,39 @@ class PetShopPrefs(context: Context) {
         private const val KEY_DELETED_PRODUCT_IDS = "deleted_product_ids_set"
         private const val KEY_PRODUCT_OVERRIDES_JSON = "product_overrides_json"
         private const val KEY_CURRENT_BALANCE = "current_cash_balance"
-        const val DEFAULT_PLACEHOLDER_URL = "https://script.google.com/macros/s/AKfycbxclmpSwhWxOq0KKWNwUPHd5hYtjs3Q_fo3N1gvaZOtBdQ4FPyc3adQBQ77QvfUVGXQ/exec"
-        const val DEFAULT_REAL_URL = "https://script.google.com/macros/s/AKfycbxclmpSwhWxOq0KKWNwUPHd5hYtjs3Q_fo3N1gvaZOtBdQ4FPyc3adQBQ77QvfUVGXQ/exec"
+        const val DEFAULT_PLACEHOLDER_URL = "https://script.google.com/macros/s/AKfycbxsIpuVeuiV36yNcBCznDLiYberyjDXdqjviFmYfvaJgbzCGhPfA2PDDXxsWUE9pXlu/exec"
+        const val DEFAULT_REAL_URL = "https://script.google.com/macros/s/AKfycbxsIpuVeuiV36yNcBCznDLiYberyjDXdqjviFmYfvaJgbzCGhPfA2PDDXxsWUE9pXlu/exec"
     }
 
     var currentBalance: Double
         get() = prefs.getFloat(KEY_CURRENT_BALANCE, 0f).toDouble()
         set(value) = prefs.edit().putFloat(KEY_CURRENT_BALANCE, value.toFloat()).apply()
 
+    private fun isOutdatedUrl(url: String): Boolean {
+        if (url.isBlank()) return true
+        if (url.contains("CONTOH_ID") || url.contains("AKfycbzPytd") || url.contains("AKfycbxuIhr")) return true
+        if (url.contains("AKfycbxcTpjehRlmfjmTll9V3LYOW79wP5X1WwznkwMn_VlFd9-0Szp1p4ize5bxPTK5Iplp")) return true
+        if (url.contains("AKfycbxclmpSwhWxOq0KKWNwUPHd5hYtjs3Q_fo3N1gvaZOtBdQ4FPyc3adQBQ77QvfUVGXQ")) return true
+        return false
+    }
+
     private val effectiveLegacyUrl: String
         get() {
             val saved = prefs.getString(KEY_APPS_SCRIPT_URL, "") ?: ""
-            return if (saved.isNotBlank() && !saved.contains("CONTOH_ID") && !saved.contains("AKfycbzPytd") && !saved.contains("AKfycbxuIhr") && !saved.contains("AKfycbxcTpjehRlmfjmTll9V3LYOW79wP5X1WwznkwMn_VlFd9-0Szp1p4ize5bxPTK5Iplp")) saved else DEFAULT_REAL_URL
+            return if (!isOutdatedUrl(saved)) saved else DEFAULT_REAL_URL
         }
 
     var productScriptUrl: String
         get() {
             val saved = prefs.getString(KEY_PRODUCT_SCRIPT_URL, "") ?: ""
-            return if (saved.isNotBlank() && !saved.contains("CONTOH_ID") && !saved.contains("AKfycbzPytd") && !saved.contains("AKfycbxuIhr") && !saved.contains("AKfycbxcTpjehRlmfjmTll9V3LYOW79wP5X1WwznkwMn_VlFd9-0Szp1p4ize5bxPTK5Iplp")) saved else effectiveLegacyUrl
+            return if (!isOutdatedUrl(saved)) saved else effectiveLegacyUrl
         }
         set(value) = prefs.edit().putString(KEY_PRODUCT_SCRIPT_URL, value.trim()).apply()
 
     var salesScriptUrl: String
         get() {
             val saved = prefs.getString(KEY_SALES_SCRIPT_URL, "") ?: ""
-            return if (saved.isNotBlank() && !saved.contains("CONTOH_ID") && !saved.contains("AKfycbzPytd") && !saved.contains("AKfycbxuIhr") && !saved.contains("AKfycbxcTpjehRlmfjmTll9V3LYOW79wP5X1WwznkwMn_VlFd9-0Szp1p4ize5bxPTK5Iplp")) saved else effectiveLegacyUrl
+            return if (!isOutdatedUrl(saved)) saved else effectiveLegacyUrl
         }
         set(value) = prefs.edit().putString(KEY_SALES_SCRIPT_URL, value.trim()).apply()
 

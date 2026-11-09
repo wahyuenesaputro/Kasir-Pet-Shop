@@ -13,15 +13,35 @@ let currentPaymentMethod = "Tunai";
 let activeReceipt = null;
 let currentMutationType = "add"; // 'add', 'withdraw', 'set'
 let currentBalance = Number(localStorage.getItem("petshop_current_balance")) || 0;
-let productScriptUrl = localStorage.getItem("petshop_product_script_url") || localStorage.getItem("petshop_apps_script_url") || "https://script.google.com/macros/s/AKfycbxclmpSwhWxOq0KKWNwUPHd5hYtjs3Q_fo3N1gvaZOtBdQ4FPyc3adQBQ77QvfUVGXQ/exec";
-let salesScriptUrl = localStorage.getItem("petshop_sales_script_url") || localStorage.getItem("petshop_apps_script_url") || "https://script.google.com/macros/s/AKfycbxclmpSwhWxOq0KKWNwUPHd5hYtjs3Q_fo3N1gvaZOtBdQ4FPyc3adQBQ77QvfUVGXQ/exec";
+const DEFAULT_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxsIpuVeuiV36yNcBCznDLiYberyjDXdqjviFmYfvaJgbzCGhPfA2PDDXxsWUE9pXlu/exec";
+
+// Otomatis migrasi browser jika masih menyimpan URL lama/placeholder
+(function migrateOldUrls() {
+  const outdatedSignatures = [
+    "AKfycbxclmpSwhWxOq0KKWNwUPHd5hYtjs3Q_fo3N1gvaZOtBdQ4FPyc3adQBQ77QvfUVGXQ",
+    "AKfycbzPytd",
+    "AKfycbxuIhr",
+    "AKfycbxcTpjehRlmfjmTll9V3LYOW79wP5X1WwznkwMn_VlFd9-0Szp1p4ize5bxPTK5Iplp",
+    "AKfycbxMTDMgUPmfCA2IqGEMGaPVk_NjZkLwcRklY1BuFumywXmDH5mTnp-mr9oQo8himA0M",
+    "CONTOH_ID"
+  ];
+  ["petshop_product_script_url", "petshop_sales_script_url", "petshop_apps_script_url"].forEach(k => {
+    const val = localStorage.getItem(k);
+    if (!val || outdatedSignatures.some(sig => val.includes(sig))) {
+      localStorage.setItem(k, DEFAULT_APPS_SCRIPT_URL);
+    }
+  });
+})();
+
+let productScriptUrl = localStorage.getItem("petshop_product_script_url") || localStorage.getItem("petshop_apps_script_url") || DEFAULT_APPS_SCRIPT_URL;
+let salesScriptUrl = localStorage.getItem("petshop_sales_script_url") || localStorage.getItem("petshop_apps_script_url") || DEFAULT_APPS_SCRIPT_URL;
 
 function getProductUrl() {
   const p = (productScriptUrl || "").trim();
   if (p && p.startsWith("https://script.google.com")) return p;
   const s = (salesScriptUrl || "").trim();
   if (s && s.startsWith("https://script.google.com")) return s;
-  return "https://script.google.com/macros/s/AKfycbxclmpSwhWxOq0KKWNwUPHd5hYtjs3Q_fo3N1gvaZOtBdQ4FPyc3adQBQ77QvfUVGXQ/exec";
+  return DEFAULT_APPS_SCRIPT_URL;
 }
 
 function getSalesUrl() {
@@ -29,7 +49,7 @@ function getSalesUrl() {
   if (s && s.startsWith("https://script.google.com")) return s;
   const p = (productScriptUrl || "").trim();
   if (p && p.startsWith("https://script.google.com")) return p;
-  return "https://script.google.com/macros/s/AKfycbxclmpSwhWxOq0KKWNwUPHd5hYtjs3Q_fo3N1gvaZOtBdQ4FPyc3adQBQ77QvfUVGXQ/exec";
+  return DEFAULT_APPS_SCRIPT_URL;
 }
 
 // Sanitasi nama produk: ganti Zak/zak menjadi Karung/karung
