@@ -145,7 +145,6 @@ class PetShopRepository {
                 itemObj.put("satuan", cartItem.product.satuan)
                 itemObj.put("jumlah", cartItem.quantity)
                 itemObj.put("hargaJual", cartItem.customUnitPrice)
-                itemObj.put("hargaBeli", cartItem.product.hargaBeli)
                 itemsArray.put(itemObj)
             }
             root.put("items", itemsArray)
@@ -351,7 +350,6 @@ class PetShopRepository {
             root.put("namaProduk", product.namaProduk)
             root.put("satuan", product.satuan)
             root.put("hargaJual", product.hargaJual)
-            root.put("hargaBeli", product.hargaBeli)
 
             val requestBody = root.toString().toRequestBody(textPlainMediaType)
             val fullUrl = if (url.contains("?")) "$url&action=add_product" else "$url?action=add_product"
