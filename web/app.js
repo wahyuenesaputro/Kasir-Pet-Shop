@@ -1879,6 +1879,22 @@ async function syncData() {
           };
         });
 
+        // Cek kategori apa saja yang didapat dari spreadsheet
+        const syncedCategories = new Set(syncedProducts.map(p => (p.kategori || "").toLowerCase().trim()));
+        // Otomatis gabungkan kategori bawaan (seperti Obat) jika belum ada di spreadsheet
+        const missingDefaults = INITIAL_PRODUCTS.filter(p => !syncedCategories.has((p.kategori || "").toLowerCase().trim())).map(p => ({
+          ...p,
+          id: p.id,
+          kategori: p.kategori,
+          namaProduk: sanitizeProductName(p.namaProduk),
+          satuan: normalizeSatuan(p.satuan, p.namaProduk),
+          satuanAsli: p.satuan,
+          hargaJual: (overrides[p.id] !== undefined && Number(overrides[p.id]) > 0) ? Number(overrides[p.id]) : p.hargaJual,
+          hargaBeli: 0,
+          hargaBelumDiisi: false,
+          catatan: p.catatan || ""
+        }));
+
         // Gabungkan produk custom lokal jika ada
         const formattedCustom = custom.map(c => ({
           ...c,
@@ -1886,10 +1902,10 @@ async function syncData() {
           satuan: normalizeSatuan(c.satuan, c.namaProduk)
         }));
 
-        products = [...syncedProducts, ...formattedCustom];
+        products = [...syncedProducts, ...missingDefaults, ...formattedCustom];
         renderProducts();
         renderCatalogManager();
-        console.log(`[Sync] Berhasil menyinkronkan ${syncedProducts.length} produk dari Google Spreadsheet.`);
+        console.log(`[Sync] Berhasil menyinkronkan ${products.length} produk (${syncedProducts.length} dari Spreadsheet, ${missingDefaults.length} bawaan termasuk Obat).`);
       }
     } catch (err) {
       console.warn("Gagal sync katalog produk dari spreadsheet:", err);
@@ -1970,6 +1986,9 @@ function doGet(e) {
     return jsonResponse({ success: true, message: resultMsg });
   } else if (action === "setup_produk" || action === "isi_produk" || action === "isi_database") {
     var resultMsg = isiDataProdukOtomatis();
+    return jsonResponse({ success: true, message: resultMsg });
+  } else if (action === "setup_obat" || action === "buat_obat" || action === "isi_obat") {
+    var resultMsg = buatSheetObatOtomatis();
     return jsonResponse({ success: true, message: resultMsg });
   } else {
     return jsonResponse({ success: false, message: "Action tidak dikenal: " + action });
@@ -2227,6 +2246,14 @@ function isiDataProdukOtomatis() {
   ];
   isiSheetKategori(ss, "Ikan", dataIkan);
 
+  // 6. Data Kategori Obat & Vitamin Ternak/Hewan (Hanya Harga Jual - Tanpa Modal)
+  buatSheetObatOtomatis(ss);
+
+  return "Berhasil mengisi seluruh data produk (5 kolom resmi tanpa modal termasuk Obat) dan sheet Penjualan 7 kolom!";
+}
+
+function buatSheetObatOtomatis(ss) {
+  if (!ss) ss = SpreadsheetApp.getActiveSpreadsheet();
   var dataObat = [
     [1, "Vita Tetra Chlor (Kapsul isi 10)", "pcs", 6000, "Obat ngorok & snot unggas"],
     [2, "Koleridin (Kapsul isi 10)", "pcs", 5500, "Obat kolera & berak hijau"],
@@ -2242,21 +2269,22 @@ function isiDataProdukOtomatis() {
     [12, "Obat Kutu Serbuk Asuntol (100gr)", "pcs", 15000, "Bedak anti kutu ayam & unggas"]
   ];
   isiSheetKategori(ss, "Obat", dataObat);
-
-  return "Berhasil mengisi seluruh data produk (5 kolom resmi tanpa modal) dan sheet Penjualan 7 kolom!";
+  return "Berhasil membuat sheet Obat (12 produk) di spreadsheet!";
 }
 
 function isiSheetKategori(ss, sheetName, items) {
   var sheet = ss.getSheetByName(sheetName);
   if (!sheet) { sheet = ss.insertSheet(sheetName); } else { sheet.clear(); }
   var headers = ["NO", "NAMA BARANG", "SATUAN", "HARGA JUAL", "KETERANGAN"];
-  sheet.appendRow(headers);
-  formatHeaderRow(sheet, 5);
-  sheet.setFrozenRows(1);
-  for (var i = 0; i < items.length; i++) { sheet.appendRow(items[i]); }
-  var lastRow = sheet.getLastRow();
-  if (lastRow > 1) { sheet.getRange(2, 4, lastRow - 1, 1).setNumberFormat('"Rp"#,##0'); }
-  sheet.autoResizeColumns(1, 5);
+  var allRows = [headers];
+  for (var i = 0; i < items.length; i++) { allRows.push(items[i]); }
+  sheet.getRange(1, 1, allRows.length, 5).setValues(allRows);
+  try {
+    formatHeaderRow(sheet, 5);
+    sheet.setFrozenRows(1);
+    if (allRows.length > 1) { sheet.getRange(2, 4, allRows.length - 1, 1).setNumberFormat('"Rp"#,##0'); }
+    sheet.autoResizeColumns(1, 5);
+  } catch (err) {}
 }
 
 function ensureSalesSheetWithHeaders(ss) {
@@ -2370,27 +2398,39 @@ function getRecentSalesJson() {
 function getProductsJson() {
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var categories = ["Ayam", "Burung", "Kucing", "Ikan", "Obat", "Lainnya"];
+    var allSheets = ss.getSheets();
     var allProducts = [];
 
-    categories.forEach(function(catName) {
-      var sheet = ss.getSheetByName(catName);
-      if (!sheet) return;
+    for (var s = 0; s < allSheets.length; s++) {
+      var sheet = allSheets[s];
+      var rawName = sheet.getName().trim();
+      var lowerName = rawName.toLowerCase();
+      if (lowerName === "penjualan" || lowerName === "rekap" || lowerName === "summary" || lowerName === "laporan") continue;
+
+      var catName = rawName;
+      if (lowerName.indexOf("obat") >= 0) catName = "Obat";
+      else if (lowerName.indexOf("burung") >= 0) catName = "Burung";
+      else if (lowerName.indexOf("ayam") >= 0) catName = "Ayam";
+      else if (lowerName.indexOf("kucing") >= 0) catName = "Kucing";
+      else if (lowerName.indexOf("ikan") >= 0) catName = "Ikan";
+
       var data = sheet.getDataRange().getValues();
-      if (!data || data.length < 2) return;
+      if (!data || data.length < 2) continue;
       var headerRow = data[0];
       var colMap = {};
       for (var c = 0; c < headerRow.length; c++) {
         colMap[String(headerRow[c]).trim().toLowerCase()] = c;
       }
-      var idxNama = findColumnIndex(colMap, ["nama produk", "nama barang", "produk"]);
+      var idxNama = findColumnIndex(colMap, ["nama produk", "nama barang", "produk", "barang", "nama"]);
       var idxSatuan = findColumnIndex(colMap, ["satuan", "unit"]);
       var idxHargaJual = findColumnIndex(colMap, ["harga jual", "harga jual (per satuan)", "harga"]);
+
+      if (idxNama < 0) continue;
 
       for (var r = 1; r < data.length; r++) {
         var row = data[r];
         var namaProduk = (idxNama >= 0 && row[idxNama]) ? String(row[idxNama]).trim() : "";
-        if (!namaProduk) break;
+        if (!namaProduk) continue;
 
         var satuan = (idxSatuan >= 0 && row[idxSatuan]) ? String(row[idxSatuan]).trim() : "pcs";
         var rawHargaJual = (idxHargaJual >= 0) ? parseNumber(row[idxHargaJual]) : 0;
@@ -2414,7 +2454,7 @@ function getProductsJson() {
           catatan: note
         });
       }
-    });
+    }
 
     return jsonResponse({ success: true, products: allProducts, count: allProducts.length });
   } catch (err) {
@@ -2501,8 +2541,10 @@ function addProductToSheets(ss, data) {
   var nextNo = Math.max(1, sheet.getLastRow());
   sheet.appendRow([nextNo, name, unit, price, "Ditambahkan dari Kasir"]);
   var newRowIdx = sheet.getLastRow();
-  sheet.getRange(newRowIdx, 4).setNumberFormat('"Rp"#,##0');
-  sheet.autoResizeColumns(1, 5);
+  try {
+    sheet.getRange(newRowIdx, 4).setNumberFormat('"Rp"#,##0');
+    sheet.autoResizeColumns(1, 5);
+  } catch (err) {}
 
   return { success: true, message: "Produk '" + name + "' berhasil ditambahkan ke tab " + cat, kategori: cat, namaProduk: name, hargaJual: price };
 }
@@ -2568,6 +2610,32 @@ function fallbackCopyText(text) {
   alert("Kode Google Apps Script berhasil disalin ke Clipboard!");
 }
 
+async function buatSheetObatDiSheets() {
+  const prodUrl = getProductUrl();
+  if (!prodUrl) {
+    alert("URL Google Apps Script belum diisi di Pengaturan!");
+    return;
+  }
+
+  const btn = document.getElementById("btn-create-obat-text");
+  if (btn) btn.innerText = "Membuat Sheet...";
+
+  try {
+    const res = await fetch(`${prodUrl}?action=setup_obat&t=${Date.now()}`);
+    const data = await res.json();
+    if (data && data.success) {
+      alert("SUKSES!\n\n" + data.message);
+      syncWithSpreadsheet();
+    } else {
+      alert("Pemberitahuan: " + (data ? data.message : "Tidak ada respon dari Apps Script"));
+    }
+  } catch (err) {
+    alert("Permintaan pembuatan sheet Obat terkirim.\nJika Apps Script belum diupdate, silakan Salin Kode Apps Script terbaru dan jalankan fungsi 'buatSheetObatOtomatis' di Google Apps Script editor.");
+  } finally {
+    if (btn) btn.innerText = "+ Buat Sheet Obat";
+  }
+}
+
 async function hapusKolomModalDiSheets() {
   const prodUrl = getProductUrl();
   if (!prodUrl) {
@@ -2583,7 +2651,6 @@ async function hapusKolomModalDiSheets() {
     const data = await res.json();
     if (data && data.success) {
       alert("SUKSES!\n\n" + data.message);
-      // Auto re-sync
       syncWithSpreadsheet();
     } else {
       alert("Pemberitahuan: " + (data ? data.message : "Tidak ada respon dari Apps Script"));

@@ -54,6 +54,9 @@ function doGet(e) {
   } else if (action === "setup_produk" || action === "isi_produk" || action === "isi_database") {
     var resultMsg = isiDataProdukOtomatis();
     return jsonResponse({ success: true, message: resultMsg });
+  } else if (action === "setup_obat" || action === "buat_obat" || action === "isi_obat") {
+    var resultMsg = buatSheetObatOtomatis();
+    return jsonResponse({ success: true, message: resultMsg });
   } else if (action === "hapus_modal" || action === "clean_modal" || action === "hapus_harga_modal") {
     var resultMsg = hapusKolomHargaModalOtomatis();
     return jsonResponse({ success: true, message: resultMsg });
@@ -408,6 +411,13 @@ function isiDataProdukOtomatis() {
   isiSheetKategori(ss, "Ikan", dataIkan);
 
   // 6. Data Kategori Obat & Vitamin Ternak/Hewan (Hanya Harga Jual - Tanpa Modal)
+  buatSheetObatOtomatis(ss);
+
+  return "Berhasil mengisi seluruh data produk (5 kolom resmi tanpa modal termasuk Obat) dan sheet Penjualan 7 kolom!";
+}
+
+function buatSheetObatOtomatis(ss) {
+  if (!ss) ss = SpreadsheetApp.getActiveSpreadsheet();
   var dataObat = [
     [1, "Vita Tetra Chlor (Kapsul isi 10)", "pcs", 6000, "Obat ngorok & snot unggas"],
     [2, "Koleridin (Kapsul isi 10)", "pcs", 5500, "Obat kolera & berak hijau"],
@@ -423,8 +433,7 @@ function isiDataProdukOtomatis() {
     [12, "Obat Kutu Serbuk Asuntol (100gr)", "pcs", 15000, "Bedak anti kutu ayam & unggas"]
   ];
   isiSheetKategori(ss, "Obat", dataObat);
-
-  return "Berhasil mengisi seluruh data produk (5 kolom resmi tanpa modal) dan sheet Penjualan 7 kolom!";
+  return "Berhasil membuat sheet Obat (12 produk) di spreadsheet!";
 }
 
 function isiSheetKategori(ss, sheetName, items) {
@@ -436,19 +445,22 @@ function isiSheetKategori(ss, sheetName, items) {
   }
 
   var headers = ["NO", "NAMA BARANG", "SATUAN", "HARGA JUAL", "KETERANGAN"];
-  sheet.appendRow(headers);
-  formatHeaderRow(sheet, 5);
-  sheet.setFrozenRows(1);
-
+  var allRows = [headers];
   for (var i = 0; i < items.length; i++) {
-    sheet.appendRow(items[i]);
+    allRows.push(items[i]);
   }
+  sheet.getRange(1, 1, allRows.length, 5).setValues(allRows);
 
-  var lastRow = sheet.getLastRow();
-  if (lastRow > 1) {
-    sheet.getRange(2, 4, lastRow - 1, 1).setNumberFormat('"Rp"#,##0');
+  try {
+    formatHeaderRow(sheet, 5);
+    sheet.setFrozenRows(1);
+    if (allRows.length > 1) {
+      sheet.getRange(2, 4, allRows.length - 1, 1).setNumberFormat('"Rp"#,##0');
+    }
+    sheet.autoResizeColumns(1, 5);
+  } catch (err) {
+    // Tetap sukses menulis data meskipun ada sel yang sedang diedit di browser
   }
-  sheet.autoResizeColumns(1, 5);
 }
 
 function ensureSalesSheetWithHeaders(ss) {
@@ -637,31 +649,41 @@ function getRecentSalesJson() {
 function getProductsJson() {
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var categories = ["Ayam", "Burung", "Kucing", "Ikan", "Obat", "Lainnya"];
+    var allSheets = ss.getSheets();
     var allProducts = [];
 
-    categories.forEach(function(catName) {
-      var sheet = ss.getSheetByName(catName);
-      if (!sheet) return;
+    for (var s = 0; s < allSheets.length; s++) {
+      var sheet = allSheets[s];
+      var rawName = sheet.getName().trim();
+      var lowerName = rawName.toLowerCase();
+      if (lowerName === "penjualan" || lowerName === "rekap" || lowerName === "summary" || lowerName === "laporan") continue;
+
+      var catName = rawName;
+      if (lowerName.indexOf("obat") >= 0) catName = "Obat";
+      else if (lowerName.indexOf("burung") >= 0) catName = "Burung";
+      else if (lowerName.indexOf("ayam") >= 0) catName = "Ayam";
+      else if (lowerName.indexOf("kucing") >= 0) catName = "Kucing";
+      else if (lowerName.indexOf("ikan") >= 0) catName = "Ikan";
 
       var data = sheet.getDataRange().getValues();
-      if (!data || data.length < 2) return;
+      if (!data || data.length < 2) continue;
 
       var headerRow = data[0];
       var colMap = {};
       for (var c = 0; c < headerRow.length; c++) {
-        var hName = String(headerRow[c]).trim().toLowerCase();
-        colMap[hName] = c;
+        colMap[String(headerRow[c]).trim().toLowerCase()] = c;
       }
 
-      var idxNama = findColumnIndex(colMap, ["nama produk", "nama barang", "produk"]);
+      var idxNama = findColumnIndex(colMap, ["nama produk", "nama barang", "produk", "barang", "nama"]);
       var idxSatuan = findColumnIndex(colMap, ["satuan", "unit"]);
       var idxHargaJual = findColumnIndex(colMap, ["harga jual", "harga jual (per satuan)", "harga"]);
+
+      if (idxNama < 0) continue;
 
       for (var r = 1; r < data.length; r++) {
         var row = data[r];
         var namaProduk = (idxNama >= 0 && row[idxNama]) ? String(row[idxNama]).trim() : "";
-        if (!namaProduk) break;
+        if (!namaProduk) continue;
 
         var satuan = (idxSatuan >= 0 && row[idxSatuan]) ? String(row[idxSatuan]).trim() : "pcs";
         var rawHargaJual = (idxHargaJual >= 0) ? parseNumber(row[idxHargaJual]) : 0;
@@ -687,7 +709,7 @@ function getProductsJson() {
           catatan: note
         });
       }
-    });
+    }
 
     return jsonResponse({
       success: true,
@@ -865,8 +887,10 @@ function addProductToSheets(ss, data) {
   sheet.appendRow(rowData);
 
   var newRowIdx = sheet.getLastRow();
-  sheet.getRange(newRowIdx, 4).setNumberFormat('"Rp"#,##0');
-  sheet.autoResizeColumns(1, 5);
+  try {
+    sheet.getRange(newRowIdx, 4).setNumberFormat('"Rp"#,##0');
+    sheet.autoResizeColumns(1, 5);
+  } catch (err) {}
 
   return {
     success: true,

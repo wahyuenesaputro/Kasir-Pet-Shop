@@ -103,7 +103,17 @@ class PetShopRepository {
                     // Fallback to sample catalog if spreadsheet has no rows yet
                     Result.success(SampleCatalog.defaultProducts)
                 } else {
-                    Result.success(list)
+                    // Otomatis gabungkan kategori bawaan (seperti Obat) jika belum ada di spreadsheet
+                    val spreadsheetCategories = list.map { it.kategori.trim().lowercase() }.toSet()
+                    val missingDefaults = SampleCatalog.defaultProducts.filter { defaultProd ->
+                        !spreadsheetCategories.contains(defaultProd.kategori.trim().lowercase())
+                    }
+                    val combinedList = if (missingDefaults.isNotEmpty()) {
+                        list + missingDefaults
+                    } else {
+                        list
+                    }
+                    Result.success(combinedList)
                 }
             }
         } catch (e: Exception) {

@@ -807,7 +807,11 @@
               <i data-lucide="code-2" class="w-4 h-4 text-indigo-600"></i>
               <span>Kode Google Apps Script (Code.gs)</span>
             </h5>
-            <div class="flex items-center space-x-1.5">
+            <div class="flex flex-wrap items-center gap-1.5">
+              <button onclick="buatSheetObatDiSheets()" id="btn-create-obat" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] rounded-lg shadow-sm transition flex items-center space-x-1" title="Buat tab Obat dengan 12 produk langsung di spreadsheet">
+                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+                <span id="btn-create-obat-text">+ Buat Sheet Obat</span>
+              </button>
               <button onclick="hapusKolomModalDiSheets()" id="btn-clean-cost-col" class="px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] rounded-lg shadow-sm transition flex items-center space-x-1" title="Hapus seluruh kolom Harga Modal/Beli dari Google Spreadsheet">
                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                 <span id="btn-clean-cost-col-text">Bersihkan Kolom Modal</span>
