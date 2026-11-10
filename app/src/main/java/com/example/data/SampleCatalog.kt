@@ -137,7 +137,6 @@ object SampleCatalog {
             namaProduk = "Leopard (MD Halus)",
             satuan = "pcs",
             hargaJual = 8000.0,
-            hargaBeli = 6900.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -146,7 +145,6 @@ object SampleCatalog {
             namaProduk = "Leopard (MD Kasar)",
             satuan = "pcs",
             hargaJual = 8000.0,
-            hargaBeli = 6900.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -155,7 +153,6 @@ object SampleCatalog {
             namaProduk = "Leopard (Hijau Kasar)",
             satuan = "pcs",
             hargaJual = 8500.0,
-            hargaBeli = 7100.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -164,7 +161,6 @@ object SampleCatalog {
             namaProduk = "Topsong (Top Song Coklat)",
             satuan = "pcs",
             hargaJual = 12000.0,
-            hargaBeli = 10900.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -173,7 +169,6 @@ object SampleCatalog {
             namaProduk = "Topsong (Top Song Hijau)",
             satuan = "pcs",
             hargaJual = 12000.0,
-            hargaBeli = 11000.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -182,7 +177,6 @@ object SampleCatalog {
             namaProduk = "SKM (SKM Halus)",
             satuan = "pcs",
             hargaJual = 4500.0,
-            hargaBeli = 3200.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -191,7 +185,6 @@ object SampleCatalog {
             namaProduk = "SKM (SKM Kasar)",
             satuan = "pcs",
             hargaJual = 4500.0,
-            hargaBeli = 3200.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -200,7 +193,6 @@ object SampleCatalog {
             namaProduk = "Kroto Sari (KSK)",
             satuan = "pcs",
             hargaJual = 3500.0,
-            hargaBeli = 2600.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -209,7 +201,6 @@ object SampleCatalog {
             namaProduk = "Kroto Sari (Krotosari Kasar)",
             satuan = "pcs",
             hargaJual = 3500.0,
-            hargaBeli = 2700.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -218,7 +209,6 @@ object SampleCatalog {
             namaProduk = "Alam Sakti (Love Bird)",
             satuan = "pcs",
             hargaJual = 10500.0,
-            hargaBeli = 9500.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -227,7 +217,6 @@ object SampleCatalog {
             namaProduk = "Alam Sakti (Kenari)",
             satuan = "pcs",
             hargaJual = 11500.0,
-            hargaBeli = 10400.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -236,7 +225,6 @@ object SampleCatalog {
             namaProduk = "Madura Koung (Madura Koung)",
             satuan = "pcs",
             hargaJual = 9500.0,
-            hargaBeli = 8600.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -245,7 +233,6 @@ object SampleCatalog {
             namaProduk = "Kutut Profit (Profit)",
             satuan = "pcs",
             hargaJual = 8500.0,
-            hargaBeli = 7300.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -254,7 +241,6 @@ object SampleCatalog {
             namaProduk = "Derkuku Comet (Comet Derkuku)",
             satuan = "pcs",
             hargaJual = 7500.0,
-            hargaBeli = 6500.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -263,7 +249,6 @@ object SampleCatalog {
             namaProduk = "Gold Coin (Kutut 250gr)",
             satuan = "pcs",
             hargaJual = 8500.0,
-            hargaBeli = 7600.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -272,7 +257,6 @@ object SampleCatalog {
             namaProduk = "Gold Coin (Hijau Seaweed 450gr)",
             satuan = "pcs",
             hargaJual = 12000.0,
-            hargaBeli = 11100.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -281,7 +265,6 @@ object SampleCatalog {
             namaProduk = "Gold Coin (Canary)",
             satuan = "pcs",
             hargaJual = 10000.0,
-            hargaBeli = 8700.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -290,7 +273,6 @@ object SampleCatalog {
             namaProduk = "Ebod Canary (Ebod)",
             satuan = "pcs",
             hargaJual = 9000.0,
-            hargaBeli = 8100.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -299,7 +281,6 @@ object SampleCatalog {
             namaProduk = "Chirpy (Besar)",
             satuan = "pcs",
             hargaJual = 10000.0,
-            hargaBeli = 9000.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -308,7 +289,6 @@ object SampleCatalog {
             namaProduk = "Chirpy (Kecil)",
             satuan = "pcs",
             hargaJual = 7000.0,
-            hargaBeli = 5900.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -317,7 +297,6 @@ object SampleCatalog {
             namaProduk = "Fancy (Besar)",
             satuan = "pcs",
             hargaJual = 14500.0,
-            hargaBeli = 13400.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -326,7 +305,6 @@ object SampleCatalog {
             namaProduk = "Fancy (Kecil 250gr)",
             satuan = "pcs",
             hargaJual = 8000.0,
-            hargaBeli = 6900.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -335,7 +313,6 @@ object SampleCatalog {
             namaProduk = "Ketan Hitam",
             satuan = "pcs",
             hargaJual = 8500.0,
-            hargaBeli = 7800.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -344,7 +321,6 @@ object SampleCatalog {
             namaProduk = "Milet Putih (1kg)",
             satuan = "kg",
             hargaJual = 14500.0,
-            hargaBeli = 13800.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -353,7 +329,6 @@ object SampleCatalog {
             namaProduk = "Milet Merah",
             satuan = "pcs",
             hargaJual = 14500.0,
-            hargaBeli = 13500.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -362,7 +337,6 @@ object SampleCatalog {
             namaProduk = "Kenari Seed (1kg)",
             satuan = "kg",
             hargaJual = 15500.0,
-            hargaBeli = 14800.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -371,7 +345,6 @@ object SampleCatalog {
             namaProduk = "Trucuk Pisang Ijo SM",
             satuan = "pcs",
             hargaJual = 4500.0,
-            hargaBeli = 2700.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -380,7 +353,6 @@ object SampleCatalog {
             namaProduk = "521 (521 Coklat)",
             satuan = "kg",
             hargaJual = 8500.0,
-            hargaBeli = 7700.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -389,7 +361,6 @@ object SampleCatalog {
             namaProduk = "521 (521 Hijau)",
             satuan = "kg",
             hargaJual = 8500.0,
-            hargaBeli = 7900.0,
             hargaBelumDiisi = false
         ),
 
@@ -681,7 +652,6 @@ object SampleCatalog {
             kategori = "Obat",
             namaProduk = "Vita Tetra Chlor (Kapsul isi 10)",
             satuan = "pcs",
-            hargaBeli = 4500.0,
             hargaJual = 6000.0,
             hargaBelumDiisi = false
         ),
@@ -690,7 +660,6 @@ object SampleCatalog {
             kategori = "Obat",
             namaProduk = "Koleridin (Kapsul isi 10)",
             satuan = "pcs",
-            hargaBeli = 4000.0,
             hargaJual = 5500.0,
             hargaBelumDiisi = false
         ),
@@ -699,7 +668,6 @@ object SampleCatalog {
             kategori = "Obat",
             namaProduk = "Vita Stress (Sachet 10gr)",
             satuan = "pcs",
-            hargaBeli = 3500.0,
             hargaJual = 5000.0,
             hargaBelumDiisi = false
         ),
@@ -708,7 +676,6 @@ object SampleCatalog {
             kategori = "Obat",
             namaProduk = "Super N (15 ml)",
             satuan = "pcs",
-            hargaBeli = 16000.0,
             hargaJual = 20000.0,
             hargaBelumDiisi = false
         ),
@@ -717,7 +684,6 @@ object SampleCatalog {
             kategori = "Obat",
             namaProduk = "Biodin Spray Antiseptik (100 ml)",
             satuan = "pcs",
-            hargaBeli = 22000.0,
             hargaJual = 28000.0,
             hargaBelumDiisi = false
         ),
@@ -726,7 +692,6 @@ object SampleCatalog {
             kategori = "Obat",
             namaProduk = "Scabies Cream / Salep Jamur Kucing",
             satuan = "pcs",
-            hargaBeli = 12000.0,
             hargaJual = 16000.0,
             hargaBelumDiisi = false
         ),
@@ -735,7 +700,6 @@ object SampleCatalog {
             kategori = "Obat",
             namaProduk = "Detick Obat Kutu Kucing (1-10kg)",
             satuan = "pcs",
-            hargaBeli = 15000.0,
             hargaJual = 22000.0,
             hargaBelumDiisi = false
         ),
@@ -744,7 +708,6 @@ object SampleCatalog {
             kategori = "Obat",
             namaProduk = "Albenworm Obat Cacing Kucing",
             satuan = "pcs",
-            hargaBeli = 14000.0,
             hargaJual = 18000.0,
             hargaBelumDiisi = false
         ),
@@ -753,7 +716,6 @@ object SampleCatalog {
             kategori = "Obat",
             namaProduk = "Minyak Ikan / Fish Oil (Botol 50 butir)",
             satuan = "pcs",
-            hargaBeli = 8000.0,
             hargaJual = 12000.0,
             hargaBelumDiisi = false
         ),
@@ -762,7 +724,6 @@ object SampleCatalog {
             kategori = "Obat",
             namaProduk = "Gendol / Tetraclor Cair Ternak (100 ml)",
             satuan = "pcs",
-            hargaBeli = 10000.0,
             hargaJual = 14000.0,
             hargaBelumDiisi = false
         ),
@@ -771,7 +732,6 @@ object SampleCatalog {
             kategori = "Obat",
             namaProduk = "Doxyvet Serbuk (Sachet 5gr)",
             satuan = "pcs",
-            hargaBeli = 4000.0,
             hargaJual = 6000.0,
             hargaBelumDiisi = false
         ),
@@ -780,7 +740,6 @@ object SampleCatalog {
             kategori = "Obat",
             namaProduk = "Obat Kutu Serbuk Asuntol (100gr)",
             satuan = "pcs",
-            hargaBeli = 11000.0,
             hargaJual = 15000.0,
             hargaBelumDiisi = false
         )

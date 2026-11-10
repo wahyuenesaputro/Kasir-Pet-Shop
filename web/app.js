@@ -87,35 +87,35 @@ const defaultCatalog = [
   { id: "ayam_13", kategori: "Ayam", namaProduk: "524 A (Karung)", satuan: "kg", hargaJual: 9000 },
   { id: "ayam_14", kategori: "Ayam", namaProduk: "324KJ (Karung)", satuan: "kg", hargaJual: 9500 },
   { id: "ayam_15", kategori: "Ayam", namaProduk: "CP 124 P", satuan: "kg", hargaJual: 11000 },
-  { id: "burung_1", kategori: "Burung", namaProduk: "Leopard (MD Halus)", satuan: "pcs", hargaBeli: 6900, hargaJual: 8000 },
-  { id: "burung_2", kategori: "Burung", namaProduk: "Leopard (MD Kasar)", satuan: "pcs", hargaBeli: 6900, hargaJual: 8000 },
-  { id: "burung_3", kategori: "Burung", namaProduk: "Leopard (Hijau Kasar)", satuan: "pcs", hargaBeli: 7100, hargaJual: 8500 },
-  { id: "burung_4", kategori: "Burung", namaProduk: "Topsong (Top Song Coklat)", satuan: "pcs", hargaBeli: 10900, hargaJual: 12000 },
-  { id: "burung_5", kategori: "Burung", namaProduk: "Topsong (Top Song Hijau)", satuan: "pcs", hargaBeli: 11000, hargaJual: 12000 },
-  { id: "burung_6", kategori: "Burung", namaProduk: "SKM (SKM Halus)", satuan: "pcs", hargaBeli: 3200, hargaJual: 4500 },
-  { id: "burung_7", kategori: "Burung", namaProduk: "SKM (SKM Kasar)", satuan: "pcs", hargaBeli: 3200, hargaJual: 4500 },
-  { id: "burung_8", kategori: "Burung", namaProduk: "Kroto Sari (KSK)", satuan: "pcs", hargaBeli: 2600, hargaJual: 3500 },
-  { id: "burung_9", kategori: "Burung", namaProduk: "Kroto Sari (Krotosari Kasar)", satuan: "pcs", hargaBeli: 2700, hargaJual: 3500 },
-  { id: "burung_10", kategori: "Burung", namaProduk: "Alam Sakti (Love Bird)", satuan: "pcs", hargaBeli: 9500, hargaJual: 10500 },
-  { id: "burung_11", kategori: "Burung", namaProduk: "Alam Sakti (Kenari)", satuan: "pcs", hargaBeli: 10400, hargaJual: 11500 },
-  { id: "burung_12", kategori: "Burung", namaProduk: "Madura Koung (Madura Koung)", satuan: "pcs", hargaBeli: 8600, hargaJual: 9500 },
-  { id: "burung_13", kategori: "Burung", namaProduk: "Kutut Profit (Profit)", satuan: "pcs", hargaBeli: 7300, hargaJual: 8500 },
-  { id: "burung_14", kategori: "Burung", namaProduk: "Derkuku Comet (Comet Derkuku)", satuan: "pcs", hargaBeli: 6500, hargaJual: 7500 },
-  { id: "burung_15", kategori: "Burung", namaProduk: "Gold Coin (Kutut 250gr)", satuan: "pcs", hargaBeli: 7600, hargaJual: 8500 },
-  { id: "burung_16", kategori: "Burung", namaProduk: "Gold Coin (Hijau Seaweed 450gr)", satuan: "pcs", hargaBeli: 11100, hargaJual: 12000 },
-  { id: "burung_17", kategori: "Burung", namaProduk: "Gold Coin (Canary)", satuan: "pcs", hargaBeli: 8700, hargaJual: 10000 },
-  { id: "burung_18", kategori: "Burung", namaProduk: "Ebod Canary (Ebod)", satuan: "pcs", hargaBeli: 8100, hargaJual: 9000 },
-  { id: "burung_19", kategori: "Burung", namaProduk: "Chirpy (Besar)", satuan: "pcs", hargaBeli: 9000, hargaJual: 10000 },
-  { id: "burung_20", kategori: "Burung", namaProduk: "Chirpy (Kecil)", satuan: "pcs", hargaBeli: 5900, hargaJual: 7000 },
-  { id: "burung_21", kategori: "Burung", namaProduk: "Fancy (Besar)", satuan: "pcs", hargaBeli: 13400, hargaJual: 14500 },
-  { id: "burung_22", kategori: "Burung", namaProduk: "Fancy (Kecil 250gr)", satuan: "pcs", hargaBeli: 6900, hargaJual: 8000 },
-  { id: "burung_23", kategori: "Burung", namaProduk: "Ketan Hitam", satuan: "pcs", hargaBeli: 7800, hargaJual: 8500 },
-  { id: "burung_24", kategori: "Burung", namaProduk: "Milet Putih (1kg)", satuan: "kg", hargaBeli: 13800, hargaJual: 14500 },
-  { id: "burung_25", kategori: "Burung", namaProduk: "Milet Merah", satuan: "pcs", hargaBeli: 13500, hargaJual: 14500 },
-  { id: "burung_26", kategori: "Burung", namaProduk: "Kenari Seed (1kg)", satuan: "kg", hargaBeli: 14800, hargaJual: 15500 },
-  { id: "burung_27", kategori: "Burung", namaProduk: "Trucuk Pisang Ijo SM", satuan: "pcs", hargaBeli: 2700, hargaJual: 4500 },
-  { id: "burung_28", kategori: "Burung", namaProduk: "521 (521 Coklat)", satuan: "kg", hargaBeli: 7700, hargaJual: 8500 },
-  { id: "burung_29", kategori: "Burung", namaProduk: "521 (521 Hijau)", satuan: "kg", hargaBeli: 7900, hargaJual: 8500 },
+  { id: "burung_1", kategori: "Burung", namaProduk: "Leopard (MD Halus)", satuan: "pcs", hargaJual: 8000 },
+  { id: "burung_2", kategori: "Burung", namaProduk: "Leopard (MD Kasar)", satuan: "pcs", hargaJual: 8000 },
+  { id: "burung_3", kategori: "Burung", namaProduk: "Leopard (Hijau Kasar)", satuan: "pcs", hargaJual: 8500 },
+  { id: "burung_4", kategori: "Burung", namaProduk: "Topsong (Top Song Coklat)", satuan: "pcs", hargaJual: 12000 },
+  { id: "burung_5", kategori: "Burung", namaProduk: "Topsong (Top Song Hijau)", satuan: "pcs", hargaJual: 12000 },
+  { id: "burung_6", kategori: "Burung", namaProduk: "SKM (SKM Halus)", satuan: "pcs", hargaJual: 4500 },
+  { id: "burung_7", kategori: "Burung", namaProduk: "SKM (SKM Kasar)", satuan: "pcs", hargaJual: 4500 },
+  { id: "burung_8", kategori: "Burung", namaProduk: "Kroto Sari (KSK)", satuan: "pcs", hargaJual: 3500 },
+  { id: "burung_9", kategori: "Burung", namaProduk: "Kroto Sari (Krotosari Kasar)", satuan: "pcs", hargaJual: 3500 },
+  { id: "burung_10", kategori: "Burung", namaProduk: "Alam Sakti (Love Bird)", satuan: "pcs", hargaJual: 10500 },
+  { id: "burung_11", kategori: "Burung", namaProduk: "Alam Sakti (Kenari)", satuan: "pcs", hargaJual: 11500 },
+  { id: "burung_12", kategori: "Burung", namaProduk: "Madura Koung (Madura Koung)", satuan: "pcs", hargaJual: 9500 },
+  { id: "burung_13", kategori: "Burung", namaProduk: "Kutut Profit (Profit)", satuan: "pcs", hargaJual: 8500 },
+  { id: "burung_14", kategori: "Burung", namaProduk: "Derkuku Comet (Comet Derkuku)", satuan: "pcs", hargaJual: 7500 },
+  { id: "burung_15", kategori: "Burung", namaProduk: "Gold Coin (Kutut 250gr)", satuan: "pcs", hargaJual: 8500 },
+  { id: "burung_16", kategori: "Burung", namaProduk: "Gold Coin (Hijau Seaweed 450gr)", satuan: "pcs", hargaJual: 12000 },
+  { id: "burung_17", kategori: "Burung", namaProduk: "Gold Coin (Canary)", satuan: "pcs", hargaJual: 10000 },
+  { id: "burung_18", kategori: "Burung", namaProduk: "Ebod Canary (Ebod)", satuan: "pcs", hargaJual: 9000 },
+  { id: "burung_19", kategori: "Burung", namaProduk: "Chirpy (Besar)", satuan: "pcs", hargaJual: 10000 },
+  { id: "burung_20", kategori: "Burung", namaProduk: "Chirpy (Kecil)", satuan: "pcs", hargaJual: 7000 },
+  { id: "burung_21", kategori: "Burung", namaProduk: "Fancy (Besar)", satuan: "pcs", hargaJual: 14500 },
+  { id: "burung_22", kategori: "Burung", namaProduk: "Fancy (Kecil 250gr)", satuan: "pcs", hargaJual: 8000 },
+  { id: "burung_23", kategori: "Burung", namaProduk: "Ketan Hitam", satuan: "pcs", hargaJual: 8500 },
+  { id: "burung_24", kategori: "Burung", namaProduk: "Milet Putih (1kg)", satuan: "kg", hargaJual: 14500 },
+  { id: "burung_25", kategori: "Burung", namaProduk: "Milet Merah", satuan: "pcs", hargaJual: 14500 },
+  { id: "burung_26", kategori: "Burung", namaProduk: "Kenari Seed (1kg)", satuan: "kg", hargaJual: 15500 },
+  { id: "burung_27", kategori: "Burung", namaProduk: "Trucuk Pisang Ijo SM", satuan: "pcs", hargaJual: 4500 },
+  { id: "burung_28", kategori: "Burung", namaProduk: "521 (521 Coklat)", satuan: "kg", hargaJual: 8500 },
+  { id: "burung_29", kategori: "Burung", namaProduk: "521 (521 Hijau)", satuan: "kg", hargaJual: 8500 },
   { id: "ikan_1", kategori: "Ikan", namaProduk: "781 (-1)", satuan: "pcs", hargaJual: 16500 },
   { id: "ikan_2", kategori: "Ikan", namaProduk: "781 (-2)", satuan: "pcs", hargaJual: 16000 },
   { id: "ikan_3", kategori: "Ikan", namaProduk: "781 (-3)", satuan: "pcs", hargaJual: 15500 },
@@ -150,18 +150,18 @@ const defaultCatalog = [
   { id: "kucing_19", kategori: "Kucing", namaProduk: "Life Cat (1 Dus Pouch 24pcs)", satuan: "pcs", hargaJual: 5000 },
   { id: "kucing_20", kategori: "Kucing", namaProduk: "Life Cat (Kaleng Adult 400gr)", satuan: "pcs", hargaJual: 13500 },
   { id: "kucing_21", kategori: "Kucing", namaProduk: "Life Cat (Kaleng Kitten 400gr)", satuan: "pcs", hargaJual: 13500 },
-  { id: "obat_1", kategori: "Obat", namaProduk: "Vita Tetra Chlor (Kapsul isi 10)", satuan: "pcs", hargaBeli: 4500, hargaJual: 6000 },
-  { id: "obat_2", kategori: "Obat", namaProduk: "Koleridin (Kapsul isi 10)", satuan: "pcs", hargaBeli: 4000, hargaJual: 5500 },
-  { id: "obat_3", kategori: "Obat", namaProduk: "Vita Stress (Sachet 10gr)", satuan: "pcs", hargaBeli: 3500, hargaJual: 5000 },
-  { id: "obat_4", kategori: "Obat", namaProduk: "Super N (15 ml)", satuan: "pcs", hargaBeli: 16000, hargaJual: 20000 },
-  { id: "obat_5", kategori: "Obat", namaProduk: "Biodin Spray Antiseptik (100 ml)", satuan: "pcs", hargaBeli: 22000, hargaJual: 28000 },
-  { id: "obat_6", kategori: "Obat", namaProduk: "Scabies Cream / Salep Jamur Kucing", satuan: "pcs", hargaBeli: 12000, hargaJual: 16000 },
-  { id: "obat_7", kategori: "Obat", namaProduk: "Detick Obat Kutu Kucing (1-10kg)", satuan: "pcs", hargaBeli: 15000, hargaJual: 22000 },
-  { id: "obat_8", kategori: "Obat", namaProduk: "Albenworm Obat Cacing Kucing", satuan: "pcs", hargaBeli: 14000, hargaJual: 18000 },
-  { id: "obat_9", kategori: "Obat", namaProduk: "Minyak Ikan / Fish Oil (Botol 50 butir)", satuan: "pcs", hargaBeli: 8000, hargaJual: 12000 },
-  { id: "obat_10", kategori: "Obat", namaProduk: "Gendol / Tetraclor Cair Ternak (100 ml)", satuan: "pcs", hargaBeli: 10000, hargaJual: 14000 },
-  { id: "obat_11", kategori: "Obat", namaProduk: "Doxyvet Serbuk (Sachet 5gr)", satuan: "pcs", hargaBeli: 4000, hargaJual: 6000 },
-  { id: "obat_12", kategori: "Obat", namaProduk: "Obat Kutu Serbuk Asuntol (100gr)", satuan: "pcs", hargaBeli: 11000, hargaJual: 15000 }
+  { id: "obat_1", kategori: "Obat", namaProduk: "Vita Tetra Chlor (Kapsul isi 10)", satuan: "pcs", hargaJual: 6000 },
+  { id: "obat_2", kategori: "Obat", namaProduk: "Koleridin (Kapsul isi 10)", satuan: "pcs", hargaJual: 5500 },
+  { id: "obat_3", kategori: "Obat", namaProduk: "Vita Stress (Sachet 10gr)", satuan: "pcs", hargaJual: 5000 },
+  { id: "obat_4", kategori: "Obat", namaProduk: "Super N (15 ml)", satuan: "pcs", hargaJual: 20000 },
+  { id: "obat_5", kategori: "Obat", namaProduk: "Biodin Spray Antiseptik (100 ml)", satuan: "pcs", hargaJual: 28000 },
+  { id: "obat_6", kategori: "Obat", namaProduk: "Scabies Cream / Salep Jamur Kucing", satuan: "pcs", hargaJual: 16000 },
+  { id: "obat_7", kategori: "Obat", namaProduk: "Detick Obat Kutu Kucing (1-10kg)", satuan: "pcs", hargaJual: 22000 },
+  { id: "obat_8", kategori: "Obat", namaProduk: "Albenworm Obat Cacing Kucing", satuan: "pcs", hargaJual: 18000 },
+  { id: "obat_9", kategori: "Obat", namaProduk: "Minyak Ikan / Fish Oil (Botol 50 butir)", satuan: "pcs", hargaJual: 12000 },
+  { id: "obat_10", kategori: "Obat", namaProduk: "Gendol / Tetraclor Cair Ternak (100 ml)", satuan: "pcs", hargaJual: 14000 },
+  { id: "obat_11", kategori: "Obat", namaProduk: "Doxyvet Serbuk (Sachet 5gr)", satuan: "pcs", hargaJual: 6000 },
+  { id: "obat_12", kategori: "Obat", namaProduk: "Obat Kutu Serbuk Asuntol (100gr)", satuan: "pcs", hargaJual: 15000 }
 ];
 
 
@@ -546,9 +546,6 @@ function openEditPriceModal(productId) {
   document.getElementById("edit-price-prod-name").innerText = p.namaProduk;
   document.getElementById("edit-price-prod-cat").innerText = `${p.kategori} • Satuan: ${p.satuan}`;
   document.getElementById("edit-price-current-disp").innerText = `${formatRupiah(p.hargaJual)} / ${p.satuan}`;
-  
-  const costDisp = document.getElementById("edit-price-cost-disp");
-  if (costDisp) costDisp.innerText = p.hargaBeli > 0 ? `${formatRupiah(p.hargaBeli)} / ${p.satuan}` : "-";
 
   const input = document.getElementById("edit-price-new-input");
   input.value = p.hargaJual;
@@ -1963,6 +1960,9 @@ function doGet(e) {
   } else if (action === "delete_product" || action === "hapus_produk") {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     return jsonResponse(deleteProductFromSheets(ss, e.parameter || {}));
+  } else if (action === "hapus_modal" || action === "clean_cost" || action === "hapus_harga_beli") {
+    var resultMsg = hapusKolomHargaModalOtomatis();
+    return jsonResponse({ success: true, message: resultMsg });
   } else if (action === "recent" || action === "balance" || action === "get_balance") {
     return getRecentSalesJson();
   } else if (action === "setup" || action === "init" || action === "buat_saldo") {
@@ -2097,7 +2097,36 @@ function buatKolomSaldoOtomatis() {
   var maxR = Math.max(sheet.getLastRow(), 2);
   sheet.getRange(2, 4, maxR - 1, 3).setNumberFormat('"Rp"#,##0');
   sheet.autoResizeColumns(1, 7);
-  return "Berhasil merapikan tab Penjualan 7 kolom!";
+
+  hapusKolomHargaModalOtomatis();
+
+  return "Berhasil merapikan tab Penjualan 7 kolom dan membersihkan kolom modal di seluruh sheet!";
+}
+
+function hapusKolomHargaModalOtomatis() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheets = ss.getSheets();
+  var cleanedSheets = [];
+
+  for (var i = 0; i < sheets.length; i++) {
+    var sheet = sheets[i];
+    var sheetName = sheet.getName();
+    if (sheetName === "Penjualan" || sheetName === "Rekap") continue;
+
+    var values = sheet.getDataRange().getValues();
+    if (!values || values.length === 0) continue;
+
+    var headerRow = values[0];
+    for (var col = headerRow.length - 1; col >= 0; col--) {
+      var headerText = String(headerRow[col] || "").trim().toLowerCase();
+      if (headerText.indexOf("beli") >= 0 || headerText.indexOf("modal") >= 0) {
+        sheet.deleteColumn(col + 1);
+        cleanedSheets.push(sheetName + " (kolom " + (col + 1) + ")");
+      }
+    }
+  }
+
+  return "Berhasil menghapus seluruh kolom Harga Modal/Beli dari spreadsheet! " + (cleanedSheets.length > 0 ? "Sheet dibersihkan: " + cleanedSheets.join(", ") : "Semua sheet sudah bersih tanpa kolom modal.");
 }
 
 function isiDataProdukOtomatis() {
@@ -2105,129 +2134,129 @@ function isiDataProdukOtomatis() {
   buatKolomSaldoOtomatis();
 
   var dataBurung = [
-    [1, "SKM (SKM Halus)", "pcs", 3200, 4500, ""],
-    [2, "SKM (SKM Kasar)", "pcs", 3200, 4500, ""],
-    [3, "Kroto Sari (KSK)", "pcs", 2600, 3500, ""],
-    [4, "Kroto Sari (Krotosari Kasar)", "pcs", 2700, 3500, ""],
-    [5, "Alam Sakti (Love Bird)", "pcs", 9500, 10500, ""],
-    [6, "Alam Sakti (Kenari)", "pcs", 10400, 11500, ""],
-    [7, "Topsong (Top Song Coklat)", "pcs", 10900, 12000, ""],
-    [8, "Topsong (Top Song Hijau)", "pcs", 11000, 12000, ""],
-    [9, "Leopard (Kuning Kasar)", "pcs", 7100, 8500, ""],
-    [10, "Leopard (Hijau Kasar)", "pcs", 7100, 8500, ""],
-    [11, "Chirpy (Besar)", "pcs", 7600, 8500, ""],
-    [12, "Madura Koung (Madura Koung)", "pcs", 8600, 9500, ""],
-    [13, "Kutut Profit (Profit)", "pcs", 7300, 8500, ""],
-    [14, "Derkuku Comet (Comet Derkuku)", "pcs", 6500, 7500, ""],
-    [15, "Gold Coin (Kutut 250gr)", "pcs", 7600, 8500, ""],
-    [16, "Gold Coin (Hijau Seaweed 450gr)", "pcs", 11100, 12000, ""],
-    [17, "Gold Coin (Canary)", "pcs", 8700, 10000, ""],
-    [18, "Ebod Canary (Ebod)", "pcs", 8100, 9000, ""],
-    [19, "Fancy (9 Bintang Anti Stress)", "pcs", 6500, 8000, ""],
-    [20, "Fancy (Love Bird)", "pcs", 13000, 14500, ""],
-    [21, "Fancy (Bintang Seaweed/Gold)", "pcs", 12500, 14500, ""],
-    [22, "Milet Racik Lovebird", "pcs", 8000, 10000, ""],
-    [23, "Milet Putih Kiloan", "kg", 13000, 14500, ""],
-    [24, "Milet Merah Kiloan", "kg", 13000, 14500, ""],
-    [25, "Bintang Kebumen (Halus)", "pcs", 7500, 9000, ""],
-    [26, "Phoenix Perkutut", "pcs", 11000, 12500, ""],
-    [27, "Canary Post (Biji Sawi)", "kg", 14000, 16000, ""],
-    [28, "Kwaci Hitam Kiloan", "kg", 18000, 22000, ""],
-    [29, "Jagung Kristal Merah", "kg", 8500, 10000, ""]
+    [1, "SKM (SKM Halus)", "pcs", 4500, ""],
+    [2, "SKM (SKM Kasar)", "pcs", 4500, ""],
+    [3, "Kroto Sari (KSK)", "pcs", 3500, ""],
+    [4, "Kroto Sari (Krotosari Kasar)", "pcs", 3500, ""],
+    [5, "Alam Sakti (Love Bird)", "pcs", 10500, ""],
+    [6, "Alam Sakti (Kenari)", "pcs", 11500, ""],
+    [7, "Topsong (Top Song Coklat)", "pcs", 12000, ""],
+    [8, "Topsong (Top Song Hijau)", "pcs", 12000, ""],
+    [9, "Leopard (Kuning Kasar)", "pcs", 8500, ""],
+    [10, "Leopard (Hijau Kasar)", "pcs", 8500, ""],
+    [11, "Chirpy (Besar)", "pcs", 8500, ""],
+    [12, "Madura Koung (Madura Koung)", "pcs", 9500, ""],
+    [13, "Kutut Profit (Profit)", "pcs", 8500, ""],
+    [14, "Derkuku Comet (Comet Derkuku)", "pcs", 7500, ""],
+    [15, "Gold Coin (Kutut 250gr)", "pcs", 8500, ""],
+    [16, "Gold Coin (Hijau Seaweed 450gr)", "pcs", 12000, ""],
+    [17, "Gold Coin (Canary)", "pcs", 10000, ""],
+    [18, "Ebod Canary (Ebod)", "pcs", 9000, ""],
+    [19, "Fancy (9 Bintang Anti Stress)", "pcs", 8000, ""],
+    [20, "Fancy (Love Bird)", "pcs", 14500, ""],
+    [21, "Fancy (Bintang Seaweed/Gold)", "pcs", 14500, ""],
+    [22, "Milet Racik Lovebird", "pcs", 10000, ""],
+    [23, "Milet Putih Kiloan", "kg", 14500, ""],
+    [24, "Milet Merah Kiloan", "kg", 14500, ""],
+    [25, "Bintang Kebumen (Halus)", "pcs", 9000, ""],
+    [26, "Phoenix Perkutut", "pcs", 12500, ""],
+    [27, "Canary Post (Biji Sawi)", "kg", 16000, ""],
+    [28, "Kwaci Hitam Kiloan", "kg", 22000, ""],
+    [29, "Jagung Kristal Merah", "kg", 10000, ""]
   ];
   isiSheetKategori(ss, "Burung", dataBurung);
 
   var dataAyam = [
-    [1, "511 (1 Karung)", "kg", 10700, 11500, "Dijual per kg (dari karung)"],
-    [2, "511 (511 K)", "kg", 13500, 14500, ""],
-    [3, "591 (591k)", "kg", 13500, 14500, ""],
-    [4, "592 (592k)", "kg", 13500, 14500, ""],
-    [5, "594 (594k)", "kg", 13500, 14500, ""],
-    [6, "BR-1 Super", "kg", 11000, 12000, ""],
-    [7, "BR-611", "kg", 9000, 10000, ""],
-    [8, "Buras (1 Karung)", "kg", 6200, 7000, ""],
-    [9, "EH 610 (1 Karung)", "kg", 8500, 9500, ""],
-    [10, "Jagung (1 Karung Meniran)", "kg", 9500, 10500, ""],
-    [11, "Jagung (1 Karung Kasar)", "kg", 9500, 10500, ""],
-    [12, "Konsentrat 144", "kg", 12500, 13500, ""],
-    [13, "Katul Super", "kg", 4500, 5500, ""],
-    [14, "Polard Gandum", "kg", 6000, 7000, ""],
-    [15, "Kupang Halus", "kg", 3000, 4000, ""]
+    [1, "511 (1 Karung)", "kg", 11500, "Dijual per kg (dari karung)"],
+    [2, "511 (511 K)", "kg", 14500, ""],
+    [3, "591 (591k)", "kg", 14500, ""],
+    [4, "592 (592k)", "kg", 14500, ""],
+    [5, "594 (594k)", "kg", 14500, ""],
+    [6, "BR-1 Super", "kg", 12000, ""],
+    [7, "BR-611", "kg", 10000, ""],
+    [8, "Buras (1 Karung)", "kg", 7000, ""],
+    [9, "EH 610 (1 Karung)", "kg", 9500, ""],
+    [10, "Jagung (1 Karung Meniran)", "kg", 10500, ""],
+    [11, "Jagung (1 Karung Kasar)", "kg", 10500, ""],
+    [12, "Konsentrat 144", "kg", 13500, ""],
+    [13, "Katul Super", "kg", 5500, ""],
+    [14, "Polard Gandum", "kg", 7000, ""],
+    [15, "Kupang Halus", "kg", 4000, ""]
   ];
   isiSheetKategori(ss, "Ayam", dataAyam);
 
   var dataKucing = [
-    [1, "Bolt Ikan Tuna (Kiloan)", "kg", 21000, 24000, ""],
-    [2, "Bolt Salmon (Kiloan)", "kg", 22000, 25000, ""],
-    [3, "Bolt Kitten Salmon", "kg", 23000, 26000, ""],
-    [4, "Me-O Adult Seafood", "kg", 32000, 36000, ""],
-    [5, "Me-O Adult Tuna", "kg", 32000, 36000, ""],
-    [6, "Me-O Kitten Ocean Fish", "kg", 34000, 38000, ""],
-    [7, "Whiskas Adult Tuna", "kg", 33000, 37000, ""],
-    [8, "Whiskas Junior Ocean Fish", "kg", 35000, 39000, ""],
-    [9, "Cat Choize Tuna", "kg", 18500, 21000, ""],
-    [10, "Cat Choize Salmon", "kg", 19000, 21500, ""],
-    [11, "Cat Choize Kitten", "kg", 20500, 23000, ""],
-    [12, "Ori Cat Kitten", "kg", 17500, 20000, ""],
-    [13, "Ori Cat Adult", "kg", 17000, 19500, ""],
-    [14, "Life Cat Pouch Tuna 85gr", "pcs", 4500, 6000, ""],
-    [15, "Life Cat Pouch Salmon 85gr", "pcs", 4500, 6000, ""],
-    [16, "Whiskas Pouch Tuna 85gr", "pcs", 6500, 8000, ""],
-    [17, "Pasir Kucing Gumpal 5L", "pcs", 22000, 27000, ""],
-    [18, "Pasir Kucing Gumpal 10L", "pcs", 42000, 50000, ""]
+    [1, "Bolt Ikan Tuna (Kiloan)", "kg", 24000, ""],
+    [2, "Bolt Salmon (Kiloan)", "kg", 25000, ""],
+    [3, "Bolt Kitten Salmon", "kg", 26000, ""],
+    [4, "Me-O Adult Seafood", "kg", 36000, ""],
+    [5, "Me-O Adult Tuna", "kg", 36000, ""],
+    [6, "Me-O Kitten Ocean Fish", "kg", 38000, ""],
+    [7, "Whiskas Adult Tuna", "kg", 37000, ""],
+    [8, "Whiskas Junior Ocean Fish", "kg", 39000, ""],
+    [9, "Cat Choize Tuna", "kg", 21000, ""],
+    [10, "Cat Choize Salmon", "kg", 21500, ""],
+    [11, "Cat Choize Kitten", "kg", 23000, ""],
+    [12, "Ori Cat Kitten", "kg", 20000, ""],
+    [13, "Ori Cat Adult", "kg", 19500, ""],
+    [14, "Life Cat Pouch Tuna 85gr", "pcs", 6000, ""],
+    [15, "Life Cat Pouch Salmon 85gr", "pcs", 6000, ""],
+    [16, "Whiskas Pouch Tuna 85gr", "pcs", 8000, ""],
+    [17, "Pasir Kucing Gumpal 5L", "pcs", 27000, ""],
+    [18, "Pasir Kucing Gumpal 10L", "pcs", 50000, ""]
   ];
   isiSheetKategori(ss, "Kucing", dataKucing);
 
   var dataIkan = [
-    [1, "Takari Hijau 100gr", "pcs", 5000, 6500, ""],
-    [2, "Takari Merah 100gr", "pcs", 5000, 6500, ""],
-    [3, "Takari 250gr", "pcs", 11000, 13500, ""],
-    [4, "Takari 500gr", "pcs", 20000, 24000, ""],
-    [5, "Akari Premium Red 100gr", "pcs", 13000, 16000, ""],
-    [6, "Akari Premium Maxi 100gr", "pcs", 13000, 16000, ""],
-    [7, "Sanyu Turtle Food 100gr", "pcs", 10000, 13000, ""],
-    [8, "Pelet Lele 781-1 Kiloan", "kg", 12000, 14000, ""],
-    [9, "Pelet Lele 781-2 Kiloan", "kg", 11500, 13500, ""],
-    [10, "Pelet Lele -1 Kiloan", "kg", 11000, 13000, ""],
-    [11, "Pelet Nila LP-1 Kiloan", "kg", 11500, 13500, ""],
-    [12, "Pelet Nila LP-2 Kiloan", "kg", 11000, 13000, ""],
-    [13, "Pelet Apung Feng-Li 0", "kg", 17000, 20000, ""],
-    [14, "Pelet Apung Feng-Li 1", "kg", 16000, 19000, ""],
-    [15, "Pelet Koi CP 1kg", "pcs", 22000, 26000, ""],
-    [16, "Pelet Mas Koki 100gr", "pcs", 6000, 8000, ""]
+    [1, "Takari Hijau 100gr", "pcs", 6500, ""],
+    [2, "Takari Merah 100gr", "pcs", 6500, ""],
+    [3, "Takari 250gr", "pcs", 13500, ""],
+    [4, "Takari 500gr", "pcs", 24000, ""],
+    [5, "Akari Premium Red 100gr", "pcs", 16000, ""],
+    [6, "Akari Premium Maxi 100gr", "pcs", 16000, ""],
+    [7, "Sanyu Turtle Food 100gr", "pcs", 13000, ""],
+    [8, "Pelet Lele 781-1 Kiloan", "kg", 14000, ""],
+    [9, "Pelet Lele 781-2 Kiloan", "kg", 13500, ""],
+    [10, "Pelet Lele -1 Kiloan", "kg", 13000, ""],
+    [11, "Pelet Nila LP-1 Kiloan", "kg", 13500, ""],
+    [12, "Pelet Nila LP-2 Kiloan", "kg", 13000, ""],
+    [13, "Pelet Apung Feng-Li 0", "kg", 20000, ""],
+    [14, "Pelet Apung Feng-Li 1", "kg", 19000, ""],
+    [15, "Pelet Koi CP 1kg", "pcs", 26000, ""],
+    [16, "Pelet Mas Koki 100gr", "pcs", 8000, ""]
   ];
   isiSheetKategori(ss, "Ikan", dataIkan);
 
   var dataObat = [
-    [1, "Vita Tetra Chlor (Kapsul isi 10)", "pcs", 4500, 6000, "Obat ngorok & snot unggas"],
-    [2, "Koleridin (Kapsul isi 10)", "pcs", 4000, 5500, "Obat kolera & berak hijau"],
-    [3, "Vita Stress (Sachet 10gr)", "pcs", 3500, 5000, "Vitamin anti stres ayam & burung"],
-    [4, "Super N (15 ml)", "pcs", 16000, 20000, "Obat infeksi pernapasan burung"],
-    [5, "Biodin Spray Antiseptik (100 ml)", "pcs", 22000, 28000, "Obat luka, jamur, korep hewan"],
-    [6, "Scabies Cream / Salep Jamur Kucing", "pcs", 12000, 16000, "Obat jamur & scabies kucing"],
-    [7, "Detick Obat Kutu Kucing (1-10kg)", "pcs", 15000, 22000, "Obat tetes kutu kucing"],
-    [8, "Albenworm Obat Cacing Kucing", "pcs", 14000, 18000, "Obat cacing tablet kucing"],
-    [9, "Minyak Ikan / Fish Oil (Botol 50 butir)", "pcs", 8000, 12000, "Suplemen bulu & nafsu makan"],
-    [10, "Gendol / Tetraclor Cair Ternak (100 ml)", "pcs", 10000, 14000, "Obat pencernaan ternak"],
-    [11, "Doxyvet Serbuk (Sachet 5gr)", "pcs", 4000, 6000, "Antibiotik batuk ngorok ternak"],
-    [12, "Obat Kutu Serbuk Asuntol (100gr)", "pcs", 11000, 15000, "Bedak anti kutu ayam & unggas"]
+    [1, "Vita Tetra Chlor (Kapsul isi 10)", "pcs", 6000, "Obat ngorok & snot unggas"],
+    [2, "Koleridin (Kapsul isi 10)", "pcs", 5500, "Obat kolera & berak hijau"],
+    [3, "Vita Stress (Sachet 10gr)", "pcs", 5000, "Vitamin anti stres ayam & burung"],
+    [4, "Super N (15 ml)", "pcs", 20000, "Obat infeksi pernapasan burung"],
+    [5, "Biodin Spray Antiseptik (100 ml)", "pcs", 28000, "Obat luka, jamur, korep hewan"],
+    [6, "Scabies Cream / Salep Jamur Kucing", "pcs", 16000, "Obat jamur & scabies kucing"],
+    [7, "Detick Obat Kutu Kucing (1-10kg)", "pcs", 22000, "Obat tetes kutu kucing"],
+    [8, "Albenworm Obat Cacing Kucing", "pcs", 18000, "Obat cacing tablet kucing"],
+    [9, "Minyak Ikan / Fish Oil (Botol 50 butir)", "pcs", 12000, "Suplemen bulu & nafsu makan"],
+    [10, "Gendol / Tetraclor Cair Ternak (100 ml)", "pcs", 14000, "Obat pencernaan ternak"],
+    [11, "Doxyvet Serbuk (Sachet 5gr)", "pcs", 6000, "Antibiotik batuk ngorok ternak"],
+    [12, "Obat Kutu Serbuk Asuntol (100gr)", "pcs", 15000, "Bedak anti kutu ayam & unggas"]
   ];
   isiSheetKategori(ss, "Obat", dataObat);
 
-  return "Berhasil mengisi seluruh data 29 pakan burung harga resmi, ayam, kucing, ikan, obat, dan sheet Penjualan 7 kolom!";
+  return "Berhasil mengisi seluruh data produk (5 kolom resmi tanpa modal) dan sheet Penjualan 7 kolom!";
 }
 
 function isiSheetKategori(ss, sheetName, items) {
   var sheet = ss.getSheetByName(sheetName);
   if (!sheet) { sheet = ss.insertSheet(sheetName); } else { sheet.clear(); }
-  var headers = ["NO", "NAMA BARANG", "SATUAN", "HARGA BELI", "HARGA JUAL", "KETERANGAN"];
+  var headers = ["NO", "NAMA BARANG", "SATUAN", "HARGA JUAL", "KETERANGAN"];
   sheet.appendRow(headers);
-  formatHeaderRow(sheet, 6);
+  formatHeaderRow(sheet, 5);
   sheet.setFrozenRows(1);
   for (var i = 0; i < items.length; i++) { sheet.appendRow(items[i]); }
   var lastRow = sheet.getLastRow();
-  if (lastRow > 1) { sheet.getRange(2, 4, lastRow - 1, 2).setNumberFormat('"Rp"#,##0'); }
-  sheet.autoResizeColumns(1, 6);
+  if (lastRow > 1) { sheet.getRange(2, 4, lastRow - 1, 1).setNumberFormat('"Rp"#,##0'); }
+  sheet.autoResizeColumns(1, 5);
 }
 
 function ensureSalesSheetWithHeaders(ss) {
@@ -2356,9 +2385,7 @@ function getProductsJson() {
       }
       var idxNama = findColumnIndex(colMap, ["nama produk", "nama barang", "produk"]);
       var idxSatuan = findColumnIndex(colMap, ["satuan", "unit"]);
-      var idxHargaBeli = findColumnIndex(colMap, ["harga beli (per satuan)", "harga beli per satuan", "harga beli"]);
       var idxHargaJual = findColumnIndex(colMap, ["harga jual", "harga jual (per satuan)", "harga"]);
-      var idxHargaBeliPerKg = findColumnIndex(colMap, ["harga beli per kg", "harga beli/kg"]);
 
       for (var r = 1; r < data.length; r++) {
         var row = data[r];
@@ -2367,14 +2394,11 @@ function getProductsJson() {
 
         var satuan = (idxSatuan >= 0 && row[idxSatuan]) ? String(row[idxSatuan]).trim() : "pcs";
         var rawHargaJual = (idxHargaJual >= 0) ? parseNumber(row[idxHargaJual]) : 0;
-        var rawHargaBeli = (idxHargaBeli >= 0) ? parseNumber(row[idxHargaBeli]) : 0;
         var finalSatuan = satuan;
-        var finalHargaBeli = rawHargaBeli;
         var note = "";
 
         if (catName.toLowerCase() === "ayam" && (satuan.toLowerCase() === "zak" || satuan.toLowerCase() === "karung")) {
           finalSatuan = "kg";
-          if (idxHargaBeliPerKg >= 0 && row[idxHargaBeliPerKg]) { finalHargaBeli = parseNumber(row[idxHargaBeliPerKg]); }
           note = "Dijual per kg (dari karung)";
         }
 
@@ -2385,7 +2409,7 @@ function getProductsJson() {
           satuan: finalSatuan,
           satuanAsli: satuan,
           hargaJual: rawHargaJual,
-          hargaBeli: finalHargaBeli,
+          hargaBeli: 0,
           hargaBelumDiisi: (rawHargaJual <= 0),
           catatan: note
         });
@@ -2454,7 +2478,7 @@ function updateProductPriceInSheets(ss, data) {
     }
   }
 
-  return addProductToSheets(ss, { kategori: targetCat || "Lainnya", namaProduk: targetName, satuan: data.satuan || "pcs", hargaJual: newPrice, hargaBeli: data.hargaBeli || 0 });
+  return addProductToSheets(ss, { kategori: targetCat || "Lainnya", namaProduk: targetName, satuan: data.satuan || "pcs", hargaJual: newPrice });
 }
 
 function addProductToSheets(ss, data) {
@@ -2463,23 +2487,22 @@ function addProductToSheets(ss, data) {
   var name = String(data.namaProduk || data.nama || "").trim();
   var unit = String(data.satuan || data.unit || "pcs").trim();
   var price = Number(data.hargaJual || data.harga || data.price) || 0;
-  var cost = Number(data.hargaBeli || data.costPrice) || 0;
 
   if (!name) return { success: false, message: "Nama produk tidak boleh kosong" };
 
   var sheet = ss.getSheetByName(cat);
   if (!sheet) {
     sheet = ss.insertSheet(cat);
-    sheet.appendRow(["NO", "NAMA BARANG", "SATUAN", "HARGA BELI", "HARGA JUAL", "KETERANGAN"]);
-    formatHeaderRow(sheet, 6);
+    sheet.appendRow(["NO", "NAMA BARANG", "SATUAN", "HARGA JUAL", "KETERANGAN"]);
+    formatHeaderRow(sheet, 5);
     sheet.setFrozenRows(1);
   }
 
   var nextNo = Math.max(1, sheet.getLastRow());
-  sheet.appendRow([nextNo, name, unit, cost, price, "Ditambahkan dari Kasir"]);
+  sheet.appendRow([nextNo, name, unit, price, "Ditambahkan dari Kasir"]);
   var newRowIdx = sheet.getLastRow();
-  sheet.getRange(newRowIdx, 4, 1, 2).setNumberFormat('"Rp"#,##0');
-  sheet.autoResizeColumns(1, 6);
+  sheet.getRange(newRowIdx, 4).setNumberFormat('"Rp"#,##0');
+  sheet.autoResizeColumns(1, 5);
 
   return { success: true, message: "Produk '" + name + "' berhasil ditambahkan ke tab " + cat, kategori: cat, namaProduk: name, hargaJual: price };
 }
@@ -2526,7 +2549,7 @@ function deleteProductFromSheets(ss, data) {
       const btn = document.getElementById("btn-copy-apps-script-text");
       if (btn) btn.innerText = "Tersalin! ✅";
       setTimeout(() => { if (btn) btn.innerText = "Salin Kode"; }, 2500);
-      alert("Kode Google Apps Script (Code.gs) berhasil disalin ke Clipboard!\\n\\nSilakan buka spreadsheet Anda > Ekstensi > Apps Script > Tempel (Ctrl+V) > Simpan & Deploy.");
+      alert("Kode Google Apps Script (Code.gs) berhasil disalin ke Clipboard!\n\nSilakan buka spreadsheet Anda > Ekstensi > Apps Script > Tempel (Ctrl+V) > Simpan & Deploy.");
     }).catch(() => {
       fallbackCopyText(code);
     });
@@ -2543,4 +2566,31 @@ function fallbackCopyText(text) {
   document.execCommand("copy");
   document.body.removeChild(ta);
   alert("Kode Google Apps Script berhasil disalin ke Clipboard!");
+}
+
+async function hapusKolomModalDiSheets() {
+  const prodUrl = getProductUrl();
+  if (!prodUrl) {
+    alert("URL Google Apps Script belum diisi di Pengaturan!");
+    return;
+  }
+
+  const btn = document.getElementById("btn-clean-cost-col-text");
+  if (btn) btn.innerText = "Membersihkan...";
+
+  try {
+    const res = await fetch(`${prodUrl}?action=hapus_modal&t=${Date.now()}`);
+    const data = await res.json();
+    if (data && data.success) {
+      alert("SUKSES!\n\n" + data.message);
+      // Auto re-sync
+      syncWithSpreadsheet();
+    } else {
+      alert("Pemberitahuan: " + (data ? data.message : "Tidak ada respon dari Apps Script"));
+    }
+  } catch (err) {
+    alert("Proses pembersihan kolom modal terkirim ke spreadsheet.\nJika script baru belum dideploy, silakan Salin Kode Apps Script terbaru dan jalankan fungsi 'hapusKolomHargaModalOtomatis' di Google Apps Script.");
+  } finally {
+    if (btn) btn.innerText = "Bersihkan Kolom Modal";
+  }
 }

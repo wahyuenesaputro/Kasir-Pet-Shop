@@ -807,13 +807,19 @@
               <i data-lucide="code-2" class="w-4 h-4 text-indigo-600"></i>
               <span>Kode Google Apps Script (Code.gs)</span>
             </h5>
-            <button onclick="copyAppsScriptCode()" id="btn-copy-apps-script" class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[11px] rounded-lg shadow-sm transition flex items-center space-x-1">
-              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-              <span id="btn-copy-apps-script-text">Salin Kode</span>
-            </button>
+            <div class="flex items-center space-x-1.5">
+              <button onclick="hapusKolomModalDiSheets()" id="btn-clean-cost-col" class="px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] rounded-lg shadow-sm transition flex items-center space-x-1" title="Hapus seluruh kolom Harga Modal/Beli dari Google Spreadsheet">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                <span id="btn-clean-cost-col-text">Bersihkan Kolom Modal</span>
+              </button>
+              <button onclick="copyAppsScriptCode()" id="btn-copy-apps-script" class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[11px] rounded-lg shadow-sm transition flex items-center space-x-1">
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                <span id="btn-copy-apps-script-text">Salin Kode</span>
+              </button>
+            </div>
           </div>
           <p class="text-[11px] text-indigo-800 leading-relaxed">
-            Tempel kode ini ke <strong>Ekstensi &gt; Apps Script</strong> di spreadsheet Anda. Jalankan fungsi <code>isiDataProdukOtomatis()</code> untuk mengisi seluruh 29 data pakan burung harga resmi, ayam, kucing, ikan &amp; tabel kas dalam 1 klik!
+            Tempel kode ini ke <strong>Ekstensi &gt; Apps Script</strong> di spreadsheet Anda. Jalankan fungsi <code>isiDataProdukOtomatis()</code> untuk mengisi seluruh 5 kategori produk (5 kolom resmi tanpa modal) &amp; tabel kas dalam 1 klik!
           </p>
         </div>
 

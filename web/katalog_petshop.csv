@@ -1,91 +1,91 @@
-KATEGORI,NO,NAMA BARANG,SATUAN,HARGA BELI,HARGA JUAL,HARGA BELI / KG,KETERANGAN
-"Ayam",1,"511 (1 Karung)","karung",10120,11500,"9775","Dijual per kg (dari karung)"
-"Ayam",2,"511 (511 K)","karung",12760,14500,"12325","Dijual per kg (dari karung)"
-"Ayam",3,"591 (591k)","karung",12760,14500,"12325","Dijual per kg (dari karung)"
-"Ayam",4,"592 (592k)","karung",12760,14500,"12325","Dijual per kg (dari karung)"
-"Ayam",5,"594 (594k)","karung",12760,14500,"12325","Dijual per kg (dari karung)"
-"Ayam",6,"BR-1 Super","karung",10560,12000,"10200","Dijual per kg (dari karung)"
-"Ayam",7,"BR-611","karung",8800,10000,"8500","Dijual per kg (dari karung)"
-"Ayam",8,"Buras (1 Karung)","karung",6160,7000,"5950","Dijual per kg (dari karung)"
-"Ayam",9,"EH 610 (1 Karung)","karung",8360,9500,"8075","Dijual per kg (dari karung)"
-"Ayam",10,"Jagung (1 Karung Meniran)","karung",9240,10500,"8925","Dijual per kg (dari karung)"
-"Ayam",11,"Jagung (1 Karung Kasar)","karung",9240,10500,"8925","Dijual per kg (dari karung)"
-"Ayam",12,"Jagung (Unyil Kristal)","pcs",11440,13000,"",""
-"Ayam",13,"524 A (Karung)","karung",7920,9000,"7650","Dijual per kg (dari karung)"
-"Ayam",14,"324KJ (Karung)","karung",8360,9500,"8075","Dijual per kg (dari karung)"
-"Ayam",15,"CP 124 P","karung",9680,11000,"9350","Dijual per kg (dari karung)"
-"Burung",1,"Leopard (MD Halus)","pcs",7040,8000,"",""
-"Burung",2,"Leopard (MD Kasar)","pcs",7040,8000,"",""
-"Burung",3,"Leopard (Hijau Kasar)","pcs",7480,8500,"",""
-"Burung",4,"Topsong (Top Song Coklat)","pcs",10560,12000,"",""
-"Burung",5,"Topsong (Top Song Hijau)","pcs",10560,12000,"",""
-"Burung",6,"SKM (SKM Halus)","pcs",0,0,"",""
-"Burung",7,"SKM (SKM Kasar)","pcs",0,0,"",""
-"Burung",8,"Kroto Sari (KSK)","pcs",0,0,"",""
-"Burung",9,"Kroto Sari (Krotosari Kasar)","pcs",0,0,"",""
-"Burung",10,"Alam Sakti (Love Bird)","pcs",0,0,"",""
-"Burung",11,"Alam Sakti (Kenari)","pcs",0,0,"",""
-"Burung",12,"Madura Koung (Madura Koung)","pcs",0,0,"",""
-"Burung",13,"Kutut Profit (Profit)","pcs",0,0,"",""
-"Burung",14,"Derkuku Comet (Comet Derkuku)","pcs",0,0,"",""
-"Burung",15,"Gold Coin (Kutut 250gr)","pcs",0,0,"",""
-"Burung",16,"Gold Coin (Hijau Seaweed 450gr)","pcs",10560,12000,"",""
-"Burung",17,"Gold Coin (Canary)","pcs",0,0,"",""
-"Burung",18,"Ebod Canary (Ebod)","pcs",0,0,"",""
-"Burung",19,"Chirpy (Besar)","pcs",0,0,"",""
-"Burung",20,"Chirpy (Kecil)","pcs",0,0,"",""
-"Burung",21,"Fancy (Besar)","pcs",0,0,"",""
-"Burung",22,"Fancy (Kecil 250gr)","pcs",0,0,"",""
-"Burung",23,"Ketan Hitam","pcs",0,0,"",""
-"Burung",24,"Milet Putih (1kg)","karung",0,0,"0","Dijual per kg (dari karung)"
-"Burung",25,"Milet Merah","pcs",0,0,"",""
-"Burung",26,"Kenari Seed (1kg)","karung",0,0,"0","Dijual per kg (dari karung)"
-"Burung",27,"Trucuk Pisang Ijo SM","pcs",0,0,"",""
-"Burung",28,"521 (521 Coklat)","karung",0,0,"0","Dijual per kg (dari karung)"
-"Burung",29,"521 (521 Hijau)","karung",0,0,"0","Dijual per kg (dari karung)"
-"Ikan",1,"781 (-1)","pcs",14520,16500,"",""
-"Ikan",2,"781 (-2)","pcs",14080,16000,"",""
-"Ikan",3,"781 (-3)","pcs",13640,15500,"",""
-"Ikan",4,"782 (-2)","pcs",12760,14500,"",""
-"Ikan",5,"782 (-3)","pcs",12320,14000,"",""
-"Ikan",6,"782 (-4)","pcs",12320,14000,"",""
-"Ikan",7,"T78 (-2) kg","pcs",11000,12500,"",""
-"Ikan",8,"T78 (-3) kg","pcs",10560,12000,"",""
-"Ikan",9,"T78 (-4) kg","pcs",10560,12000,"",""
-"Ikan",10,"Hiu (-2)","pcs",7480,8500,"",""
-"Ikan",11,"Hiu (-3)","pcs",7480,8500,"",""
-"Ikan",12,"Hiu (-5)","pcs",7480,8500,"",""
-"Ikan",13,"Takari (100 gr)","pcs",3960,4500,"",""
-"Kucing",1,"Bolt (Ikan Ungu 800gr)","pcs",16720,19000,"",""
-"Kucing",2,"Bolt (Donat Kuning 800gr)","pcs",16720,19000,"",""
-"Kucing",3,"Bolt (Pink Bulat 800gr)","pcs",16720,19000,"",""
-"Kucing",4,"Bolt (Kitten Bolt 500gr)","pcs",11440,13000,"",""
-"Kucing",5,"Felibite (Felibite Ikan)","pcs",10560,12000,"",""
-"Kucing",6,"Felibite (Felibite Donat)","pcs",10560,12000,"",""
-"Kucing",7,"Felibite (Felibite Kitten Donat)","pcs",11440,13000,"",""
-"Kucing",8,"Excel (Adult Ikan 500gr)","pcs",10120,11500,"",""
-"Kucing",9,"Excel (Adult Donat)","pcs",10120,11500,"",""
-"Kucing",10,"Excel (Adult Segitiga Oren)","pcs",10120,11500,"",""
-"Kucing",11,"Excel (Kitten Pink 500gr)","pcs",11440,13000,"",""
-"Kucing",12,"Cat Choize (Hijau Adult 800gr)","pcs",15840,18000,"",""
-"Kucing",13,"Cat Choize (Oren Adult 800gr)","pcs",15840,18000,"",""
-"Kucing",14,"Cat Choize (Kitten Tuna Pink 1kg)","pcs",21560,24500,"",""
-"Kucing",15,"Cat Choize (Kitten Salmon Kuning 1kg)","pcs",21560,24500,"",""
-"Kucing",16,"Chester (800gr)","pcs",14960,17000,"",""
-"Kucing",17,"Whiskas Pouch (1 Dus 28 Pcs Junior)","pcs",5280,6000,"",""
-"Kucing",18,"Whiskas Pouch (1 Dus isi 28 Pcs Adult)","pcs",5280,6000,"",""
-"Kucing",19,"Life Cat (1 Dus Pouch 24pcs)","pcs",4400,5000,"",""
-"Kucing",20,"Life Cat (Kaleng Adult 400gr)","pcs",11880,13500,"",""
-"Kucing",21,"Life Cat (Kaleng Kitten 400gr)","pcs",11880,13500,"",""
-"Obat",1,"Vita Tetra Chlor (Kapsul isi 10)","pcs",4500,6000,"","Obat ngorok & snot unggas"
-"Obat",2,"Koleridin (Kapsul isi 10)","pcs",4000,5500,"","Obat kolera & berak hijau"
-"Obat",3,"Vita Stress (Sachet 10gr)","pcs",3500,5000,"","Vitamin anti stres ayam & burung"
-"Obat",4,"Super N (15 ml)","pcs",16000,20000,"","Obat infeksi pernapasan burung"
-"Obat",5,"Biodin Spray Antiseptik (100 ml)","pcs",22000,28000,"","Obat luka jamur korep hewan"
-"Obat",6,"Scabies Cream / Salep Jamur Kucing","pcs",12000,16000,"","Obat jamur & scabies kucing"
-"Obat",7,"Detick Obat Kutu Kucing (1-10kg)","pcs",15000,22000,"","Obat tetes kutu kucing"
-"Obat",8,"Albenworm Obat Cacing Kucing","pcs",14000,18000,"","Obat cacing tablet kucing"
-"Obat",9,"Minyak Ikan / Fish Oil (Botol 50 butir)","pcs",8000,12000,"","Suplemen bulu & nafsu makan"
-"Obat",10,"Gendol / Tetraclor Cair Ternak (100 ml)","pcs",10000,14000,"","Obat pencernaan ternak"
-"Obat",11,"Doxyvet Serbuk (Sachet 5gr)","pcs",4000,6000,"","Antibiotik batuk ngorok ternak"
-"Obat",12,"Obat Kutu Serbuk Asuntol (100gr)","pcs",11000,15000,"","Bedak anti kutu ayam & unggas"
+KATEGORI,NO,NAMA BARANG,SATUAN,HARGA JUAL,KETERANGAN
+Ayam,1,511 (1 Karung),karung,11500,Dijual per kg (dari karung)
+Ayam,2,511 (511 K),karung,14500,Dijual per kg (dari karung)
+Ayam,3,591 (591k),karung,14500,Dijual per kg (dari karung)
+Ayam,4,592 (592k),karung,14500,Dijual per kg (dari karung)
+Ayam,5,594 (594k),karung,14500,Dijual per kg (dari karung)
+Ayam,6,BR-1 Super,karung,12000,Dijual per kg (dari karung)
+Ayam,7,BR-611,karung,10000,Dijual per kg (dari karung)
+Ayam,8,Buras (1 Karung),karung,7000,Dijual per kg (dari karung)
+Ayam,9,EH 610 (1 Karung),karung,9500,Dijual per kg (dari karung)
+Ayam,10,Jagung (1 Karung Meniran),karung,10500,Dijual per kg (dari karung)
+Ayam,11,Jagung (1 Karung Kasar),karung,10500,Dijual per kg (dari karung)
+Ayam,12,Jagung (Unyil Kristal),pcs,13000,
+Ayam,13,524 A (Karung),karung,9000,Dijual per kg (dari karung)
+Ayam,14,324KJ (Karung),karung,9500,Dijual per kg (dari karung)
+Ayam,15,CP 124 P,karung,11000,Dijual per kg (dari karung)
+Burung,1,Leopard (MD Halus),pcs,8000,
+Burung,2,Leopard (MD Kasar),pcs,8000,
+Burung,3,Leopard (Hijau Kasar),pcs,8500,
+Burung,4,Topsong (Top Song Coklat),pcs,12000,
+Burung,5,Topsong (Top Song Hijau),pcs,12000,
+Burung,6,SKM (SKM Halus),pcs,0,
+Burung,7,SKM (SKM Kasar),pcs,0,
+Burung,8,Kroto Sari (KSK),pcs,0,
+Burung,9,Kroto Sari (Krotosari Kasar),pcs,0,
+Burung,10,Alam Sakti (Love Bird),pcs,0,
+Burung,11,Alam Sakti (Kenari),pcs,0,
+Burung,12,Madura Koung (Madura Koung),pcs,0,
+Burung,13,Kutut Profit (Profit),pcs,0,
+Burung,14,Derkuku Comet (Comet Derkuku),pcs,0,
+Burung,15,Gold Coin (Kutut 250gr),pcs,0,
+Burung,16,Gold Coin (Hijau Seaweed 450gr),pcs,12000,
+Burung,17,Gold Coin (Canary),pcs,0,
+Burung,18,Ebod Canary (Ebod),pcs,0,
+Burung,19,Chirpy (Besar),pcs,0,
+Burung,20,Chirpy (Kecil),pcs,0,
+Burung,21,Fancy (Besar),pcs,0,
+Burung,22,Fancy (Kecil 250gr),pcs,0,
+Burung,23,Ketan Hitam,pcs,0,
+Burung,24,Milet Putih (1kg),karung,0,Dijual per kg (dari karung)
+Burung,25,Milet Merah,pcs,0,
+Burung,26,Kenari Seed (1kg),karung,0,Dijual per kg (dari karung)
+Burung,27,Trucuk Pisang Ijo SM,pcs,0,
+Burung,28,521 (521 Coklat),karung,0,Dijual per kg (dari karung)
+Burung,29,521 (521 Hijau),karung,0,Dijual per kg (dari karung)
+Ikan,1,781 (-1),pcs,16500,
+Ikan,2,781 (-2),pcs,16000,
+Ikan,3,781 (-3),pcs,15500,
+Ikan,4,782 (-2),pcs,14500,
+Ikan,5,782 (-3),pcs,14000,
+Ikan,6,782 (-4),pcs,14000,
+Ikan,7,T78 (-2) kg,pcs,12500,
+Ikan,8,T78 (-3) kg,pcs,12000,
+Ikan,9,T78 (-4) kg,pcs,12000,
+Ikan,10,Hiu (-2),pcs,8500,
+Ikan,11,Hiu (-3),pcs,8500,
+Ikan,12,Hiu (-5),pcs,8500,
+Ikan,13,Takari (100 gr),pcs,4500,
+Kucing,1,Bolt (Ikan Ungu 800gr),pcs,19000,
+Kucing,2,Bolt (Donat Kuning 800gr),pcs,19000,
+Kucing,3,Bolt (Pink Bulat 800gr),pcs,19000,
+Kucing,4,Bolt (Kitten Bolt 500gr),pcs,13000,
+Kucing,5,Felibite (Felibite Ikan),pcs,12000,
+Kucing,6,Felibite (Felibite Donat),pcs,12000,
+Kucing,7,Felibite (Felibite Kitten Donat),pcs,13000,
+Kucing,8,Excel (Adult Ikan 500gr),pcs,11500,
+Kucing,9,Excel (Adult Donat),pcs,11500,
+Kucing,10,Excel (Adult Segitiga Oren),pcs,11500,
+Kucing,11,Excel (Kitten Pink 500gr),pcs,13000,
+Kucing,12,Cat Choize (Hijau Adult 800gr),pcs,18000,
+Kucing,13,Cat Choize (Oren Adult 800gr),pcs,18000,
+Kucing,14,Cat Choize (Kitten Tuna Pink 1kg),pcs,24500,
+Kucing,15,Cat Choize (Kitten Salmon Kuning 1kg),pcs,24500,
+Kucing,16,Chester (800gr),pcs,17000,
+Kucing,17,Whiskas Pouch (1 Dus 28 Pcs Junior),pcs,6000,
+Kucing,18,Whiskas Pouch (1 Dus isi 28 Pcs Adult),pcs,6000,
+Kucing,19,Life Cat (1 Dus Pouch 24pcs),pcs,5000,
+Kucing,20,Life Cat (Kaleng Adult 400gr),pcs,13500,
+Kucing,21,Life Cat (Kaleng Kitten 400gr),pcs,13500,
+Obat,1,Vita Tetra Chlor (Kapsul isi 10),pcs,6000,Obat ngorok & snot unggas
+Obat,2,Koleridin (Kapsul isi 10),pcs,5500,Obat kolera & berak hijau
+Obat,3,Vita Stress (Sachet 10gr),pcs,5000,Vitamin anti stres ayam & burung
+Obat,4,Super N (15 ml),pcs,20000,Obat infeksi pernapasan burung
+Obat,5,Biodin Spray Antiseptik (100 ml),pcs,28000,Obat luka jamur korep hewan
+Obat,6,Scabies Cream / Salep Jamur Kucing,pcs,16000,Obat jamur & scabies kucing
+Obat,7,Detick Obat Kutu Kucing (1-10kg),pcs,22000,Obat tetes kutu kucing
+Obat,8,Albenworm Obat Cacing Kucing,pcs,18000,Obat cacing tablet kucing
+Obat,9,Minyak Ikan / Fish Oil (Botol 50 butir),pcs,12000,Suplemen bulu & nafsu makan
+Obat,10,Gendol / Tetraclor Cair Ternak (100 ml),pcs,14000,Obat pencernaan ternak
+Obat,11,Doxyvet Serbuk (Sachet 5gr),pcs,6000,Antibiotik batuk ngorok ternak
+Obat,12,Obat Kutu Serbuk Asuntol (100gr),pcs,15000,Bedak anti kutu ayam & unggas

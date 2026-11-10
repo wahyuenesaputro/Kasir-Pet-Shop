@@ -54,6 +54,9 @@ function doGet(e) {
   } else if (action === "setup_produk" || action === "isi_produk" || action === "isi_database") {
     var resultMsg = isiDataProdukOtomatis();
     return jsonResponse({ success: true, message: resultMsg });
+  } else if (action === "hapus_modal" || action === "clean_modal" || action === "hapus_harga_modal") {
+    var resultMsg = hapusKolomHargaModalOtomatis();
+    return jsonResponse({ success: true, message: resultMsg });
   } else {
     return jsonResponse({ success: false, message: "Action tidak dikenal: " + action });
   }
@@ -268,7 +271,36 @@ function buatKolomSaldoOtomatis() {
   sheet.getRange(2, 4, maxR - 1, 3).setNumberFormat('"Rp"#,##0');
   sheet.autoResizeColumns(1, 7);
 
+  // 6. Otomatis bersihkan kolom Harga Modal/Beli dari seluruh sheet kategori jika ada
+  hapusKolomHargaModalOtomatis();
+
   return "Berhasil membersihkan kolom lama H-O dan merapikan 7 kolom mutasi kas murni!";
+}
+
+function hapusKolomHargaModalOtomatis() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheets = ss.getSheets();
+  var cleanedSheets = [];
+
+  for (var i = 0; i < sheets.length; i++) {
+    var sheet = sheets[i];
+    var sheetName = sheet.getName();
+    if (sheetName === "Penjualan" || sheetName === "Rekap") continue;
+
+    var values = sheet.getDataRange().getValues();
+    if (!values || values.length === 0) continue;
+
+    var headerRow = values[0];
+    for (var col = headerRow.length - 1; col >= 0; col--) {
+      var headerText = String(headerRow[col] || "").trim().toLowerCase();
+      if (headerText.indexOf("beli") >= 0 || headerText.indexOf("modal") >= 0) {
+        sheet.deleteColumn(col + 1);
+        cleanedSheets.push(sheetName + " (kolom " + (col + 1) + ")");
+      }
+    }
+  }
+
+  return "Berhasil menghapus seluruh kolom Harga Modal/Beli dari spreadsheet! " + (cleanedSheets.length > 0 ? "Sheet dibersihkan: " + cleanedSheets.join(", ") : "Semua sheet sudah bersih tanpa kolom modal.");
 }
 
 function isiDataProdukOtomatis() {
@@ -277,122 +309,122 @@ function isiDataProdukOtomatis() {
   // 1. Buat sheet Penjualan (7 Kolom Mutasi Kas)
   buatKolomSaldoOtomatis();
 
-  // 2. Data 29 Produk Burung Resmi (Beserta Harga Modal & Jual)
+  // 2. Data 29 Produk Burung Resmi (Hanya Harga Jual - Tanpa Modal)
   var dataBurung = [
-    [1, "SKM (SKM Halus)", "pcs", 3200, 4500, ""],
-    [2, "SKM (SKM Kasar)", "pcs", 3200, 4500, ""],
-    [3, "Kroto Sari (KSK)", "pcs", 2600, 3500, ""],
-    [4, "Kroto Sari (Krotosari Kasar)", "pcs", 2700, 3500, ""],
-    [5, "Alam Sakti (Love Bird)", "pcs", 9500, 10500, ""],
-    [6, "Alam Sakti (Kenari)", "pcs", 10400, 11500, ""],
-    [7, "Topsong (Top Song Coklat)", "pcs", 10900, 12000, ""],
-    [8, "Topsong (Top Song Hijau)", "pcs", 11000, 12000, ""],
-    [9, "Leopard (Kuning Kasar)", "pcs", 7100, 8500, ""],
-    [10, "Leopard (Hijau Kasar)", "pcs", 7100, 8500, ""],
-    [11, "Chirpy (Besar)", "pcs", 7600, 8500, ""],
-    [12, "Madura Koung (Madura Koung)", "pcs", 8600, 9500, ""],
-    [13, "Kutut Profit (Profit)", "pcs", 7300, 8500, ""],
-    [14, "Derkuku Comet (Comet Derkuku)", "pcs", 6500, 7500, ""],
-    [15, "Gold Coin (Kutut 250gr)", "pcs", 7600, 8500, ""],
-    [16, "Gold Coin (Hijau Seaweed 450gr)", "pcs", 11100, 12000, ""],
-    [17, "Gold Coin (Canary)", "pcs", 8700, 10000, ""],
-    [18, "Ebod Canary (Ebod)", "pcs", 8100, 9000, ""],
-    [19, "Fancy (9 Bintang Anti Stress)", "pcs", 6500, 8000, ""],
-    [20, "Fancy (Love Bird)", "pcs", 13000, 14500, ""],
-    [21, "Fancy (Bintang Seaweed/Gold)", "pcs", 12500, 14500, ""],
-    [22, "Milet Racik Lovebird", "pcs", 8000, 10000, ""],
-    [23, "Milet Putih Kiloan", "kg", 13000, 14500, ""],
-    [24, "Milet Merah Kiloan", "kg", 13000, 14500, ""],
-    [25, "Bintang Kebumen (Halus)", "pcs", 7500, 9000, ""],
-    [26, "Phoenix Perkutut", "pcs", 11000, 12500, ""],
-    [27, "Canary Post (Biji Sawi)", "kg", 14000, 16000, ""],
-    [28, "Kwaci Hitam Kiloan", "kg", 18000, 22000, ""],
-    [29, "Jagung Kristal Merah", "kg", 8500, 10000, ""]
+    [1, "SKM (SKM Halus)", "pcs", 4500, ""],
+    [2, "SKM (SKM Kasar)", "pcs", 4500, ""],
+    [3, "Kroto Sari (KSK)", "pcs", 3500, ""],
+    [4, "Kroto Sari (Krotosari Kasar)", "pcs", 3500, ""],
+    [5, "Alam Sakti (Love Bird)", "pcs", 10500, ""],
+    [6, "Alam Sakti (Kenari)", "pcs", 11500, ""],
+    [7, "Topsong (Top Song Coklat)", "pcs", 12000, ""],
+    [8, "Topsong (Top Song Hijau)", "pcs", 12000, ""],
+    [9, "Leopard (Kuning Kasar)", "pcs", 8500, ""],
+    [10, "Leopard (Hijau Kasar)", "pcs", 8500, ""],
+    [11, "Chirpy (Besar)", "pcs", 8500, ""],
+    [12, "Madura Koung (Madura Koung)", "pcs", 9500, ""],
+    [13, "Kutut Profit (Profit)", "pcs", 8500, ""],
+    [14, "Derkuku Comet (Comet Derkuku)", "pcs", 7500, ""],
+    [15, "Gold Coin (Kutut 250gr)", "pcs", 8500, ""],
+    [16, "Gold Coin (Hijau Seaweed 450gr)", "pcs", 12000, ""],
+    [17, "Gold Coin (Canary)", "pcs", 10000, ""],
+    [18, "Ebod Canary (Ebod)", "pcs", 9000, ""],
+    [19, "Fancy (9 Bintang Anti Stress)", "pcs", 8000, ""],
+    [20, "Fancy (Love Bird)", "pcs", 14500, ""],
+    [21, "Fancy (Bintang Seaweed/Gold)", "pcs", 14500, ""],
+    [22, "Milet Racik Lovebird", "pcs", 10000, ""],
+    [23, "Milet Putih Kiloan", "kg", 14500, ""],
+    [24, "Milet Merah Kiloan", "kg", 14500, ""],
+    [25, "Bintang Kebumen (Halus)", "pcs", 9000, ""],
+    [26, "Phoenix Perkutut", "pcs", 12500, ""],
+    [27, "Canary Post (Biji Sawi)", "kg", 16000, ""],
+    [28, "Kwaci Hitam Kiloan", "kg", 22000, ""],
+    [29, "Jagung Kristal Merah", "kg", 10000, ""]
   ];
   isiSheetKategori(ss, "Burung", dataBurung);
 
-  // 3. Data Produk Ayam
+  // 3. Data Produk Ayam (Hanya Harga Jual - Tanpa Modal)
   var dataAyam = [
-    [1, "511 (1 Karung)", "kg", 10700, 11500, "Dijual per kg (dari karung)"],
-    [2, "511 (511 K)", "kg", 13500, 14500, ""],
-    [3, "591 (591k)", "kg", 13500, 14500, ""],
-    [4, "592 (592k)", "kg", 13500, 14500, ""],
-    [5, "594 (594k)", "kg", 13500, 14500, ""],
-    [6, "BR-1 Super", "kg", 11000, 12000, ""],
-    [7, "BR-611", "kg", 9000, 10000, ""],
-    [8, "Buras (1 Karung)", "kg", 6200, 7000, ""],
-    [9, "EH 610 (1 Karung)", "kg", 8500, 9500, ""],
-    [10, "Jagung (1 Karung Meniran)", "kg", 9500, 10500, ""],
-    [11, "Jagung (1 Karung Kasar)", "kg", 9500, 10500, ""],
-    [12, "Konsentrat 144", "kg", 12500, 13500, ""],
-    [13, "Katul Super", "kg", 4500, 5500, ""],
-    [14, "Polard Gandum", "kg", 6000, 7000, ""],
-    [15, "Kupang Halus", "kg", 3000, 4000, ""]
+    [1, "511 (1 Karung)", "kg", 11500, "Dijual per kg (dari karung)"],
+    [2, "511 (511 K)", "kg", 14500, ""],
+    [3, "591 (591k)", "kg", 14500, ""],
+    [4, "592 (592k)", "kg", 14500, ""],
+    [5, "594 (594k)", "kg", 14500, ""],
+    [6, "BR-1 Super", "kg", 12000, ""],
+    [7, "BR-611", "kg", 10000, ""],
+    [8, "Buras (1 Karung)", "kg", 7000, ""],
+    [9, "EH 610 (1 Karung)", "kg", 9500, ""],
+    [10, "Jagung (1 Karung Meniran)", "kg", 10500, ""],
+    [11, "Jagung (1 Karung Kasar)", "kg", 10500, ""],
+    [12, "Konsentrat 144", "kg", 13500, ""],
+    [13, "Katul Super", "kg", 5500, ""],
+    [14, "Polard Gandum", "kg", 7000, ""],
+    [15, "Kupang Halus", "kg", 4000, ""]
   ];
   isiSheetKategori(ss, "Ayam", dataAyam);
 
-  // 4. Data Produk Kucing
+  // 4. Data Produk Kucing (Hanya Harga Jual - Tanpa Modal)
   var dataKucing = [
-    [1, "Bolt Ikan Tuna (Kiloan)", "kg", 21000, 24000, ""],
-    [2, "Bolt Salmon (Kiloan)", "kg", 22000, 25000, ""],
-    [3, "Bolt Kitten Salmon", "kg", 23000, 26000, ""],
-    [4, "Me-O Adult Seafood", "kg", 32000, 36000, ""],
-    [5, "Me-O Adult Tuna", "kg", 32000, 36000, ""],
-    [6, "Me-O Kitten Ocean Fish", "kg", 34000, 38000, ""],
-    [7, "Whiskas Adult Tuna", "kg", 33000, 37000, ""],
-    [8, "Whiskas Junior Ocean Fish", "kg", 35000, 39000, ""],
-    [9, "Cat Choize Tuna", "kg", 18500, 21000, ""],
-    [10, "Cat Choize Salmon", "kg", 19000, 21500, ""],
-    [11, "Cat Choize Kitten", "kg", 20500, 23000, ""],
-    [12, "Ori Cat Kitten", "kg", 17500, 20000, ""],
-    [13, "Ori Cat Adult", "kg", 17000, 19500, ""],
-    [14, "Life Cat Pouch Tuna 85gr", "pcs", 4500, 6000, ""],
-    [15, "Life Cat Pouch Salmon 85gr", "pcs", 4500, 6000, ""],
-    [16, "Whiskas Pouch Tuna 85gr", "pcs", 6500, 8000, ""],
-    [17, "Pasir Kucing Gumpal 5L", "pcs", 22000, 27000, ""],
-    [18, "Pasir Kucing Gumpal 10L", "pcs", 42000, 50000, ""]
+    [1, "Bolt Ikan Tuna (Kiloan)", "kg", 24000, ""],
+    [2, "Bolt Salmon (Kiloan)", "kg", 25000, ""],
+    [3, "Bolt Kitten Salmon", "kg", 26000, ""],
+    [4, "Me-O Adult Seafood", "kg", 36000, ""],
+    [5, "Me-O Adult Tuna", "kg", 36000, ""],
+    [6, "Me-O Kitten Ocean Fish", "kg", 38000, ""],
+    [7, "Whiskas Adult Tuna", "kg", 37000, ""],
+    [8, "Whiskas Junior Ocean Fish", "kg", 39000, ""],
+    [9, "Cat Choize Tuna", "kg", 21000, ""],
+    [10, "Cat Choize Salmon", "kg", 21500, ""],
+    [11, "Cat Choize Kitten", "kg", 23000, ""],
+    [12, "Ori Cat Kitten", "kg", 20000, ""],
+    [13, "Ori Cat Adult", "kg", 19500, ""],
+    [14, "Life Cat Pouch Tuna 85gr", "pcs", 6000, ""],
+    [15, "Life Cat Pouch Salmon 85gr", "pcs", 6000, ""],
+    [16, "Whiskas Pouch Tuna 85gr", "pcs", 8000, ""],
+    [17, "Pasir Kucing Gumpal 5L", "pcs", 27000, ""],
+    [18, "Pasir Kucing Gumpal 10L", "pcs", 50000, ""]
   ];
   isiSheetKategori(ss, "Kucing", dataKucing);
 
-  // 5. Data Produk Ikan
+  // 5. Data Produk Ikan (Hanya Harga Jual - Tanpa Modal)
   var dataIkan = [
-    [1, "Takari Hijau 100gr", "pcs", 5000, 6500, ""],
-    [2, "Takari Merah 100gr", "pcs", 5000, 6500, ""],
-    [3, "Takari 250gr", "pcs", 11000, 13500, ""],
-    [4, "Takari 500gr", "pcs", 20000, 24000, ""],
-    [5, "Akari Premium Red 100gr", "pcs", 13000, 16000, ""],
-    [6, "Akari Premium Maxi 100gr", "pcs", 13000, 16000, ""],
-    [7, "Sanyu Turtle Food 100gr", "pcs", 10000, 13000, ""],
-    [8, "Pelet Lele 781-1 Kiloan", "kg", 12000, 14000, ""],
-    [9, "Pelet Lele 781-2 Kiloan", "kg", 11500, 13500, ""],
-    [10, "Pelet Lele -1 Kiloan", "kg", 11000, 13000, ""],
-    [11, "Pelet Nila LP-1 Kiloan", "kg", 11500, 13500, ""],
-    [12, "Pelet Nila LP-2 Kiloan", "kg", 11000, 13000, ""],
-    [13, "Pelet Apung Feng-Li 0", "kg", 17000, 20000, ""],
-    [14, "Pelet Apung Feng-Li 1", "kg", 16000, 19000, ""],
-    [15, "Pelet Koi CP 1kg", "pcs", 22000, 26000, ""],
-    [16, "Pelet Mas Koki 100gr", "pcs", 6000, 8000, ""]
+    [1, "Takari Hijau 100gr", "pcs", 6500, ""],
+    [2, "Takari Merah 100gr", "pcs", 6500, ""],
+    [3, "Takari 250gr", "pcs", 13500, ""],
+    [4, "Takari 500gr", "pcs", 24000, ""],
+    [5, "Akari Premium Red 100gr", "pcs", 16000, ""],
+    [6, "Akari Premium Maxi 100gr", "pcs", 16000, ""],
+    [7, "Sanyu Turtle Food 100gr", "pcs", 13000, ""],
+    [8, "Pelet Lele 781-1 Kiloan", "kg", 14000, ""],
+    [9, "Pelet Lele 781-2 Kiloan", "kg", 13500, ""],
+    [10, "Pelet Lele -1 Kiloan", "kg", 13000, ""],
+    [11, "Pelet Nila LP-1 Kiloan", "kg", 13500, ""],
+    [12, "Pelet Nila LP-2 Kiloan", "kg", 13000, ""],
+    [13, "Pelet Apung Feng-Li 0", "kg", 20000, ""],
+    [14, "Pelet Apung Feng-Li 1", "kg", 19000, ""],
+    [15, "Pelet Koi CP 1kg", "pcs", 26000, ""],
+    [16, "Pelet Mas Koki 100gr", "pcs", 8000, ""]
   ];
   isiSheetKategori(ss, "Ikan", dataIkan);
 
-  // 5. Data Kategori Obat & Vitamin Ternak/Hewan
+  // 6. Data Kategori Obat & Vitamin Ternak/Hewan (Hanya Harga Jual - Tanpa Modal)
   var dataObat = [
-    [1, "Vita Tetra Chlor (Kapsul isi 10)", "pcs", 4500, 6000, "Obat ngorok & snot unggas"],
-    [2, "Koleridin (Kapsul isi 10)", "pcs", 4000, 5500, "Obat kolera & berak hijau"],
-    [3, "Vita Stress (Sachet 10gr)", "pcs", 3500, 5000, "Vitamin anti stres ayam & burung"],
-    [4, "Super N (15 ml)", "pcs", 16000, 20000, "Obat infeksi pernapasan burung"],
-    [5, "Biodin Spray Antiseptik (100 ml)", "pcs", 22000, 28000, "Obat luka, jamur, korep hewan"],
-    [6, "Scabies Cream / Salep Jamur Kucing", "pcs", 12000, 16000, "Obat jamur & scabies kucing"],
-    [7, "Detick Obat Kutu Kucing (1-10kg)", "pcs", 15000, 22000, "Obat tetes kutu kucing"],
-    [8, "Albenworm Obat Cacing Kucing", "pcs", 14000, 18000, "Obat cacing tablet kucing"],
-    [9, "Minyak Ikan / Fish Oil (Botol 50 butir)", "pcs", 8000, 12000, "Suplemen bulu & nafsu makan"],
-    [10, "Gendol / Tetraclor Cair Ternak (100 ml)", "pcs", 10000, 14000, "Obat pencernaan ternak"],
-    [11, "Doxyvet Serbuk (Sachet 5gr)", "pcs", 4000, 6000, "Antibiotik batuk ngorok ternak"],
-    [12, "Obat Kutu Serbuk Asuntol (100gr)", "pcs", 11000, 15000, "Bedak anti kutu ayam & unggas"]
+    [1, "Vita Tetra Chlor (Kapsul isi 10)", "pcs", 6000, "Obat ngorok & snot unggas"],
+    [2, "Koleridin (Kapsul isi 10)", "pcs", 5500, "Obat kolera & berak hijau"],
+    [3, "Vita Stress (Sachet 10gr)", "pcs", 5000, "Vitamin anti stres ayam & burung"],
+    [4, "Super N (15 ml)", "pcs", 20000, "Obat infeksi pernapasan burung"],
+    [5, "Biodin Spray Antiseptik (100 ml)", "pcs", 28000, "Obat luka, jamur, korep hewan"],
+    [6, "Scabies Cream / Salep Jamur Kucing", "pcs", 16000, "Obat jamur & scabies kucing"],
+    [7, "Detick Obat Kutu Kucing (1-10kg)", "pcs", 22000, "Obat tetes kutu kucing"],
+    [8, "Albenworm Obat Cacing Kucing", "pcs", 18000, "Obat cacing tablet kucing"],
+    [9, "Minyak Ikan / Fish Oil (Botol 50 butir)", "pcs", 12000, "Suplemen bulu & nafsu makan"],
+    [10, "Gendol / Tetraclor Cair Ternak (100 ml)", "pcs", 14000, "Obat pencernaan ternak"],
+    [11, "Doxyvet Serbuk (Sachet 5gr)", "pcs", 6000, "Antibiotik batuk ngorok ternak"],
+    [12, "Obat Kutu Serbuk Asuntol (100gr)", "pcs", 15000, "Bedak anti kutu ayam & unggas"]
   ];
   isiSheetKategori(ss, "Obat", dataObat);
 
-  return "Berhasil mengisi seluruh data 29 pakan burung harga resmi, ayam, kucing, ikan, obat, dan sheet Penjualan 7 kolom!";
+  return "Berhasil mengisi seluruh data produk (5 kolom resmi tanpa modal) dan sheet Penjualan 7 kolom!";
 }
 
 function isiSheetKategori(ss, sheetName, items) {
@@ -403,9 +435,9 @@ function isiSheetKategori(ss, sheetName, items) {
     sheet.clear();
   }
 
-  var headers = ["NO", "NAMA BARANG", "SATUAN", "HARGA BELI", "HARGA JUAL", "KETERANGAN"];
+  var headers = ["NO", "NAMA BARANG", "SATUAN", "HARGA JUAL", "KETERANGAN"];
   sheet.appendRow(headers);
-  formatHeaderRow(sheet, 6);
+  formatHeaderRow(sheet, 5);
   sheet.setFrozenRows(1);
 
   for (var i = 0; i < items.length; i++) {
@@ -414,9 +446,9 @@ function isiSheetKategori(ss, sheetName, items) {
 
   var lastRow = sheet.getLastRow();
   if (lastRow > 1) {
-    sheet.getRange(2, 4, lastRow - 1, 2).setNumberFormat('"Rp"#,##0');
+    sheet.getRange(2, 4, lastRow - 1, 1).setNumberFormat('"Rp"#,##0');
   }
-  sheet.autoResizeColumns(1, 6);
+  sheet.autoResizeColumns(1, 5);
 }
 
 function ensureSalesSheetWithHeaders(ss) {
@@ -624,9 +656,7 @@ function getProductsJson() {
 
       var idxNama = findColumnIndex(colMap, ["nama produk", "nama barang", "produk"]);
       var idxSatuan = findColumnIndex(colMap, ["satuan", "unit"]);
-      var idxHargaBeli = findColumnIndex(colMap, ["harga beli (per satuan)", "harga beli per satuan", "harga beli"]);
       var idxHargaJual = findColumnIndex(colMap, ["harga jual", "harga jual (per satuan)", "harga"]);
-      var idxHargaBeliPerKg = findColumnIndex(colMap, ["harga beli per kg", "harga beli/kg"]);
 
       for (var r = 1; r < data.length; r++) {
         var row = data[r];
@@ -635,18 +665,13 @@ function getProductsJson() {
 
         var satuan = (idxSatuan >= 0 && row[idxSatuan]) ? String(row[idxSatuan]).trim() : "pcs";
         var rawHargaJual = (idxHargaJual >= 0) ? parseNumber(row[idxHargaJual]) : 0;
-        var rawHargaBeli = (idxHargaBeli >= 0) ? parseNumber(row[idxHargaBeli]) : 0;
 
         var finalSatuan = satuan;
         var finalHargaJual = rawHargaJual;
-        var finalHargaBeli = rawHargaBeli;
         var note = "";
 
         if (catName.toLowerCase() === "ayam" && (satuan.toLowerCase() === "zak" || satuan.toLowerCase() === "karung")) {
           finalSatuan = "kg";
-          if (idxHargaBeliPerKg >= 0 && row[idxHargaBeliPerKg]) {
-            finalHargaBeli = parseNumber(row[idxHargaBeliPerKg]);
-          }
           note = "Dijual per kg (dari karung)";
         }
 
@@ -657,7 +682,7 @@ function getProductsJson() {
           satuan: finalSatuan,
           satuanAsli: satuan,
           hargaJual: finalHargaJual,
-          hargaBeli: finalHargaBeli,
+          hargaBeli: 0,
           hargaBelumDiisi: (finalHargaJual <= 0),
           catatan: note
         });
@@ -773,8 +798,7 @@ function updateProductPriceInSheets(ss, data) {
       kategori: targetCat || "Lainnya",
       namaProduk: targetName,
       satuan: data.satuan || "pcs",
-      hargaJual: newPrice,
-      hargaBeli: data.hargaBeli || 0
+      hargaJual: newPrice
     });
     return {
       success: true,
@@ -792,7 +816,6 @@ function addProductToSheets(ss, data) {
   var name = String(data.namaProduk || data.nama || "").trim();
   var unit = String(data.satuan || data.unit || "pcs").trim();
   var price = Number(data.hargaJual || data.harga || data.price) || 0;
-  var cost = Number(data.hargaBeli || data.costPrice) || 0;
 
   if (!name) {
     return { success: false, message: "Nama produk tidak boleh kosong" };
@@ -801,8 +824,8 @@ function addProductToSheets(ss, data) {
   var sheet = ss.getSheetByName(cat);
   if (!sheet) {
     sheet = ss.insertSheet(cat);
-    sheet.appendRow(["NO", "NAMA BARANG", "SATUAN", "HARGA BELI", "HARGA JUAL", "HARGA BELI / KG", "KETERANGAN"]);
-    formatHeaderRow(sheet, 7);
+    sheet.appendRow(["NO", "NAMA BARANG", "SATUAN", "HARGA JUAL", "KETERANGAN"]);
+    formatHeaderRow(sheet, 5);
     sheet.setFrozenRows(1);
   }
 
@@ -838,13 +861,12 @@ function addProductToSheets(ss, data) {
   }
 
   var nextNo = Math.max(1, sheet.getLastRow());
-  var rowData = [nextNo, name, unit, cost, price, 0, "Ditambahkan dari Kasir"];
+  var rowData = [nextNo, name, unit, price, "Ditambahkan dari Kasir"];
   sheet.appendRow(rowData);
 
   var newRowIdx = sheet.getLastRow();
   sheet.getRange(newRowIdx, 4).setNumberFormat('"Rp"#,##0');
-  sheet.getRange(newRowIdx, 5).setNumberFormat('"Rp"#,##0');
-  sheet.autoResizeColumns(1, 7);
+  sheet.autoResizeColumns(1, 5);
 
   return {
     success: true,
