@@ -13,11 +13,12 @@ let currentPaymentMethod = "Tunai";
 let activeReceipt = null;
 let currentMutationType = "add"; // 'add', 'withdraw', 'set'
 let currentBalance = Number(localStorage.getItem("petshop_current_balance")) || 0;
-const DEFAULT_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxsIpuVeuiV36yNcBCznDLiYberyjDXdqjviFmYfvaJgbzCGhPfA2PDDXxsWUE9pXlu/exec";
+const DEFAULT_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxUA6s50T7pEQ4a3Kg8AdbcT2HlFkW-MOoJMR7gZ2OHSMjg4jzdQIcW4tLd80nDfbNh/exec";
 
 // Otomatis migrasi browser jika masih menyimpan URL lama/placeholder
 (function migrateOldUrls() {
   const outdatedSignatures = [
+    "AKfycbxsIpuVeuiV36yNcBCznDLiYberyjDXdqjviFmYfvaJgbzCGhPfA2PDDXxsWUE9pXlu",
     "AKfycbxclmpSwhWxOq0KKWNwUPHd5hYtjs3Q_fo3N1gvaZOtBdQ4FPyc3adQBQ77QvfUVGXQ",
     "AKfycbzPytd",
     "AKfycbxuIhr",

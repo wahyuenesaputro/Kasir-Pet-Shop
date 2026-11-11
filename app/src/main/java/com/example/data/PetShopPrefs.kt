@@ -18,8 +18,8 @@ class PetShopPrefs(context: Context) {
         private const val KEY_DELETED_PRODUCT_IDS = "deleted_product_ids_set"
         private const val KEY_PRODUCT_OVERRIDES_JSON = "product_overrides_json"
         private const val KEY_CURRENT_BALANCE = "current_cash_balance"
-        const val DEFAULT_PLACEHOLDER_URL = "https://script.google.com/macros/s/AKfycbxsIpuVeuiV36yNcBCznDLiYberyjDXdqjviFmYfvaJgbzCGhPfA2PDDXxsWUE9pXlu/exec"
-        const val DEFAULT_REAL_URL = "https://script.google.com/macros/s/AKfycbxsIpuVeuiV36yNcBCznDLiYberyjDXdqjviFmYfvaJgbzCGhPfA2PDDXxsWUE9pXlu/exec"
+        const val DEFAULT_PLACEHOLDER_URL = "https://script.google.com/macros/s/AKfycbxUA6s50T7pEQ4a3Kg8AdbcT2HlFkW-MOoJMR7gZ2OHSMjg4jzdQIcW4tLd80nDfbNh/exec"
+        const val DEFAULT_REAL_URL = "https://script.google.com/macros/s/AKfycbxUA6s50T7pEQ4a3Kg8AdbcT2HlFkW-MOoJMR7gZ2OHSMjg4jzdQIcW4tLd80nDfbNh/exec"
     }
 
     var currentBalance: Double
@@ -31,6 +31,7 @@ class PetShopPrefs(context: Context) {
         if (url.contains("CONTOH_ID") || url.contains("AKfycbzPytd") || url.contains("AKfycbxuIhr")) return true
         if (url.contains("AKfycbxcTpjehRlmfjmTll9V3LYOW79wP5X1WwznkwMn_VlFd9-0Szp1p4ize5bxPTK5Iplp")) return true
         if (url.contains("AKfycbxclmpSwhWxOq0KKWNwUPHd5hYtjs3Q_fo3N1gvaZOtBdQ4FPyc3adQBQ77QvfUVGXQ")) return true
+        if (url.contains("AKfycbxsIpuVeuiV36yNcBCznDLiYberyjDXdqjviFmYfvaJgbzCGhPfA2PDDXxsWUE9pXlu")) return true
         return false
     }
 
