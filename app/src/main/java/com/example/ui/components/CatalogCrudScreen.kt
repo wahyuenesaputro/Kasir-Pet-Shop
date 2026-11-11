@@ -62,10 +62,12 @@ fun CatalogCrudScreen(
     products: List<Product>,
     onOpenAddProductDialog: () -> Unit,
     onOpenEditProductDialog: (Product) -> Unit,
-    onOpenDeleteProductDialog: (Product) -> Unit
+    onOpenDeleteProductDialog: (Product) -> Unit,
+    onClearAllProducts: () -> Unit = {}
 ) {
     var filterCategory by remember { mutableStateOf("Semua") }
     var searchQuery by remember { mutableStateOf("") }
+    var showClearConfirmDialog by remember { mutableStateOf(false) }
 
     val categories = listOf("Semua", "Ayam", "Burung", "Ikan", "Kucing", "Obat", "Lainnya")
 
@@ -73,6 +75,35 @@ fun CatalogCrudScreen(
         val matchCat = filterCategory == "Semua" || p.kategori.equals(filterCategory, ignoreCase = true)
         val matchSearch = searchQuery.isBlank() || p.namaProduk.contains(searchQuery.trim(), ignoreCase = true)
         matchCat && matchSearch
+    }
+
+    if (showClearConfirmDialog) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showClearConfirmDialog = false },
+            icon = { Icon(Icons.Default.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.error) },
+            title = { Text("Hapus Semua Produk?", fontWeight = FontWeight.Bold) },
+            text = {
+                Text("Katalog produk di aplikasi akan dikosongkan (0 produk) sehingga siap diisi produk baru besok.")
+            },
+            confirmButton = {
+                androidx.compose.material3.Button(
+                    onClick = {
+                        showClearConfirmDialog = false
+                        onClearAllProducts()
+                    },
+                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text("Ya, Hapus Semua")
+                }
+            },
+            dismissButton = {
+                androidx.compose.material3.OutlinedButton(onClick = { showClearConfirmDialog = false }) {
+                    Text("Batal")
+                }
+            }
+        )
     }
 
     Scaffold(
@@ -143,18 +174,37 @@ fun CatalogCrudScreen(
                         )
                     }
 
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = MaterialTheme.colorScheme.primary,
-                        tonalElevation = 2.dp
-                    ) {
-                        Text(
-                            text = "${products.size} Barang",
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 12.sp
-                        )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        if (products.isNotEmpty()) {
+                            IconButton(
+                                onClick = { showClearConfirmDialog = true },
+                                modifier = Modifier.size(36.dp),
+                                colors = IconButtonDefaults.iconButtonColors(
+                                    contentColor = MaterialTheme.colorScheme.error
+                                )
+                            ) {
+                                Icon(
+                                    Icons.Default.Delete,
+                                    contentDescription = "Hapus Semua Produk",
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(4.dp))
+                        }
+
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = MaterialTheme.colorScheme.primary,
+                            tonalElevation = 2.dp
+                        ) {
+                            Text(
+                                text = "${products.size} Barang",
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp
+                            )
+                        }
                     }
                 }
             }

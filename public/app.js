@@ -13,11 +13,12 @@ let currentPaymentMethod = "Tunai";
 let activeReceipt = null;
 let currentMutationType = "add"; // 'add', 'withdraw', 'set'
 let currentBalance = Number(localStorage.getItem("petshop_current_balance")) || 0;
-const DEFAULT_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxUA6s50T7pEQ4a3Kg8AdbcT2HlFkW-MOoJMR7gZ2OHSMjg4jzdQIcW4tLd80nDfbNh/exec";
+const DEFAULT_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwo4DxmOjUj6bqrtzCwSIkOf-SImOhLTrqgtZNtC8408U3n1XHiYLgbwUAoL6arOsur/exec";
 
 // Otomatis migrasi browser jika masih menyimpan URL lama/placeholder
 (function migrateOldUrls() {
   const outdatedSignatures = [
+    "AKfycbxUA6s50T7pEQ4a3Kg8AdbcT2HlFkW-MOoJMR7gZ2OHSMjg4jzdQIcW4tLd80nDfbNh",
     "AKfycbxsIpuVeuiV36yNcBCznDLiYberyjDXdqjviFmYfvaJgbzCGhPfA2PDDXxsWUE9pXlu",
     "AKfycbxclmpSwhWxOq0KKWNwUPHd5hYtjs3Q_fo3N1gvaZOtBdQ4FPyc3adQBQ77QvfUVGXQ",
     "AKfycbzPytd",
@@ -264,7 +265,16 @@ function loadStoredProducts() {
   const overrides = JSON.parse(localStorage.getItem("petshop_price_overrides") || "{}");
   const deletedIds = JSON.parse(localStorage.getItem("petshop_deleted_product_ids") || "[]");
   
-  const baseCatalog = isCleanSlate ? [] : defaultCatalog;
+  if (isCleanSlate) {
+    products = custom.map(p => {
+      const cleanedName = sanitizeProductName(p.namaProduk);
+      const normSatuan = normalizeSatuan(p.satuan, cleanedName);
+      return { ...p, namaProduk: cleanedName, satuan: normSatuan };
+    });
+    return;
+  }
+  
+  const baseCatalog = defaultCatalog;
   const all = [...baseCatalog, ...custom].filter(p => !deletedIds.includes(p.id));
   
   products = all.map(p => {
@@ -1904,6 +1914,17 @@ async function syncData() {
           renderProducts();
           renderCatalogManager();
           console.log("[Sync] Spreadsheet berstatus kosong/bersih. Katalog produk direset.");
+        } else if (localStorage.getItem("petshop_clean_slate") === "true") {
+          // Mode bersih / kosong aktif atas instruksi pengguna (0 produk)
+          const custom = JSON.parse(localStorage.getItem("petshop_custom_products") || "[]");
+          products = custom.map(p => ({
+            ...p,
+            namaProduk: sanitizeProductName(p.namaProduk),
+            satuan: normalizeSatuan(p.satuan, p.namaProduk)
+          }));
+          renderProducts();
+          renderCatalogManager();
+          console.log(`[Sync] Mode bersih aktif: 0 produk ditampilkan (${data.products.length} baris di sheets belum dibersihkan manual).`);
         } else {
           localStorage.removeItem("petshop_clean_slate");
           const custom = JSON.parse(localStorage.getItem("petshop_custom_products") || "[]");
@@ -2902,4 +2923,35 @@ async function resetDanFormatSpreadsheet() {
     alert("Permintaan format terkirim ke spreadsheet.\nJika Apps Script belum diupdate, silakan jalankan fungsi 'bersihkanDanFormatSemuaSheet' di Google Apps Script editor.");
   }
 }
+
+async function kosongkanSemuaProduk() {
+  if (!confirm("⚠️ PERINGATAN: Apakah Anda yakin ingin MENGHAPUS SEMUA PRODUK dari kasir?\n\nKatalog produk akan dikosongkan total (0 barang) sehingga Anda siap mengisi produk baru.")) {
+    return;
+  }
+
+  // 1. Bersihkan seluruh data katalog lokal
+  localStorage.setItem("petshop_clean_slate", "true");
+  localStorage.removeItem("petshop_custom_products");
+  localStorage.removeItem("petshop_price_overrides");
+  localStorage.removeItem("petshop_deleted_product_ids");
+  
+  products = [];
+  cart = [];
+  
+  // 2. Render ulang UI seketika menjadi 0 produk
+  renderCart();
+  renderProducts();
+  renderCatalogManager();
+
+  // 3. Panggil webhook Apps Script jika tersedia
+  const pUrl = getProductUrl();
+  if (pUrl) {
+    try {
+      fetch(`${pUrl}?action=reset_and_format&t=${Date.now()}`).catch(() => {});
+    } catch (e) {}
+  }
+
+  alert("✅ SELURUH PRODUK TELAH DIHAPUS!\n\nKatalog kasir sekarang telah kosong (0 Produk).\n\nUntuk membersihkan baris di Google Sheets agar tidak tertarik lagi:\n1. Buka spreadsheet Anda > Ekstensi > Apps Script\n2. Buka Code.gs > Pilih fungsi 'bersihkanDanFormatSemuaSheet'\n3. Klik Run (Jalankan), atau blok baris 2 ke bawah di Google Sheets lalu tekan tombol Delete.");
+}
+
 

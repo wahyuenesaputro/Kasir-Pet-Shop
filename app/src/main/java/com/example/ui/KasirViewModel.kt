@@ -208,8 +208,13 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
         val overrides = prefs.getProductOverrides()
         val customPrices = prefs.getAllCustomPrices()
 
-        // 1. Gabungkan produk bawaan/spreadsheet dengan produk kustom buatan kasir
-        val combined = customCreated + rawList
+        if (rawList.isEmpty() && prefs.isCleanSlate) {
+            prefs.isCleanSlate = false
+        }
+
+        // 1. Jika mode bersih aktif, sembunyikan baris lama yang belum dibersihkan dari spreadsheet fisik
+        val effectiveRaw = if (prefs.isCleanSlate) emptyList() else rawList
+        val combined = customCreated + effectiveRaw
 
         // 2. Filter produk yang telah dihapus
         val activeProducts = combined.filterNot { deletedIds.contains(it.id) }
@@ -537,6 +542,17 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
             viewModelScope.launch {
                 repository.deleteProduct(scriptUrl, target)
             }
+        }
+    }
+
+    fun clearAllProducts() {
+        prefs.clearAllProducts()
+        _uiState.update { state ->
+            state.copy(
+                products = emptyList(),
+                cart = emptyList(),
+                successMessage = "Seluruh data produk telah dibersihkan (0 produk)."
+            )
         }
     }
 

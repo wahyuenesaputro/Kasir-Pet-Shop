@@ -18,8 +18,26 @@ class PetShopPrefs(context: Context) {
         private const val KEY_DELETED_PRODUCT_IDS = "deleted_product_ids_set"
         private const val KEY_PRODUCT_OVERRIDES_JSON = "product_overrides_json"
         private const val KEY_CURRENT_BALANCE = "current_cash_balance"
-        const val DEFAULT_PLACEHOLDER_URL = "https://script.google.com/macros/s/AKfycbxUA6s50T7pEQ4a3Kg8AdbcT2HlFkW-MOoJMR7gZ2OHSMjg4jzdQIcW4tLd80nDfbNh/exec"
-        const val DEFAULT_REAL_URL = "https://script.google.com/macros/s/AKfycbxUA6s50T7pEQ4a3Kg8AdbcT2HlFkW-MOoJMR7gZ2OHSMjg4jzdQIcW4tLd80nDfbNh/exec"
+        private const val KEY_CLEAN_SLATE = "is_clean_slate_enabled"
+        const val DEFAULT_PLACEHOLDER_URL = "https://script.google.com/macros/s/AKfycbwo4DxmOjUj6bqrtzCwSIkOf-SImOhLTrqgtZNtC8408U3n1XHiYLgbwUAoL6arOsur/exec"
+        const val DEFAULT_REAL_URL = "https://script.google.com/macros/s/AKfycbwo4DxmOjUj6bqrtzCwSIkOf-SImOhLTrqgtZNtC8408U3n1XHiYLgbwUAoL6arOsur/exec"
+    }
+
+    var isCleanSlate: Boolean
+        get() = prefs.getBoolean(KEY_CLEAN_SLATE, false)
+        set(value) = prefs.edit().putBoolean(KEY_CLEAN_SLATE, value).apply()
+
+    fun clearAllProducts() {
+        val editor = prefs.edit()
+            .putBoolean(KEY_CLEAN_SLATE, true)
+            .remove(KEY_CUSTOM_PRODUCTS_JSON)
+            .remove(KEY_PRODUCT_OVERRIDES_JSON)
+            .remove(KEY_DELETED_PRODUCT_IDS)
+        
+        prefs.all.keys.filter { it.startsWith(PREFIX_CUSTOM_PRICE) }.forEach {
+            editor.remove(it)
+        }
+        editor.apply()
     }
 
     var currentBalance: Double
@@ -32,6 +50,7 @@ class PetShopPrefs(context: Context) {
         if (url.contains("AKfycbxcTpjehRlmfjmTll9V3LYOW79wP5X1WwznkwMn_VlFd9-0Szp1p4ize5bxPTK5Iplp")) return true
         if (url.contains("AKfycbxclmpSwhWxOq0KKWNwUPHd5hYtjs3Q_fo3N1gvaZOtBdQ4FPyc3adQBQ77QvfUVGXQ")) return true
         if (url.contains("AKfycbxsIpuVeuiV36yNcBCznDLiYberyjDXdqjviFmYfvaJgbzCGhPfA2PDDXxsWUE9pXlu")) return true
+        if (url.contains("AKfycbxUA6s50T7pEQ4a3Kg8AdbcT2HlFkW-MOoJMR7gZ2OHSMjg4jzdQIcW4tLd80nDfbNh")) return true
         return false
     }
 
