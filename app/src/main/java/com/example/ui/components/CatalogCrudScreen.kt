@@ -248,23 +248,31 @@ fun CatalogCrudScreen(
                         .weight(1f),
                     contentAlignment = Alignment.Center
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxWidth(0.85f)
+                    ) {
                         Icon(
                             Icons.Default.Inventory2,
                             contentDescription = null,
-                            modifier = Modifier.size(48.dp),
-                            tint = MaterialTheme.colorScheme.outline
+                            modifier = Modifier.size(52.dp),
+                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
                         Text(
-                            text = "Tidak Ada Produk",
+                            text = if (products.isEmpty()) "Katalog Master Bersih & Kosong" else "Tidak Ada Produk",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
+                        Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Tidak ditemukan produk dengan kata kunci '$searchQuery'",
+                            text = if (products.isEmpty())
+                                "Format spreadsheet Emerald Green telah siap. Anda dapat menginput produk di spreadsheet atau klik tombol Tambah Produk."
+                            else
+                                "Tidak ditemukan produk dengan kata kunci '$searchQuery'",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
                         )
                     }
                 }

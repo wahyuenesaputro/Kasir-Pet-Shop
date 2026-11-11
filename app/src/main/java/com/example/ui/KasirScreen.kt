@@ -568,19 +568,36 @@ private fun KasirCatalogContent(
                     .padding(24.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = "📦", fontSize = 48.sp)
-                    Spacer(modifier = Modifier.height(8.dp))
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxWidth(0.85f)
+                ) {
+                    Text(text = if (uiState.products.isEmpty()) "✨" else "📦", fontSize = 48.sp)
+                    Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        text = "Tidak Ada Produk",
+                        text = if (uiState.products.isEmpty()) "Katalog Bersih & Siap Digunakan" else "Tidak Ada Produk",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Tidak ditemukan produk dengan kata kunci '${uiState.searchQuery}'",
+                        text = if (uiState.products.isEmpty())
+                            "Data produk telah dibersihkan. Anda dapat menambahkan produk baru langsung dari Google Sheets atau melalui form di bawah."
+                        else
+                            "Tidak ditemukan produk dengan kata kunci '${uiState.searchQuery}'",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
                     )
+                    if (uiState.products.isEmpty()) {
+                        Spacer(modifier = Modifier.height(14.dp))
+                        androidx.compose.material3.OutlinedButton(
+                            onClick = onOpenAddCustomItem,
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text("+ Tambah Item Kasir", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                        }
+                    }
                 }
             }
         } else {

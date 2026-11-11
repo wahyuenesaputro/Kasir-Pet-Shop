@@ -258,11 +258,13 @@ function setupKeyboardShortcuts() {
 }
 
 function loadStoredProducts() {
+  const isCleanSlate = localStorage.getItem("petshop_clean_slate") === "true";
   const custom = JSON.parse(localStorage.getItem("petshop_custom_products") || "[]");
   const overrides = JSON.parse(localStorage.getItem("petshop_price_overrides") || "{}");
   const deletedIds = JSON.parse(localStorage.getItem("petshop_deleted_product_ids") || "[]");
   
-  const all = [...defaultCatalog, ...custom].filter(p => !deletedIds.includes(p.id));
+  const baseCatalog = isCleanSlate ? [] : defaultCatalog;
+  const all = [...baseCatalog, ...custom].filter(p => !deletedIds.includes(p.id));
   
   products = all.map(p => {
     const cleanedName = sanitizeProductName(p.namaProduk);
@@ -372,13 +374,33 @@ function renderProducts() {
   });
 
   if (filtered.length === 0) {
-    grid.innerHTML = `
-      <div class="col-span-2 sm:col-span-3 xl:col-span-4 py-16 text-center text-slate-400 space-y-2">
-        <i data-lucide="package-search" class="w-12 h-12 mx-auto stroke-1 text-slate-300"></i>
-        <p class="text-sm font-semibold">Tidak ditemukan produk terkait</p>
-        <p class="text-xs text-slate-400">Coba ganti kata kunci atau pilih kategori lain</p>
-      </div>
-    `;
+    if (products.length === 0) {
+      grid.innerHTML = `
+        <div class="col-span-2 sm:col-span-3 xl:col-span-4 py-16 px-4 text-center max-w-md mx-auto space-y-3">
+          <div class="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto shadow-sm border border-emerald-100">
+            <i data-lucide="sparkles" class="w-8 h-8"></i>
+          </div>
+          <h3 class="text-base font-bold text-slate-800">Katalog Produk Masih Bersih & Kosong</h3>
+          <p class="text-xs text-slate-500 leading-relaxed">
+            Spreadsheet telah disiapkan dengan format Emerald Green modern. Anda dapat mulai menambahkan produk langsung di Google Sheets atau menggunakan tombol di bawah.
+          </p>
+          <div class="pt-2 flex justify-center space-x-2">
+            <button onclick="openAddProductModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center space-x-1.5">
+              <i data-lucide="plus-circle" class="w-4 h-4"></i>
+              <span>+ Tambah Produk Baru</span>
+            </button>
+          </div>
+        </div>
+      `;
+    } else {
+      grid.innerHTML = `
+        <div class="col-span-2 sm:col-span-3 xl:col-span-4 py-16 text-center text-slate-400 space-y-2">
+          <i data-lucide="package-search" class="w-12 h-12 mx-auto stroke-1 text-slate-300"></i>
+          <p class="text-sm font-semibold">Tidak ditemukan produk terkait</p>
+          <p class="text-xs text-slate-400">Coba ganti kata kunci atau pilih kategori lain</p>
+        </div>
+      `;
+    }
     if (window.lucide) lucide.createIcons();
     return;
   }
@@ -480,12 +502,32 @@ function renderCatalogManager() {
   if (badge) badge.innerText = `${filtered.length} dari ${products.length} Produk`;
 
   if (filtered.length === 0) {
-    listContainer.innerHTML = `
-      <div class="col-span-1 sm:col-span-2 lg:col-span-3 py-16 text-center text-slate-400 space-y-2">
-        <i data-lucide="package-search" class="w-12 h-12 mx-auto stroke-1 text-slate-300"></i>
-        <p class="text-sm font-semibold">Tidak ada produk ditemukan</p>
-      </div>
-    `;
+    if (products.length === 0) {
+      listContainer.innerHTML = `
+        <div class="col-span-1 sm:col-span-2 lg:col-span-3 py-16 px-4 text-center max-w-md mx-auto space-y-3">
+          <div class="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto shadow-sm border border-emerald-100">
+            <i data-lucide="sparkles" class="w-8 h-8"></i>
+          </div>
+          <h3 class="text-base font-bold text-slate-800">Katalog Master Bersih & Kosong</h3>
+          <p class="text-xs text-slate-500 leading-relaxed">
+            Format spreadsheet Emerald Green telah siap. Anda dapat menginput produk di spreadsheet atau klik tombol Tambah Produk di bawah.
+          </p>
+          <div class="pt-2 flex justify-center space-x-2">
+            <button onclick="openAddProductModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center space-x-1.5">
+              <i data-lucide="plus-circle" class="w-4 h-4"></i>
+              <span>+ Tambah Produk Baru</span>
+            </button>
+          </div>
+        </div>
+      `;
+    } else {
+      listContainer.innerHTML = `
+        <div class="col-span-1 sm:col-span-2 lg:col-span-3 py-16 text-center text-slate-400 space-y-2">
+          <i data-lucide="package-search" class="w-12 h-12 mx-auto stroke-1 text-slate-300"></i>
+          <p class="text-sm font-semibold">Tidak ada produk ditemukan</p>
+        </div>
+      `;
+    }
     if (window.lucide) lucide.createIcons();
     return;
   }
@@ -1850,62 +1892,59 @@ async function syncData() {
     try {
       const res = await fetch(`${pUrl}?action=products&t=${Date.now()}`);
       const data = await res.json();
-      if (data && data.success && Array.isArray(data.products) && data.products.length > 0) {
-        const custom = JSON.parse(localStorage.getItem("petshop_custom_products") || "[]");
-        const overrides = JSON.parse(localStorage.getItem("petshop_price_overrides") || "{}");
-        
-        // Tata ulang setiap objek produk agar properti kategori, harga, dan nama konsisten 100%
-        const syncedProducts = data.products.map((p, idx) => {
-          const cleanedName = sanitizeProductName(p.namaProduk || p.nama || "Produk");
-          const rawKat = String(p.kategori || "Lainnya").trim();
-          const formattedKategori = rawKat.charAt(0).toUpperCase() + rawKat.slice(1).toLowerCase();
-          const normSatuan = normalizeSatuan(p.satuan, cleanedName);
+      if (data && data.success && Array.isArray(data.products)) {
+        if (data.products.length === 0) {
+          // Spreadsheet berstatus bersih / kosong setelah reset total
+          localStorage.setItem("petshop_clean_slate", "true");
+          localStorage.removeItem("petshop_custom_products");
+          localStorage.removeItem("petshop_price_overrides");
+          localStorage.removeItem("petshop_deleted_product_ids");
+          products = [];
+          renderProducts();
+          renderCatalogManager();
+          console.log("[Sync] Spreadsheet berstatus kosong/bersih. Katalog produk direset.");
+        } else {
+          localStorage.removeItem("petshop_clean_slate");
+          const custom = JSON.parse(localStorage.getItem("petshop_custom_products") || "[]");
+          const overrides = JSON.parse(localStorage.getItem("petshop_price_overrides") || "{}");
           
-          let finalPrice = Number(p.hargaJual) || 0;
-          if (overrides[p.id] !== undefined && Number(overrides[p.id]) > 0) {
-            finalPrice = Number(overrides[p.id]);
-          }
+          // Tata ulang setiap objek produk agar properti kategori, harga, dan nama konsisten 100%
+          const syncedProducts = data.products.map((p, idx) => {
+            const cleanedName = sanitizeProductName(p.namaProduk || p.nama || "Produk");
+            const rawKat = String(p.kategori || "Lainnya").trim();
+            const formattedKategori = rawKat.charAt(0).toUpperCase() + rawKat.slice(1).toLowerCase();
+            const normSatuan = normalizeSatuan(p.satuan, cleanedName);
+            
+            let finalPrice = Number(p.hargaJual) || 0;
+            if (overrides[p.id] !== undefined && Number(overrides[p.id]) > 0) {
+              finalPrice = Number(overrides[p.id]);
+            }
 
-          return {
-            id: p.id || `${formattedKategori}_${idx + 1}`,
-            kategori: formattedKategori,
-            namaProduk: cleanedName,
-            satuan: normSatuan,
-            satuanAsli: p.satuanAsli || p.satuan || normSatuan,
-            hargaJual: finalPrice,
-            hargaBeli: Number(p.hargaBeli) || 0,
-            hargaBelumDiisi: Boolean(p.hargaBelumDiisi || finalPrice <= 0),
-            catatan: p.catatan || ""
-          };
-        });
+            return {
+              id: p.id || `${formattedKategori}_${idx + 1}`,
+              kategori: formattedKategori,
+              namaProduk: cleanedName,
+              satuan: normSatuan,
+              satuanAsli: p.satuanAsli || p.satuan || normSatuan,
+              hargaJual: finalPrice,
+              hargaBeli: Number(p.hargaBeli) || 0,
+              hargaBelumDiisi: Boolean(p.hargaBelumDiisi || finalPrice <= 0),
+              catatan: p.catatan || ""
+            };
+          });
 
-        // Cek kategori apa saja yang didapat dari spreadsheet
-        const syncedCategories = new Set(syncedProducts.map(p => (p.kategori || "").toLowerCase().trim()));
-        // Otomatis gabungkan kategori bawaan (seperti Obat) jika belum ada di spreadsheet
-        const missingDefaults = INITIAL_PRODUCTS.filter(p => !syncedCategories.has((p.kategori || "").toLowerCase().trim())).map(p => ({
-          ...p,
-          id: p.id,
-          kategori: p.kategori,
-          namaProduk: sanitizeProductName(p.namaProduk),
-          satuan: normalizeSatuan(p.satuan, p.namaProduk),
-          satuanAsli: p.satuan,
-          hargaJual: (overrides[p.id] !== undefined && Number(overrides[p.id]) > 0) ? Number(overrides[p.id]) : p.hargaJual,
-          hargaBeli: 0,
-          hargaBelumDiisi: false,
-          catatan: p.catatan || ""
-        }));
+          // Gabungkan produk custom lokal jika ada
+          const formattedCustom = custom.map(c => ({
+            ...c,
+            namaProduk: sanitizeProductName(c.namaProduk),
+            satuan: normalizeSatuan(c.satuan, c.namaProduk)
+          }));
 
-        // Gabungkan produk custom lokal jika ada
-        const formattedCustom = custom.map(c => ({
-          ...c,
-          namaProduk: sanitizeProductName(c.namaProduk),
-          satuan: normalizeSatuan(c.satuan, c.namaProduk)
-        }));
-
-        products = [...syncedProducts, ...missingDefaults, ...formattedCustom];
-        renderProducts();
-        renderCatalogManager();
-        console.log(`[Sync] Berhasil menyinkronkan ${products.length} produk (${syncedProducts.length} dari Spreadsheet, ${missingDefaults.length} bawaan termasuk Obat).`);
+          products = [...syncedProducts, ...formattedCustom];
+          renderProducts();
+          renderCatalogManager();
+          console.log(`[Sync] Berhasil menyinkronkan ${products.length} produk dari Spreadsheet.`);
+        }
       }
     } catch (err) {
       console.warn("Gagal sync katalog produk dari spreadsheet:", err);
@@ -1976,6 +2015,9 @@ function doGet(e) {
   } else if (action === "delete_product" || action === "hapus_produk") {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     return jsonResponse(deleteProductFromSheets(ss, e.parameter || {}));
+  } else if (action === "reset_and_format" || action === "bersihkan_semua" || action === "format_estetik") {
+    var resultMsg = bersihkanDanFormatSemuaSheet();
+    return jsonResponse({ success: true, message: resultMsg });
   } else if (action === "hapus_modal" || action === "clean_cost" || action === "hapus_harga_beli") {
     var resultMsg = hapusKolomHargaModalOtomatis();
     return jsonResponse({ success: true, message: resultMsg });
@@ -2306,12 +2348,177 @@ function ensureSalesSheetWithHeaders(ss) {
   return sheet;
 }
 
+function onOpen(e) {
+  try {
+    SpreadsheetApp.getUi()
+      .createMenu("✨ Kasir Pet Shop")
+      .addItem("🧹 Bersihkan & Format Estetik Seluruh Sheet", "bersihkanDanFormatSemuaSheet")
+      .addItem("📦 Isi Contoh Data Awal (Opsional)", "isiDataProdukOtomatis")
+      .addToUi();
+  } catch (err) {}
+}
+
+function bersihkanDanFormatSemuaSheet() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var kategoriList = ["Ayam", "Burung", "Kucing", "Ikan", "Obat"];
+  
+  // 1. Format & Bersihkan ke-5 Kategori Produk (Hanya Header 5 Kolom Tanpa Modal)
+  for (var k = 0; k < kategoriList.length; k++) {
+    var catName = kategoriList[k];
+    var sheet = ss.getSheetByName(catName);
+    if (!sheet) {
+      sheet = ss.insertSheet(catName);
+    } else {
+      sheet.clear();
+      try { sheet.clearConditionalFormatRules(); } catch (e) {}
+      try {
+        var bandings = sheet.getBandings();
+        for (var b = 0; b < bandings.length; b++) { bandings[b].remove(); }
+      } catch (e) {}
+    }
+
+    var headers = [["NO", "NAMA BARANG", "SATUAN", "HARGA JUAL", "KETERANGAN"]];
+    sheet.getRange(1, 1, 1, 5).setValues(headers);
+
+    var headerRange = sheet.getRange(1, 1, 1, 5);
+    headerRange.setBackground("#064e3b"); // Deep Emerald Green
+    headerRange.setFontColor("#FFFFFF");
+    headerRange.setFontWeight("bold");
+    headerRange.setFontSize(11);
+    headerRange.setFontFamily("Arial");
+    headerRange.setVerticalAlignment("middle");
+    headerRange.setHorizontalAlignment("center");
+    try { sheet.setRowHeight(1, 36); } catch (e) {}
+    try { sheet.setFrozenRows(1); } catch (e) {}
+
+    // Lebar Kolom Proporsional & Rapi
+    try {
+      sheet.setColumnWidth(1, 55);  // NO
+      sheet.setColumnWidth(2, 280); // NAMA BARANG
+      sheet.setColumnWidth(3, 110); // SATUAN
+      sheet.setColumnWidth(4, 135); // HARGA JUAL
+      sheet.setColumnWidth(5, 250); // KETERANGAN
+    } catch (e) {}
+
+    // Format Alignment Data & Format Angka Mata Uang
+    try {
+      sheet.getRange(2, 1, 100, 1).setHorizontalAlignment("center");
+      sheet.getRange(2, 2, 100, 1).setHorizontalAlignment("left");
+      sheet.getRange(2, 3, 100, 1).setHorizontalAlignment("center");
+      sheet.getRange(2, 4, 100, 1).setHorizontalAlignment("right");
+      sheet.getRange(2, 5, 100, 1).setHorizontalAlignment("left");
+      sheet.getRange(2, 4, 100, 1).setNumberFormat('"Rp"#,##0');
+    } catch (e) {}
+
+    // Dropdown Data Validation untuk Kolom Satuan (Kg, Bungkus, Karung, Botol, Sachet, Pcs, dll)
+    try {
+      var satuanOptions = ["Kg", "Bungkus", "Karung", "Botol", "Sachet", "Pcs", "Butir", "Tablet", "Kapsul", "Ekor"];
+      var rule = SpreadsheetApp.newDataValidation()
+        .requireValueInList(satuanOptions, true)
+        .setAllowInvalid(true)
+        .build();
+      sheet.getRange(2, 3, 100, 1).setDataValidation(rule);
+    } catch (e) {}
+
+    // Alternating Row Colors (Zebra Striping Hijau Emerald Halus)
+    try {
+      var dataRange = sheet.getRange(1, 1, 100, 5);
+      var banding = dataRange.applyRowBanding(SpreadsheetApp.BandingTheme.LIGHT_GREY);
+      banding.setHeaderRowColor("#064e3b");
+      banding.setFirstRowColor("#ffffff");
+      banding.setSecondRowColor("#f0fdf4");
+    } catch (e) {}
+  }
+
+  // 2. Format & Bersihkan Sheet Penjualan (Mutasi Kas 7 Kolom)
+  var salesSheet = ss.getSheetByName("Penjualan");
+  if (!salesSheet) {
+    salesSheet = ss.insertSheet("Penjualan");
+  } else {
+    salesSheet.clear();
+    try { salesSheet.clearConditionalFormatRules(); } catch (e) {}
+    try {
+      var bandings = salesSheet.getBandings();
+      for (var b = 0; b < bandings.length; b++) { bandings[b].remove(); }
+    } catch (e) {}
+  }
+
+  var salesHeaders = [["Tanggal", "Jam", "Keterangan / Transaksi", "Masuk (+)", "Keluar (-)", "Saldo Kas Akhir", "Metode"]];
+  salesSheet.getRange(1, 1, 1, 7).setValues(salesHeaders);
+
+  var salesHeaderRange = salesSheet.getRange(1, 1, 1, 7);
+  salesHeaderRange.setBackground("#064e3b");
+  salesHeaderRange.setFontColor("#FFFFFF");
+  salesHeaderRange.setFontWeight("bold");
+  salesHeaderRange.setFontSize(11);
+  salesHeaderRange.setFontFamily("Arial");
+  salesHeaderRange.setVerticalAlignment("middle");
+  salesHeaderRange.setHorizontalAlignment("center");
+  try { salesSheet.setRowHeight(1, 36); } catch (e) {}
+  try { salesSheet.setFrozenRows(1); } catch (e) {}
+
+  // Lebar Kolom Sheet Penjualan
+  try {
+    salesSheet.setColumnWidth(1, 110);
+    salesSheet.setColumnWidth(2, 85);
+    salesSheet.setColumnWidth(3, 260);
+    salesSheet.setColumnWidth(4, 125);
+    salesSheet.setColumnWidth(5, 125);
+    salesSheet.setColumnWidth(6, 140);
+    salesSheet.setColumnWidth(7, 100);
+  } catch (e) {}
+
+  // Baris Pembuka: Saldo Kas Awal Rp 0 (Reset Bersih)
+  var now = new Date();
+  var tz = Session.getScriptTimeZone() || "GMT+7";
+  var openingRow = [
+    Utilities.formatDate(now, tz, "yyyy-MM-dd"),
+    Utilities.formatDate(now, tz, "HH:mm:ss"),
+    "Saldo Kas Awal Toko (Reset Bersih)",
+    0,
+    0,
+    0,
+    "Sistem"
+  ];
+  salesSheet.getRange(2, 1, 1, 7).setValues([openingRow]);
+
+  try {
+    salesSheet.getRange(2, 1, 100, 1).setHorizontalAlignment("center");
+    salesSheet.getRange(2, 2, 100, 1).setHorizontalAlignment("center");
+    salesSheet.getRange(2, 3, 100, 1).setHorizontalAlignment("left");
+    salesSheet.getRange(2, 4, 100, 3).setHorizontalAlignment("right");
+    salesSheet.getRange(2, 7, 100, 1).setHorizontalAlignment("center");
+    salesSheet.getRange(2, 4, 100, 3).setNumberFormat('"Rp"#,##0');
+  } catch (e) {}
+
+  // Zebra Striping Sheet Penjualan
+  try {
+    var salesRange = salesSheet.getRange(1, 1, 100, 7);
+    var salesBanding = salesRange.applyRowBanding(SpreadsheetApp.BandingTheme.LIGHT_GREY);
+    salesBanding.setHeaderRowColor("#064e3b");
+    salesBanding.setFirstRowColor("#ffffff");
+    salesBanding.setSecondRowColor("#f0fdf4");
+  } catch (e) {}
+
+  // Hapus sheet default "Sheet1" jika masih ada dan kosong
+  try {
+    var sheet1 = ss.getSheetByName("Sheet1");
+    if (sheet1 && ss.getSheets().length > 1) {
+      ss.deleteSheet(sheet1);
+    }
+  } catch (e) {}
+
+  return "Berhasil mereset seluruh sheet dan memformat estetik tema Emerald Green!";
+}
+
 function formatHeaderRow(sheet, colCount) {
   var headerRange = sheet.getRange(1, 1, 1, colCount);
   headerRange.setFontWeight("bold");
-  headerRange.setBackground("#1D4ED8");
+  headerRange.setBackground("#064e3b");
   headerRange.setFontColor("#FFFFFF");
   headerRange.setHorizontalAlignment("center");
+  headerRange.setVerticalAlignment("middle");
+  try { sheet.setRowHeight(1, 36); } catch (e) {}
 }
 
 function getLastCashBalance(sh) {
@@ -2661,3 +2868,37 @@ async function hapusKolomModalDiSheets() {
     if (btn) btn.innerText = "Bersihkan Kolom Modal";
   }
 }
+
+async function resetDanFormatSpreadsheet() {
+  const pUrl = getProductUrl();
+  if (!pUrl) {
+    alert("URL Google Apps Script belum diisi di Pengaturan!");
+    return;
+  }
+  if (!confirm("Peringatan: Seluruh data produk dan riwayat transaksi di spreadsheet akan dibersihkan total dan diformat ulang dengan tema Emerald Green modern.\n\nLanjutkan?")) {
+    return;
+  }
+  try {
+    const res = await fetch(`${pUrl}?action=reset_and_format&t=${Date.now()}`);
+    const data = await res.json();
+    if (data && data.success) {
+      alert("SUKSES!\n\n" + data.message);
+      localStorage.setItem("petshop_clean_slate", "true");
+      localStorage.setItem("petshop_current_balance", "0");
+      localStorage.removeItem("petshop_custom_products");
+      localStorage.removeItem("petshop_price_overrides");
+      localStorage.removeItem("petshop_deleted_product_ids");
+      localStorage.removeItem("petshop_local_sales");
+      products = [];
+      currentBalance = 0;
+      updateDashboard();
+      renderProducts();
+      renderCatalogManager();
+    } else {
+      alert("Pemberitahuan: " + (data ? data.message : "Tidak ada respon dari Apps Script"));
+    }
+  } catch (err) {
+    alert("Permintaan format terkirim ke spreadsheet.\nJika Apps Script belum diupdate, silakan jalankan fungsi 'bersihkanDanFormatSemuaSheet' di Google Apps Script editor.");
+  }
+}
+

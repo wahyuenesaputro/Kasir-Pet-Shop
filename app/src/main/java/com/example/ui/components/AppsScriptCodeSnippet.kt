@@ -48,6 +48,9 @@ function doGet(e) {
     return jsonResponse(deleteProductFromSheets(ss, e.parameter || {}));
   } else if (action === "recent" || action === "balance" || action === "get_balance") {
     return getRecentSalesJson();
+  } else if (action === "reset_and_format" || action === "bersihkan_semua" || action === "format_estetik") {
+    var resultMsg = bersihkanDanFormatSemuaSheet();
+    return jsonResponse({ success: true, message: resultMsg });
   } else if (action === "setup" || action === "init" || action === "buat_saldo") {
     var resultMsg = buatKolomSaldoOtomatis();
     return jsonResponse({ success: true, message: resultMsg });
@@ -519,12 +522,177 @@ function ensureSalesSheetWithHeaders(ss) {
   return sheet;
 }
 
+function onOpen(e) {
+  try {
+    SpreadsheetApp.getUi()
+      .createMenu("✨ Kasir Pet Shop")
+      .addItem("🧹 Bersihkan & Format Estetik Seluruh Sheet", "bersihkanDanFormatSemuaSheet")
+      .addItem("📦 Isi Contoh Data Awal (Opsional)", "isiDataProdukOtomatis")
+      .addToUi();
+  } catch (err) {}
+}
+
+function bersihkanDanFormatSemuaSheet() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var kategoriList = ["Ayam", "Burung", "Kucing", "Ikan", "Obat"];
+  
+  // 1. Format & Bersihkan ke-5 Kategori Produk (Hanya Header 5 Kolom Tanpa Modal)
+  for (var k = 0; k < kategoriList.length; k++) {
+    var catName = kategoriList[k];
+    var sheet = ss.getSheetByName(catName);
+    if (!sheet) {
+      sheet = ss.insertSheet(catName);
+    } else {
+      sheet.clear();
+      try { sheet.clearConditionalFormatRules(); } catch (e) {}
+      try {
+        var bandings = sheet.getBandings();
+        for (var b = 0; b < bandings.length; b++) { bandings[b].remove(); }
+      } catch (e) {}
+    }
+
+    var headers = [["NO", "NAMA BARANG", "SATUAN", "HARGA JUAL", "KETERANGAN"]];
+    sheet.getRange(1, 1, 1, 5).setValues(headers);
+
+    var headerRange = sheet.getRange(1, 1, 1, 5);
+    headerRange.setBackground("#064e3b"); // Deep Emerald Green
+    headerRange.setFontColor("#FFFFFF");
+    headerRange.setFontWeight("bold");
+    headerRange.setFontSize(11);
+    headerRange.setFontFamily("Arial");
+    headerRange.setVerticalAlignment("middle");
+    headerRange.setHorizontalAlignment("center");
+    try { sheet.setRowHeight(1, 36); } catch (e) {}
+    try { sheet.setFrozenRows(1); } catch (e) {}
+
+    // Lebar Kolom Proporsional & Rapi
+    try {
+      sheet.setColumnWidth(1, 55);  // NO
+      sheet.setColumnWidth(2, 280); // NAMA BARANG
+      sheet.setColumnWidth(3, 110); // SATUAN
+      sheet.setColumnWidth(4, 135); // HARGA JUAL
+      sheet.setColumnWidth(5, 250); // KETERANGAN
+    } catch (e) {}
+
+    // Format Alignment Data & Format Angka Mata Uang
+    try {
+      sheet.getRange(2, 1, 100, 1).setHorizontalAlignment("center");
+      sheet.getRange(2, 2, 100, 1).setHorizontalAlignment("left");
+      sheet.getRange(2, 3, 100, 1).setHorizontalAlignment("center");
+      sheet.getRange(2, 4, 100, 1).setHorizontalAlignment("right");
+      sheet.getRange(2, 5, 100, 1).setHorizontalAlignment("left");
+      sheet.getRange(2, 4, 100, 1).setNumberFormat('"Rp"#,##0');
+    } catch (e) {}
+
+    // Dropdown Data Validation untuk Kolom Satuan (Kg, Bungkus, Karung, Botol, Sachet, Pcs, dll)
+    try {
+      var satuanOptions = ["Kg", "Bungkus", "Karung", "Botol", "Sachet", "Pcs", "Butir", "Tablet", "Kapsul", "Ekor"];
+      var rule = SpreadsheetApp.newDataValidation()
+        .requireValueInList(satuanOptions, true)
+        .setAllowInvalid(true)
+        .build();
+      sheet.getRange(2, 3, 100, 1).setDataValidation(rule);
+    } catch (e) {}
+
+    // Alternating Row Colors (Zebra Striping Hijau Emerald Halus)
+    try {
+      var dataRange = sheet.getRange(1, 1, 100, 5);
+      var banding = dataRange.applyRowBanding(SpreadsheetApp.BandingTheme.LIGHT_GREY);
+      banding.setHeaderRowColor("#064e3b");
+      banding.setFirstRowColor("#ffffff");
+      banding.setSecondRowColor("#f0fdf4");
+    } catch (e) {}
+  }
+
+  // 2. Format & Bersihkan Sheet Penjualan (Mutasi Kas 7 Kolom)
+  var salesSheet = ss.getSheetByName("Penjualan");
+  if (!salesSheet) {
+    salesSheet = ss.insertSheet("Penjualan");
+  } else {
+    salesSheet.clear();
+    try { salesSheet.clearConditionalFormatRules(); } catch (e) {}
+    try {
+      var bandings = salesSheet.getBandings();
+      for (var b = 0; b < bandings.length; b++) { bandings[b].remove(); }
+    } catch (e) {}
+  }
+
+  var salesHeaders = [["Tanggal", "Jam", "Keterangan / Transaksi", "Masuk (+)", "Keluar (-)", "Saldo Kas Akhir", "Metode"]];
+  salesSheet.getRange(1, 1, 1, 7).setValues(salesHeaders);
+
+  var salesHeaderRange = salesSheet.getRange(1, 1, 1, 7);
+  salesHeaderRange.setBackground("#064e3b");
+  salesHeaderRange.setFontColor("#FFFFFF");
+  salesHeaderRange.setFontWeight("bold");
+  salesHeaderRange.setFontSize(11);
+  salesHeaderRange.setFontFamily("Arial");
+  salesHeaderRange.setVerticalAlignment("middle");
+  salesHeaderRange.setHorizontalAlignment("center");
+  try { salesSheet.setRowHeight(1, 36); } catch (e) {}
+  try { salesSheet.setFrozenRows(1); } catch (e) {}
+
+  // Lebar Kolom Sheet Penjualan
+  try {
+    salesSheet.setColumnWidth(1, 110);
+    salesSheet.setColumnWidth(2, 85);
+    salesSheet.setColumnWidth(3, 260);
+    salesSheet.setColumnWidth(4, 125);
+    salesSheet.setColumnWidth(5, 125);
+    salesSheet.setColumnWidth(6, 140);
+    salesSheet.setColumnWidth(7, 100);
+  } catch (e) {}
+
+  // Baris Pembuka: Saldo Kas Awal Rp 0 (Reset)
+  var now = new Date();
+  var tz = Session.getScriptTimeZone() || "GMT+7";
+  var openingRow = [
+    Utilities.formatDate(now, tz, "yyyy-MM-dd"),
+    Utilities.formatDate(now, tz, "HH:mm:ss"),
+    "Saldo Kas Awal Toko (Reset Bersih)",
+    0,
+    0,
+    0,
+    "Sistem"
+  ];
+  salesSheet.getRange(2, 1, 1, 7).setValues([openingRow]);
+
+  try {
+    salesSheet.getRange(2, 1, 100, 1).setHorizontalAlignment("center");
+    salesSheet.getRange(2, 2, 100, 1).setHorizontalAlignment("center");
+    salesSheet.getRange(2, 3, 100, 1).setHorizontalAlignment("left");
+    salesSheet.getRange(2, 4, 100, 3).setHorizontalAlignment("right");
+    salesSheet.getRange(2, 7, 100, 1).setHorizontalAlignment("center");
+    salesSheet.getRange(2, 4, 100, 3).setNumberFormat('"Rp"#,##0');
+  } catch (e) {}
+
+  // Zebra Striping Sheet Penjualan
+  try {
+    var salesRange = salesSheet.getRange(1, 1, 100, 7);
+    var salesBanding = salesRange.applyRowBanding(SpreadsheetApp.BandingTheme.LIGHT_GREY);
+    salesBanding.setHeaderRowColor("#064e3b");
+    salesBanding.setFirstRowColor("#ffffff");
+    salesBanding.setSecondRowColor("#f0fdf4");
+  } catch (e) {}
+
+  // Hapus sheet default "Sheet1" jika masih ada dan kosong
+  try {
+    var sheet1 = ss.getSheetByName("Sheet1");
+    if (sheet1 && ss.getSheets().length > 1) {
+      ss.deleteSheet(sheet1);
+    }
+  } catch (e) {}
+
+  return "Berhasil mereset seluruh sheet dan memformat estetik tema Emerald Green!";
+}
+
 function formatHeaderRow(sheet, colCount) {
   var headerRange = sheet.getRange(1, 1, 1, colCount);
   headerRange.setFontWeight("bold");
-  headerRange.setBackground("#1D4ED8");
+  headerRange.setBackground("#064e3b");
   headerRange.setFontColor("#FFFFFF");
   headerRange.setHorizontalAlignment("center");
+  headerRange.setVerticalAlignment("middle");
+  try { sheet.setRowHeight(1, 36); } catch (e) {}
 }
 
 function getLastCashBalance(sh) {

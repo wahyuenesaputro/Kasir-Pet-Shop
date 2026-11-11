@@ -1,99 +1,101 @@
-# Integrasi Katalog Harga Baru & Pemisahan Link Spreadsheet (Produk & Penjualan)
+# Rencana Reset & Format Ulang Desain Spreadsheet Pet Shop (Web & Android)
 
-Rencana implementasi integrasi 29 daftar harga terbaru dari file toko, penyediaan 2 link Google Spreadsheet terpisah (Katalog Produk & Riwayat Penjualan/Kas), serta fitur pembaruan produk langsung dari website kasir desktop yang tersinkron otomatis ke seluruh perangkat (tanpa fitur stok barang terlebih dahulu).
+Pembersihan menyeluruh seluruh item produk dan riwayat transaksi di Google Spreadsheet serta aplikasi kasir, disertai pembaruan desain visual spreadsheet bertema **Emerald Green Modern** bergaris zebra rapi, validasi satuan terstandarisasi, dan penataan state aplikasi agar siap digunakan untuk penginputan data baru oleh pengguna.
 
 ---
 
 ### User Review & Critical Decisions
 
 > [!IMPORTANT]
-> **Keputusan yang Telah Dikonfirmasi Pengguna:**
-> 1. **Dua Link Google Spreadsheet Terpisah:**
->    - Di menu Pengaturan (Web POS & Android) akan disediakan dua kolom input URL:
->      - **URL Spreadsheet Produk / Katalog**: Untuk mengambil data barang, kategori, harga beli, harga jual, serta menerima update harga dari aplikasi.
->      - **URL Spreadsheet Penjualan / Kas**: Untuk mencatat mutasi kas penjualan 7 kolom (`Tanggal | Jam | Keterangan | Masuk | Keluar | Saldo Kas Akhir | Metode`).
->      - *Fallback Otomatis:* Jika hanya 1 URL yang diisi, sistem otomatis menggunakan URL tersebut untuk kedua fungsi.
-> 2. **Penerapan 29 Data Harga Terbaru:**
->    - Seluruh 29 produk pakan burung dan pakan lainnya dari file `Daftar_Toko_PakanTernak_a9847901` (seperti SKM Halus/Kasar Rp 4.500, Kroto Sari Rp 3.500, Alam Sakti Rp 10.500/Rp 11.500, Topsong Rp 12.000, Fancy Rp 14.500, Milet, Kenari Seed, dll.) langsung diterapkan ke katalog aplikasi dan Google Spreadsheet sehingga tidak ada lagi produk yang berharga Rp 0.
-> 3. **Pengeditan Barang dari Website Desktop:**
->    - Kasir atau pemilik toko dapat mengedit harga jual produk atau menambah barang baru langsung dari layar komputer/laptop di Web POS, dan perubahan tersebut seketika terkirim dan tersimpan ke Google Spreadsheet tab kategori terkait.
-> 4. **Penundaan Fitur Stok:**
->    - Sesuai instruksi pengguna (*"jangan beri stok dulu itu nanti"*), sistem saat ini tidak menambahkan kolom stok atau pembatasan kuantitas stok agar fokus penuh pada kelancaran harga dan transaksi.
+> Berdasarkan jawaban klarifikasi pengguna, berikut keputusan utama yang telah disepakati:
+> - **Status Data Produk:** Dikosongkan total (hanya menyisakan baris judul dan header kolom berformat rapi) untuk 5 kategori: `Ayam`, `Burung`, `Kucing`, `Ikan`, dan `Obat`.
+> - **Tema Visual Spreadsheet:** **Hijau Emerald Modern** (`#064e3b` / `#0f5132`) dengan teks putih tebal, garis batas halus, zebra striping lembut (`#f0fdf4`), dan format mata uang `Rp#,##0`.
+> - **Riwayat Kas & Saldo:** Sheet `Penjualan` (7 kolom) dibersihkan riwayat lamanya dan disetel dengan baris pembuka Saldo Kas Awal = **Rp 0**.
+> - **Validasi Satuan:** Kolom SATUAN dilengkapi dropdown standar: `Kg`, `Bungkus`, `Karung`, `Botol`, `Sachet`, `Pcs`, `Butir`, `Tablet`, `Kapsul`, `Ekor`.
 
 ---
 
 ### 1. Overview & Core Concept
 
-- **Apa yang Dibangun?**
-  - Arsitektur dual-spreadsheet (URL Katalog Produk vs URL Penjualan Kas) yang fleksibel.
-  - Pembaruan menyeluruh database katalog lokal & Google Spreadsheet dengan 29 harga barang terbaru.
-  - Antarmuka edit harga cepat di Web POS desktop yang langsung menulis ke Google Spreadsheet tab kategori (`Ayam`, `Burung`, `Kucing`, `Ikan`, `Lainnya`).
-- **Target Pengguna:**
-  - Kasir dan pemilik toko pet shop yang menggunakan komputer desktop untuk pengelolaan barang serta smartphone untuk penjualan lapangan.
-- **Nilai Manfaat:**
-  - Pemisahan data pembukuan keuangan (penjualan kas) dari data master barang (katalog produk) sehingga spreadsheet penjualan tetap bersih 7 kolom, sementara master produk tetap rapi per sheet kategori.
+- **Tujuan Utama:** Menghadirkan template spreadsheet profesional yang bersih, modern, dan tidak kaku/biasa, sekaligus mereset aplikasi kasir (Web Desktop & Android) ke kondisi awal yang siap menerima input produk baru esok hari.
+- **Hasil yang Diberikan:**
+  1. **Google Apps Script Terpadu (Code.gs):** Memiliki fungsi otomatis `bersihkanDanFormatSemuaSheet()` serta menu spreadsheet Google Sheets ("✨ Kasir Pet Shop > 🧹 Reset & Format Estetik") dan endpoint API `?action=reset_and_format` untuk dieksekusi dalam 1 klik.
+  2. **Tampilan Spreadsheet Profesional:** Header bertema Emerald Green, font rapi (Roboto / Arial), zebra striping, kolom lebar proporsional dengan autofit, format mata uang otomatis, serta dropdown pilihan satuan baku.
+  3. **Aplikasi Web & Android:** Tampilan empty state yang elegan ketika produk masih kosong, saldo kas kasir direset ke Rp 0, dan sistem sinkronisasi yang siap menerima produk baru tanpa memunculkan data lama.
 
 ---
 
 ### 2. User Experience & Visual Design
 
-- **Alur Pengguna di Website Desktop:**
-  1. **Update Harga Barang dari Desktop:**
-     - Pemilik toko membuka menu **Katalog** di laptop/PC kasir &rarr; Mengetik nama barang di kotak pencarian atau memilih chip kategori &rarr; Klik tombol pensil (Edit Harga) pada barang terkait &rarr; Muncul dialog modal modern berisi Nama Produk, Kategori, Harga Beli, dan input Harga Jual Baru &rarr; Mengetik harga baru (atau klik tombol shortcut `+1.000`, `+2.000`, `+5.000`) &rarr; Klik **"Simpan & Sinkronkan"** &rarr; Indikator hijau muncul *"Tersimpan ke Spreadsheet!"* &rarr; Nilai di Google Spreadsheet dan seluruh aplikasi HP langsung ter-update seketika.
-  2. **Pengaturan Dua Link Spreadsheet:**
-     - Di modal Pengaturan, terdapat 2 field terpisah dengan deskripsi jelas:
-       - 🏷️ **Link Spreadsheet Katalog Produk** (Target: Sheet Ayam, Burung, Kucing, Ikan)
-       - 💰 **Link Spreadsheet Riwayat Penjualan / Mutasi Kas** (Target: Sheet Penjualan 7 kolom)
-       - Tombol **"Tes Koneksi"** dan **"Salin Kode Script"** untuk masing-masing fungsi.
-  3. **Tampilan Kasir dengan Harga Terbaru:**
-     - Seluruh barang (khususnya kategori Burung seperti Kroto Sari, Topsong, Leopard, Gold Coin) langsung menampilkan label harga jual yang valid dan siap ditransaksikan dalam 1 klik.
+#### A. Desain Spreadsheet Google Sheets (Emerald Modern)
+- **Palette Warna:**
+  - Header Utama: Dark Emerald Green (`#064e3b`) dengan font putih tebal, tinggi baris 32px, text centered & vertically aligned.
+  - Subheader / Keterangan: Muted Emerald (`#dcfce7`).
+  - Zebra Striping (Baris Genap): Soft Mint (`#f0fdf4`), Baris Ganjil: Putih murni (`#ffffff`).
+  - Gridlines: Soft Gray Border (`#cbd5e1`).
+- **Struktur Kolom 5 Kategori Produk (Ayam, Burung, Kucing, Ikan, Obat):**
+  - Kolom A: `NO` (Lebar 50px, Center)
+  - Kolom B: `NAMA BARANG` (Lebar 280px, Left aligned, Font Semi-Bold)
+  - Kolom C: `SATUAN` (Lebar 110px, Center, dengan Data Validation Dropdown: `Kg, Bungkus, Karung, Botol, Sachet, Pcs, Butir, Tablet, Kapsul, Ekor`)
+  - Kolom D: `HARGA JUAL` (Lebar 130px, Right aligned, Format otomatis `Rp#,##0`)
+  - Kolom E: `KETERANGAN` (Lebar 220px, Left aligned, Catatan/Deskripsi)
+  *(Sesuai instruksi sebelumnya: Tanpa Kolom Harga Modal)*
+- **Struktur Kolom Sheet `Penjualan` (Riwayat Kasir 7 Kolom):**
+  - `TANGGAL | JAM | KETERANGAN | MASUK (+) | KELUAR (-) | SALDO KAS AKHIR | METODE`
+  - Baris 2: Catatan pembuka saldo awal `Rp 0`.
+
+#### B. Desain Aplikasi Kasir (Web & Android)
+- **Empty State:** Ilustrasi ramah dengan pesan: *"Katalog Produk Masih Bersih & Kosong — Siap Ditambahkan dari Spreadsheet atau Form Produk"*.
+- **Indikator Saldo Kas:** Menampilkan **Rp 0** dengan badge status *"Siap Operasional"*.
 
 ---
 
 ### 3. Key Product Decisions & Trade-Offs
 
-- **Keputusan 1: Dukungan 2 URL Terpisah dengan Fallback 1 URL**
-  - *Pendekatan:* Jika pemilik toko ingin menggunakan 2 Google Spreadsheet berbeda (misal: spreadsheet rahasia keuangan terpisah dari spreadsheet katalog barang), sistem mendukungnya secara penuh. Namun jika pemilik toko ingin tetap memakai 1 spreadsheet untuk keduanya, sistem tetap berjalan lancar.
-  - *Alasan:* Memberikan kebebasan manajemen akuntansi dan privasi bagi pemilik toko.
-- **Keputusan 2: Pembaruan Harga Beli & Jual Terintegrasi**
-  - *Pendekatan:* Memperbarui daftar katalog standar di kode lokal Web & Android dengan 29 harga resmi dari file lampiran, serta menyediakan fungsi Apps Script untuk memperbarui sheet di Google Spreadsheet.
+- **Decision 1: Otomasi Pemformatan Spreadsheet via Apps Script**
+  - *Pendekatan:* Menyediakan fungsi khusus di Google Apps Script yang langsung membuat menu atas spreadsheet (*Custom Menu*) dan endpoint web. Pengguna cukup klik 1 tombol di spreadsheet untuk mereset dan memformat seluruh sheet menjadi estetik dalam sekejap.
+  - *Alasan:* Menghindari keharusan pengguna mengatur warna, border, dan dropdown satu per satu secara manual di Google Sheets.
+- **Decision 2: Penanganan Data Lokal di Web dan Android**
+  - *Pendekatan:* Menghapus cache lokal data produk contoh lama di `SampleCatalog.kt` dan `INITIAL_PRODUCTS` di `app.js` ketika pengguna memilih reset, sehingga sinkron dengan spreadsheet yang baru dikosongkan.
+  - *Alasan:* Mencegah produk default lama (seperti pakan ayam 78 item) muncul kembali saat spreadsheet kosong.
 
 ---
 
 ### 4. Technical Architecture & Data Strategy
 
 ```
-┌──────────────────────────────────────┐       ┌──────────────────────────────────────┐
-│  SPREADSHEET 1: MASTER PRODUK        │       │  SPREADSHEET 2: MUTASI PENJUALAN     │
-│  (Ayam, Burung, Kucing, Ikan)        │       │  (Sheet: Penjualan - 7 Kolom Murni)  │
-│  [No | Nama | Satuan | Beli | Jual]  │       │  [Tgl | Jam | Ket | Msk | Klr | Saldo│
-└──────────────────┬───────────────────┘       └──────────────────┬───────────────────┘
-                   │                                              │
-         Apps Script Produk                             Apps Script Kas
-      (action=products, update_price)                 (action=sale, recent, balance)
-                   │                                              │
-                   └───────────────────────┬──────────────────────┘
-                                           │
-                        ┌──────────────────┴──────────────────┐
-                        ▼                                     ▼
-            ┌───────────────────────┐             ┌───────────────────────┐
-            │   APLIKASI WEB POS    │             │ APLIKASI ANDROID POS  │
-            │  (Desktop Workstation)│             │   (Smartphone Kasir)  │
-            │                       │             │                       │
-            │ • Edit Harga Desktop  │             │ • Baca 2 URL Prefs    │
-            │ • Input 2 URL Mandiri │             │ • Transaksi Kasir     │
-            │ • Katalog 78+ Produk  │             │ • Sinkron 2 Arah      │
-            └───────────────────────┘             └───────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                   Google Sheets Spreadsheet                 │
+│  [Ayam]  [Burung]  [Kucing]  [Ikan]  [Obat]   [Penjualan]   │
+│  - 5 Kolom Produk (Tanpa Modal)                - 7 Kolom Kas│
+│  - Emerald Green Headers + Zebra Striping     - Saldo Rp 0 │
+│  - Dropdown Satuan Standar                                  │
+└──────────────────────────────┬──────────────────────────────┘
+                               │
+                Google Apps Script (Code.gs)
+                - doResetAndFormatAllSheets()
+                - Custom Menu: "✨ Kasir Pet Shop"
+                - Web App API: ?action=reset_and_format
+                               │
+               ┌───────────────┴───────────────┐
+               ▼                               ▼
+┌─────────────────────────────┐ ┌─────────────────────────────┐
+│     Web Desktop Client      │ │       Android Client        │
+│  - Empty State Elegan       │ │  - Empty State Elegan       │
+│  - Saldo Kas Aktif: Rp 0    │ │  - Saldo Kas Aktif: Rp 0    │
+│  - Dropdown Satuan Standar  │ │  - Sinkronisasi Bersih      │
+└─────────────────────────────┘ └─────────────────────────────┘
 ```
 
-- **Rencana File yang Dikerjakan:**
-  1. `SampleCatalog.kt`, `web/app.js`, dan `public/app.js`:
-     - Memperbarui daftar 29 produk burung dengan harga beli dan harga jual dari file `Daftar_Toko_PakanTernak_a9847901`.
-  2. `web/app.js` & `web/index.html`:
-     - Menambahkan input field untuk `productScriptUrl` dan `salesScriptUrl` di modal Pengaturan.
-     - Mengarahkan aksi get/update produk ke `productScriptUrl` dan aksi checkout/saldo ke `salesScriptUrl`.
-  3. `PetShopPrefs.kt`, `SettingsDialog.kt`, & `PetShopRepository.kt`:
-     - Menambahkan penyimpanan preferensi `productScriptUrl` dan `salesScriptUrl`.
-     - Mengarahkan `fetchProducts` & `updateProductPrice` ke URL produk, dan `submitSale` & `adjustBalance` ke URL penjualan.
-  4. `Code.gs` & `AppsScriptCodeSnippet.kt`:
-     - Memastikan kompatibilitas penuh jika dipasang di 2 spreadsheet terpisah maupun di 1 spreadsheet terpadu.
+#### Komponen yang Diperbarui:
+1. **Google Apps Script Template (`web/app.js`, `public/app.js`, & `AppsScriptCodeSnippet.kt`):**
+   - Menambahkan fungsi `bersihkanDanFormatSemuaSheet(ss)`.
+   - Mengatur styling: Background header `#064e3b`, teks putih tebal, border rapi, font family, text wrapping, format number currency `Rp#,##0`, dan dropdown data validation untuk satuan.
+   - Menambahkan event handler menu `onOpen(e)` sehingga muncul tombol di bar menu Google Sheets.
+2. **Web Desktop Application (`web/app.js` & `public/app.js`):**
+   - Mengupdate state awal produk menjadi kosong bila memilih reset.
+   - Mengupdate opsi dropdown satuan saat menambah produk baru via form web agar selaras dengan spreadsheet.
+   - Mereset saldo kas berjalan dan mutasi kasir ke Rp 0.
+3. **Android Client (`SampleCatalog.kt`, `PetShopRepository.kt`, `PetShopPrefs.kt`):**
+   - Menyediakan fleksibilitas reset data lokal produk & transaksi kasir ke saldo Rp 0.
+   - Menjamin sinkronisasi tetap stabil saat spreadsheet berstatus kosong (tidak crash atau force close).
