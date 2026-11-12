@@ -185,6 +185,7 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
     val uiState: StateFlow<KasirUiState> = _uiState.asStateFlow()
 
     init {
+        prefs.isCleanSlate = false
         // Sinkronisasi otomatis saat pertama kali dibuka (onLoad)
         autoSync()
 

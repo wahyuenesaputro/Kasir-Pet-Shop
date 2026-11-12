@@ -232,8 +232,7 @@ fun KasirScreen(
                                 products = uiState.products,
                                 onOpenAddProductDialog = { viewModel.openAddProductDialog() },
                                 onOpenEditProductDialog = { prod -> viewModel.openEditProductCrudDialog(prod) },
-                                onOpenDeleteProductDialog = { prod -> viewModel.openDeleteProductDialog(prod) },
-                                onClearAllProducts = { viewModel.clearAllProducts() }
+                                onOpenDeleteProductDialog = { prod -> viewModel.openDeleteProductDialog(prod) }
                             )
                         }
                         3 -> {

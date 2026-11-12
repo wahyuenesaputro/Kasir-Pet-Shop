@@ -48,6 +48,9 @@ function doGet(e) {
     return jsonResponse(deleteProductFromSheets(ss, e.parameter || {}));
   } else if (action === "recent" || action === "balance" || action === "get_balance") {
     return getRecentSalesJson();
+  } else if (action === "setup_data_baru" || action === "isi_pakan_baru" || action === "buat_spreadsheet_baru" || action === "reset_data_baru") {
+    var resultMsg = buatSpreadsheetDataPakanBaru();
+    return jsonResponse({ success: true, message: resultMsg });
   } else if (action === "reset_and_format" || action === "bersihkan_semua" || action === "format_estetik") {
     var resultMsg = bersihkanDanFormatSemuaSheet();
     return jsonResponse({ success: true, message: resultMsg });
@@ -522,12 +525,709 @@ function ensureSalesSheetWithHeaders(ss) {
   return sheet;
 }
 
+
+/**
+ * MEMBUAT SPREADSHEET BARU UNTUK DATA PAKAN (78 PRODUK)
+ * - Menghapus data lama di tab Kucing, Burung, Ayam, Ikan, Obat, dan Penjualan.
+ * - Mengisi 78 item pakan resmi dari data pakan baru.
+ * - Tab Obat dikosongkan (hanya header).
+ * - Tidak menambahkan kategori Lainnya.
+ * - Tema visual Emerald Green modern dengan zebra striping & dropdown satuan.
+ */
+function buatSpreadsheetDataPakanBaru() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  
+  var rawDataPakan = {
+  "Kucing": [
+    {
+      "id": "kucing_1",
+      "kategori": "Kucing",
+      "namaProduk": "Bolt (Ikan Ungu 800gr)",
+      "satuan": "pcs",
+      "hargaJual": 19000
+    },
+    {
+      "id": "kucing_2",
+      "kategori": "Kucing",
+      "namaProduk": "Bolt (Donat Kuning 800gr)",
+      "satuan": "pcs",
+      "hargaJual": 19000
+    },
+    {
+      "id": "kucing_3",
+      "kategori": "Kucing",
+      "namaProduk": "Bolt (Pink Bulat 800gr)",
+      "satuan": "pcs",
+      "hargaJual": 19000
+    },
+    {
+      "id": "kucing_4",
+      "kategori": "Kucing",
+      "namaProduk": "Bolt (Kitten Bolt 500gr)",
+      "satuan": "pcs",
+      "hargaJual": 14000
+    },
+    {
+      "id": "kucing_5",
+      "kategori": "Kucing",
+      "namaProduk": "Felibite (Felibite Ikan)",
+      "satuan": "pcs",
+      "hargaJual": 12000
+    },
+    {
+      "id": "kucing_6",
+      "kategori": "Kucing",
+      "namaProduk": "Felibite (Felibite Donat)",
+      "satuan": "pcs",
+      "hargaJual": 12000
+    },
+    {
+      "id": "kucing_7",
+      "kategori": "Kucing",
+      "namaProduk": "Felibite (Felibite Kitten Donat)",
+      "satuan": "pcs",
+      "hargaJual": 12500
+    },
+    {
+      "id": "kucing_8",
+      "kategori": "Kucing",
+      "namaProduk": "Excel (Adult Ikan 500gr)",
+      "satuan": "pcs",
+      "hargaJual": 11500
+    },
+    {
+      "id": "kucing_9",
+      "kategori": "Kucing",
+      "namaProduk": "Excel (Adult Donat)",
+      "satuan": "pcs",
+      "hargaJual": 11500
+    },
+    {
+      "id": "kucing_10",
+      "kategori": "Kucing",
+      "namaProduk": "Excel (Adult Segitiga Oren)",
+      "satuan": "pcs",
+      "hargaJual": 11500
+    },
+    {
+      "id": "kucing_11",
+      "kategori": "Kucing",
+      "namaProduk": "Excel (Kitten Pink 500gr)",
+      "satuan": "pcs",
+      "hargaJual": 13000
+    },
+    {
+      "id": "kucing_12",
+      "kategori": "Kucing",
+      "namaProduk": "Cat Choize (Hijau Adult 800gr)",
+      "satuan": "pcs",
+      "hargaJual": 18000
+    },
+    {
+      "id": "kucing_13",
+      "kategori": "Kucing",
+      "namaProduk": "Cat Choize (Oren Adult 800gr)",
+      "satuan": "pcs",
+      "hargaJual": 18000
+    },
+    {
+      "id": "kucing_14",
+      "kategori": "Kucing",
+      "namaProduk": "Cat Choize (Kitten Tuna Pink 1kg)",
+      "satuan": "pcs",
+      "hargaJual": 24500
+    },
+    {
+      "id": "kucing_15",
+      "kategori": "Kucing",
+      "namaProduk": "Cat Choize (Kitten Salmon Kuning 1kg)",
+      "satuan": "pcs",
+      "hargaJual": 24500
+    },
+    {
+      "id": "kucing_16",
+      "kategori": "Kucing",
+      "namaProduk": "Chester (800gr)",
+      "satuan": "pcs",
+      "hargaJual": 19500
+    },
+    {
+      "id": "kucing_17",
+      "kategori": "Kucing",
+      "namaProduk": "Whiskas Pouch (Kitten)",
+      "satuan": "pcs",
+      "hargaJual": 6500
+    },
+    {
+      "id": "kucing_18",
+      "kategori": "Kucing",
+      "namaProduk": "Whiskas Pouch (Adult)",
+      "satuan": "pcs",
+      "hargaJual": 6500
+    },
+    {
+      "id": "kucing_19",
+      "kategori": "Kucing",
+      "namaProduk": "Life Cat (Pouch)",
+      "satuan": "pcs",
+      "hargaJual": 6000
+    },
+    {
+      "id": "kucing_20",
+      "kategori": "Kucing",
+      "namaProduk": "Life Cat (Kaleng Adult 400gr)",
+      "satuan": "pcs",
+      "hargaJual": 13500
+    },
+    {
+      "id": "kucing_21",
+      "kategori": "Kucing",
+      "namaProduk": "Life Cat (Kaleng Kitten 400gr)",
+      "satuan": "pcs",
+      "hargaJual": 13500
+    }
+  ],
+  "Burung": [
+    {
+      "id": "burung_1",
+      "kategori": "Burung",
+      "namaProduk": "Leopard (MD Halus)",
+      "satuan": "pcs",
+      "hargaJual": 8000
+    },
+    {
+      "id": "burung_2",
+      "kategori": "Burung",
+      "namaProduk": "Leopard (MD Kasar)",
+      "satuan": "pcs",
+      "hargaJual": 8000
+    },
+    {
+      "id": "burung_3",
+      "kategori": "Burung",
+      "namaProduk": "Leopard (Hijau Kasar)",
+      "satuan": "pcs",
+      "hargaJual": 8000
+    },
+    {
+      "id": "burung_4",
+      "kategori": "Burung",
+      "namaProduk": "Topsong (Top Song Coklat)",
+      "satuan": "pcs",
+      "hargaJual": 12000
+    },
+    {
+      "id": "burung_5",
+      "kategori": "Burung",
+      "namaProduk": "Topsong (Top Song Hijau)",
+      "satuan": "pcs",
+      "hargaJual": 12000
+    },
+    {
+      "id": "burung_6",
+      "kategori": "Burung",
+      "namaProduk": "SKM (SKM Halus)",
+      "satuan": "pcs",
+      "hargaJual": 4000
+    },
+    {
+      "id": "burung_7",
+      "kategori": "Burung",
+      "namaProduk": "SKM (SKM Kasar)",
+      "satuan": "pcs",
+      "hargaJual": 4000
+    },
+    {
+      "id": "burung_8",
+      "kategori": "Burung",
+      "namaProduk": "Kroto Sari (KSK)",
+      "satuan": "pcs",
+      "hargaJual": 3500
+    },
+    {
+      "id": "burung_9",
+      "kategori": "Burung",
+      "namaProduk": "Kroto Sari (Krotosari Kasar)",
+      "satuan": "pcs",
+      "hargaJual": 3500
+    },
+    {
+      "id": "burung_10",
+      "kategori": "Burung",
+      "namaProduk": "Alam Sakti (Love Bird)",
+      "satuan": "pcs",
+      "hargaJual": 10500
+    },
+    {
+      "id": "burung_11",
+      "kategori": "Burung",
+      "namaProduk": "Alam Sakti (Kenari)",
+      "satuan": "pcs",
+      "hargaJual": 11500
+    },
+    {
+      "id": "burung_12",
+      "kategori": "Burung",
+      "namaProduk": "Madura Koung (Madura Koung)",
+      "satuan": "pcs",
+      "hargaJual": 9500
+    },
+    {
+      "id": "burung_13",
+      "kategori": "Burung",
+      "namaProduk": "Kutut Profit (Profit)",
+      "satuan": "pcs",
+      "hargaJual": 8500
+    },
+    {
+      "id": "burung_14",
+      "kategori": "Burung",
+      "namaProduk": "Derkuku Comet (Comet Derkuku)",
+      "satuan": "pcs",
+      "hargaJual": 7500
+    },
+    {
+      "id": "burung_15",
+      "kategori": "Burung",
+      "namaProduk": "Gold Coin (Kutut 250gr)",
+      "satuan": "pcs",
+      "hargaJual": 8500
+    },
+    {
+      "id": "burung_16",
+      "kategori": "Burung",
+      "namaProduk": "Gold Coin (Hijau Seaweed 450gr)",
+      "satuan": "pcs",
+      "hargaJual": 12000
+    },
+    {
+      "id": "burung_17",
+      "kategori": "Burung",
+      "namaProduk": "Gold Coin (Kenari)",
+      "satuan": "pcs",
+      "hargaJual": 9500
+    },
+    {
+      "id": "burung_18",
+      "kategori": "Burung",
+      "namaProduk": "Ebod Canary (Ebod)",
+      "satuan": "pcs",
+      "hargaJual": 9000
+    },
+    {
+      "id": "burung_19",
+      "kategori": "Burung",
+      "namaProduk": "Chirpy (Besar)",
+      "satuan": "pcs",
+      "hargaJual": 10000
+    },
+    {
+      "id": "burung_20",
+      "kategori": "Burung",
+      "namaProduk": "Chirpy (Kecil)",
+      "satuan": "pcs",
+      "hargaJual": 7000
+    },
+    {
+      "id": "burung_21",
+      "kategori": "Burung",
+      "namaProduk": "Fancy (Besar)",
+      "satuan": "pcs",
+      "hargaJual": 14500
+    },
+    {
+      "id": "burung_22",
+      "kategori": "Burung",
+      "namaProduk": "Fancy (Kecil 250gr)",
+      "satuan": "pcs",
+      "hargaJual": 8000
+    },
+    {
+      "id": "burung_23",
+      "kategori": "Burung",
+      "namaProduk": "Ketan Hitam",
+      "satuan": "pcs",
+      "hargaJual": 8500
+    },
+    {
+      "id": "burung_24",
+      "kategori": "Burung",
+      "namaProduk": "Milet Putih (1kg)",
+      "satuan": "pcs",
+      "hargaJual": 14500
+    },
+    {
+      "id": "burung_25",
+      "kategori": "Burung",
+      "namaProduk": "Milet Merah",
+      "satuan": "pcs",
+      "hargaJual": 14500
+    },
+    {
+      "id": "burung_26",
+      "kategori": "Burung",
+      "namaProduk": "Kenari Seed (1kg)",
+      "satuan": "pcs",
+      "hargaJual": 15500
+    },
+    {
+      "id": "burung_27",
+      "kategori": "Burung",
+      "namaProduk": "Trucuk Pisang Ijo SM",
+      "satuan": "pcs",
+      "hargaJual": 3500
+    },
+    {
+      "id": "burung_28",
+      "kategori": "Burung",
+      "namaProduk": "521 (521 Coklat)",
+      "satuan": "pcs",
+      "hargaJual": 8500
+    },
+    {
+      "id": "burung_29",
+      "kategori": "Burung",
+      "namaProduk": "521 (521 Hijau)",
+      "satuan": "pcs",
+      "hargaJual": 9000
+    }
+  ],
+  "Ayam": [
+    {
+      "id": "ayam_1",
+      "kategori": "Ayam",
+      "namaProduk": "511 (Zak)",
+      "satuan": "kg",
+      "hargaJual": 11500
+    },
+    {
+      "id": "ayam_2",
+      "kategori": "Ayam",
+      "namaProduk": "511 (511 K)",
+      "satuan": "pcs",
+      "hargaJual": 14500
+    },
+    {
+      "id": "ayam_3",
+      "kategori": "Ayam",
+      "namaProduk": "591 (591k)",
+      "satuan": "pcs",
+      "hargaJual": 14500
+    },
+    {
+      "id": "ayam_4",
+      "kategori": "Ayam",
+      "namaProduk": "592 (592k)",
+      "satuan": "pcs",
+      "hargaJual": 14500
+    },
+    {
+      "id": "ayam_5",
+      "kategori": "Ayam",
+      "namaProduk": "594 (594k)",
+      "satuan": "pcs",
+      "hargaJual": 14500
+    },
+    {
+      "id": "ayam_6",
+      "kategori": "Ayam",
+      "namaProduk": "EH510 (1 kg) / BR Super",
+      "satuan": "pcs",
+      "hargaJual": 12000
+    },
+    {
+      "id": "ayam_7",
+      "kategori": "Ayam",
+      "namaProduk": "BR Multifeed (BR 1kg)",
+      "satuan": "pcs",
+      "hargaJual": 10500
+    },
+    {
+      "id": "ayam_8",
+      "kategori": "Ayam",
+      "namaProduk": "Buras (Zak)",
+      "satuan": "kg",
+      "hargaJual": 7000
+    },
+    {
+      "id": "ayam_9",
+      "kategori": "Ayam",
+      "namaProduk": "EH 610 (Zak)",
+      "satuan": "kg",
+      "hargaJual": 9500
+    },
+    {
+      "id": "ayam_10",
+      "kategori": "Ayam",
+      "namaProduk": "Jagung (Zak Meniran)",
+      "satuan": "kg",
+      "hargaJual": 10500
+    },
+    {
+      "id": "ayam_11",
+      "kategori": "Ayam",
+      "namaProduk": "Jagung (Zak Kasar)",
+      "satuan": "kg",
+      "hargaJual": 10500
+    },
+    {
+      "id": "ayam_12",
+      "kategori": "Ayam",
+      "namaProduk": "Jagung (Unyil Kristal)",
+      "satuan": "pcs",
+      "hargaJual": 13500
+    },
+    {
+      "id": "ayam_13",
+      "kategori": "Ayam",
+      "namaProduk": "524 A (Zak)",
+      "satuan": "kg",
+      "hargaJual": 9500
+    },
+    {
+      "id": "ayam_14",
+      "kategori": "Ayam",
+      "namaProduk": "324KJ (Zak)",
+      "satuan": "kg",
+      "hargaJual": 9500
+    },
+    {
+      "id": "ayam_15",
+      "kategori": "Ayam",
+      "namaProduk": "CP 124 P",
+      "satuan": "pcs",
+      "hargaJual": 11000
+    }
+  ],
+  "Ikan": [
+    {
+      "id": "ikan_1",
+      "kategori": "Ikan",
+      "namaProduk": "781 (-1)",
+      "satuan": "pcs",
+      "hargaJual": 16500
+    },
+    {
+      "id": "ikan_2",
+      "kategori": "Ikan",
+      "namaProduk": "781 (-2)",
+      "satuan": "pcs",
+      "hargaJual": 16000
+    },
+    {
+      "id": "ikan_3",
+      "kategori": "Ikan",
+      "namaProduk": "781 (-3)",
+      "satuan": "pcs",
+      "hargaJual": 15500
+    },
+    {
+      "id": "ikan_4",
+      "kategori": "Ikan",
+      "namaProduk": "782 (-2)",
+      "satuan": "pcs",
+      "hargaJual": 14500
+    },
+    {
+      "id": "ikan_5",
+      "kategori": "Ikan",
+      "namaProduk": "782 (-3)",
+      "satuan": "pcs",
+      "hargaJual": 14500
+    },
+    {
+      "id": "ikan_6",
+      "kategori": "Ikan",
+      "namaProduk": "782 (-4)",
+      "satuan": "pcs",
+      "hargaJual": 14500
+    },
+    {
+      "id": "ikan_7",
+      "kategori": "Ikan",
+      "namaProduk": "T78 (-2 kg)",
+      "satuan": "pcs",
+      "hargaJual": 12500
+    },
+    {
+      "id": "ikan_8",
+      "kategori": "Ikan",
+      "namaProduk": "T78 (-3 kg)",
+      "satuan": "pcs",
+      "hargaJual": 12000
+    },
+    {
+      "id": "ikan_9",
+      "kategori": "Ikan",
+      "namaProduk": "T78 (-4 kg)",
+      "satuan": "pcs",
+      "hargaJual": 12000
+    },
+    {
+      "id": "ikan_10",
+      "kategori": "Ikan",
+      "namaProduk": "Hiu (-2)",
+      "satuan": "pcs",
+      "hargaJual": 8500
+    },
+    {
+      "id": "ikan_11",
+      "kategori": "Ikan",
+      "namaProduk": "Hiu (-3)",
+      "satuan": "pcs",
+      "hargaJual": 8500
+    },
+    {
+      "id": "ikan_12",
+      "kategori": "Ikan",
+      "namaProduk": "Hiu (-5)",
+      "satuan": "pcs",
+      "hargaJual": 8500
+    },
+    {
+      "id": "ikan_13",
+      "kategori": "Ikan",
+      "namaProduk": "Takari (100 gr)",
+      "satuan": "pcs",
+      "hargaJual": 4500
+    }
+  ],
+  "Obat": []
+};
+
+  var categories = ["Kucing", "Burung", "Ayam", "Ikan", "Obat"];
+  var satuanOptions = ["Kg", "Bungkus", "Karung", "Botol", "Sachet", "Pcs", "Butir", "Tablet", "Kapsul", "Ekor"];
+  var satuanRule = SpreadsheetApp.newDataValidation()
+    .requireValueInList(satuanOptions, true)
+    .setAllowInvalid(true)
+    .build();
+
+  for (var k = 0; k < categories.length; k++) {
+    var catName = categories[k];
+    var sheet = ss.getSheetByName(catName);
+    if (!sheet) {
+      sheet = ss.insertSheet(catName);
+    } else {
+      sheet.clear();
+      try { sheet.clearConditionalFormatRules(); } catch (e) {}
+      try {
+        var bandings = sheet.getBandings();
+        for (var b = 0; b < bandings.length; b++) { bandings[b].remove(); }
+      } catch (e) {}
+    }
+
+    // 5 Kolom Standar Tanpa Modal: NO | NAMA BARANG | SATUAN | HARGA JUAL | KETERANGAN
+    var headers = [["NO", "NAMA BARANG", "SATUAN", "HARGA JUAL", "KETERANGAN"]];
+    sheet.getRange(1, 1, 1, 5).setValues(headers);
+
+    var headerRange = sheet.getRange(1, 1, 1, 5);
+    headerRange.setBackground("#064e3b"); // Deep Emerald Green
+    headerRange.setFontColor("#FFFFFF");
+    headerRange.setFontWeight("bold");
+    headerRange.setFontSize(11);
+    headerRange.setFontFamily("Arial");
+    headerRange.setVerticalAlignment("middle");
+    headerRange.setHorizontalAlignment("center");
+    try { sheet.setRowHeight(1, 36); } catch (e) {}
+    try { sheet.setFrozenRows(1); } catch (e) {}
+
+    // Lebar kolom rapi proporsional
+    try {
+      sheet.setColumnWidth(1, 55);  // NO
+      sheet.setColumnWidth(2, 280); // NAMA BARANG
+      sheet.setColumnWidth(3, 110); // SATUAN
+      sheet.setColumnWidth(4, 135); // HARGA JUAL
+      sheet.setColumnWidth(5, 250); // KETERANGAN
+    } catch (e) {}
+
+    var items = rawDataPakan[catName] || [];
+    if (items.length > 0) {
+      var rows = [];
+      for (var i = 0; i < items.length; i++) {
+        var it = items[i];
+        rows.push([i + 1, it.namaProduk, it.satuan, it.hargaJual, ""]);
+      }
+      sheet.getRange(2, 1, rows.length, 5).setValues(rows);
+
+      // Alignment dan format mata uang
+      sheet.getRange(2, 1, rows.length, 1).setHorizontalAlignment("center");
+      sheet.getRange(2, 2, rows.length, 1).setHorizontalAlignment("left");
+      sheet.getRange(2, 3, rows.length, 1).setHorizontalAlignment("center");
+      sheet.getRange(2, 4, rows.length, 1).setHorizontalAlignment("right");
+      sheet.getRange(2, 5, rows.length, 1).setHorizontalAlignment("left");
+      sheet.getRange(2, 4, rows.length, 1).setNumberFormat(""Rp"#,##0");
+      sheet.getRange(2, 3, rows.length, 1).setDataValidation(satuanRule);
+
+      // Zebra striping halus
+      try {
+        var banding = sheet.getRange(1, 1, rows.length + 1, 5).applyRowBanding(SpreadsheetApp.BandingTheme.LIGHT_GREY);
+        banding.setHeaderRowColor("#064e3b");
+        banding.setFirstRowColor("#ffffff");
+        banding.setSecondRowColor("#f0fdf4");
+      } catch (e) {}
+    } else {
+      // Tab Obat kosong: tetap pasang dropdown satuan & format mata uang untuk baris masa depan
+      try {
+        sheet.getRange(2, 3, 50, 1).setDataValidation(satuanRule);
+        sheet.getRange(2, 4, 50, 1).setNumberFormat(""Rp"#,##0");
+      } catch (e) {}
+    }
+  }
+
+  // Format sheet Penjualan (7 Kolom Mutasi Kas Murni)
+  var salesSheet = ss.getSheetByName("Penjualan");
+  if (!salesSheet) {
+    salesSheet = ss.insertSheet("Penjualan");
+  } else {
+    salesSheet.clear();
+    try { salesSheet.clearConditionalFormatRules(); } catch (e) {}
+    try {
+      var sBandings = salesSheet.getBandings();
+      for (var sb = 0; sb < sBandings.length; sb++) { sBandings[sb].remove(); }
+    } catch (e) {}
+  }
+
+  var salesHeaders = [["Tanggal", "Jam", "Keterangan / Transaksi", "Masuk (+)", "Keluar (-)", "Saldo Kas Akhir", "Metode"]];
+  salesSheet.getRange(1, 1, 1, 7).setValues(salesHeaders);
+  var sHeaderRange = salesSheet.getRange(1, 1, 1, 7);
+  sHeaderRange.setBackground("#064e3b");
+  sHeaderRange.setFontColor("#FFFFFF");
+  sHeaderRange.setFontWeight("bold");
+  sHeaderRange.setFontSize(11);
+  sHeaderRange.setFontFamily("Arial");
+  sHeaderRange.setVerticalAlignment("middle");
+  sHeaderRange.setHorizontalAlignment("center");
+  try { salesSheet.setRowHeight(1, 36); } catch (e) {}
+  try { salesSheet.setFrozenRows(1); } catch (e) {}
+
+  try {
+    salesSheet.setColumnWidth(1, 110);
+    salesSheet.setColumnWidth(2, 90);
+    salesSheet.setColumnWidth(3, 260);
+    salesSheet.setColumnWidth(4, 120);
+    salesSheet.setColumnWidth(5, 120);
+    salesSheet.setColumnWidth(6, 140);
+    salesSheet.setColumnWidth(7, 130);
+  } catch (e) {}
+
+  var now = new Date();
+  var tz = Session.getScriptTimeZone() || "GMT+7";
+  var tgl = Utilities.formatDate(now, tz, "yyyy-MM-dd");
+  var jam = Utilities.formatDate(now, tz, "HH:mm:ss");
+  salesSheet.appendRow([tgl, jam, "Saldo Awal Kasir", 0, 0, 0, "Sistem"]);
+  salesSheet.getRange(2, 4, 1, 3).setNumberFormat(""Rp"#,##0");
+
+  return "Berhasil membuat spreadsheet data pakan baru (78 produk) dengan tema Emerald Green dan tab Obat kosong!";
+}
+
+
 function onOpen(e) {
   try {
     SpreadsheetApp.getUi()
       .createMenu("✨ Kasir Pet Shop")
-      .addItem("🧹 Bersihkan & Format Estetik Seluruh Sheet", "bersihkanDanFormatSemuaSheet")
-      .addItem("📦 Isi Contoh Data Awal (Opsional)", "isiDataProdukOtomatis")
+      .addItem("🚀 Buat Spreadsheet Data Pakan Baru (78 Produk)", "buatSpreadsheetDataPakanBaru")
+      .addItem("🧹 Bersihkan Seluruh Sheet (Kosongkan)", "bersihkanDanFormatSemuaSheet")
+      .addItem("💰 Rapikan 7 Kolom Mutasi Kas Saja", "buatKolomSaldoOtomatis")
       .addToUi();
   } catch (err) {}
 }
@@ -1155,5 +1855,6 @@ function sanitizeNameForMatch(str) {
     .toLowerCase()
     .replace(/[^a-z0-9]/g, "");
 }
+
 """.trimIndent()
 }

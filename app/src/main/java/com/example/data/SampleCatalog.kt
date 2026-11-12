@@ -4,133 +4,174 @@ import com.example.model.Product
 
 object SampleCatalog {
     val defaultProducts: List<Product> = listOf(
-        // ====================================================================
-        // === Kategori: Ayam 🐔 (15 Produk) ==================================
-        // ====================================================================
         Product(
-            id = "ayam_1",
-            kategori = "Ayam",
-            namaProduk = "511 (1 Karung)",
-            satuan = "kg",
-            hargaJual = 11500.0,
+            id = "kucing_1",
+            kategori = "Kucing",
+            namaProduk = "Bolt (Ikan Ungu 800gr)",
+            satuan = "pcs",
+            hargaJual = 19000.0,
             hargaBelumDiisi = false
         ),
         Product(
-            id = "ayam_2",
-            kategori = "Ayam",
-            namaProduk = "511 (511 K)",
-            satuan = "kg",
-            hargaJual = 14500.0,
+            id = "kucing_2",
+            kategori = "Kucing",
+            namaProduk = "Bolt (Donat Kuning 800gr)",
+            satuan = "pcs",
+            hargaJual = 19000.0,
             hargaBelumDiisi = false
         ),
         Product(
-            id = "ayam_3",
-            kategori = "Ayam",
-            namaProduk = "591 (591k)",
-            satuan = "kg",
-            hargaJual = 14500.0,
+            id = "kucing_3",
+            kategori = "Kucing",
+            namaProduk = "Bolt (Pink Bulat 800gr)",
+            satuan = "pcs",
+            hargaJual = 19000.0,
             hargaBelumDiisi = false
         ),
         Product(
-            id = "ayam_4",
-            kategori = "Ayam",
-            namaProduk = "592 (592k)",
-            satuan = "kg",
-            hargaJual = 14500.0,
+            id = "kucing_4",
+            kategori = "Kucing",
+            namaProduk = "Bolt (Kitten Bolt 500gr)",
+            satuan = "pcs",
+            hargaJual = 14000.0,
             hargaBelumDiisi = false
         ),
         Product(
-            id = "ayam_5",
-            kategori = "Ayam",
-            namaProduk = "594 (594k)",
-            satuan = "kg",
-            hargaJual = 14500.0,
-            hargaBelumDiisi = false
-        ),
-        Product(
-            id = "ayam_6",
-            kategori = "Ayam",
-            namaProduk = "BR-1 Super",
-            satuan = "kg",
+            id = "kucing_5",
+            kategori = "Kucing",
+            namaProduk = "Felibite (Felibite Ikan)",
+            satuan = "pcs",
             hargaJual = 12000.0,
             hargaBelumDiisi = false
         ),
         Product(
-            id = "ayam_7",
-            kategori = "Ayam",
-            namaProduk = "BR-611",
-            satuan = "kg",
-            hargaJual = 10000.0,
+            id = "kucing_6",
+            kategori = "Kucing",
+            namaProduk = "Felibite (Felibite Donat)",
+            satuan = "pcs",
+            hargaJual = 12000.0,
             hargaBelumDiisi = false
         ),
         Product(
-            id = "ayam_8",
-            kategori = "Ayam",
-            namaProduk = "Buras (1 Karung)",
-            satuan = "kg",
-            hargaJual = 7000.0,
+            id = "kucing_7",
+            kategori = "Kucing",
+            namaProduk = "Felibite (Felibite Kitten Donat)",
+            satuan = "pcs",
+            hargaJual = 12500.0,
             hargaBelumDiisi = false
         ),
         Product(
-            id = "ayam_9",
-            kategori = "Ayam",
-            namaProduk = "EH 610 (1 Karung)",
-            satuan = "kg",
-            hargaJual = 9500.0,
+            id = "kucing_8",
+            kategori = "Kucing",
+            namaProduk = "Excel (Adult Ikan 500gr)",
+            satuan = "pcs",
+            hargaJual = 11500.0,
             hargaBelumDiisi = false
         ),
         Product(
-            id = "ayam_10",
-            kategori = "Ayam",
-            namaProduk = "Jagung (1 Karung Meniran)",
-            satuan = "kg",
-            hargaJual = 10500.0,
+            id = "kucing_9",
+            kategori = "Kucing",
+            namaProduk = "Excel (Adult Donat)",
+            satuan = "pcs",
+            hargaJual = 11500.0,
             hargaBelumDiisi = false
         ),
         Product(
-            id = "ayam_11",
-            kategori = "Ayam",
-            namaProduk = "Jagung (1 Karung Kasar)",
-            satuan = "kg",
-            hargaJual = 10500.0,
+            id = "kucing_10",
+            kategori = "Kucing",
+            namaProduk = "Excel (Adult Segitiga Oren)",
+            satuan = "pcs",
+            hargaJual = 11500.0,
             hargaBelumDiisi = false
         ),
         Product(
-            id = "ayam_12",
-            kategori = "Ayam",
-            namaProduk = "Jagung (Unyil Kristal)",
+            id = "kucing_11",
+            kategori = "Kucing",
+            namaProduk = "Excel (Kitten Pink 500gr)",
             satuan = "pcs",
             hargaJual = 13000.0,
             hargaBelumDiisi = false
         ),
         Product(
-            id = "ayam_13",
-            kategori = "Ayam",
-            namaProduk = "524 A (Karung)",
-            satuan = "kg",
-            hargaJual = 9000.0,
+            id = "kucing_12",
+            kategori = "Kucing",
+            namaProduk = "Cat Choize (Hijau Adult 800gr)",
+            satuan = "pcs",
+            hargaJual = 18000.0,
             hargaBelumDiisi = false
         ),
         Product(
-            id = "ayam_14",
-            kategori = "Ayam",
-            namaProduk = "324KJ (Karung)",
-            satuan = "kg",
-            hargaJual = 9500.0,
+            id = "kucing_13",
+            kategori = "Kucing",
+            namaProduk = "Cat Choize (Oren Adult 800gr)",
+            satuan = "pcs",
+            hargaJual = 18000.0,
             hargaBelumDiisi = false
         ),
         Product(
-            id = "ayam_15",
-            kategori = "Ayam",
-            namaProduk = "CP 124 P",
-            satuan = "kg",
-            hargaJual = 11000.0,
+            id = "kucing_14",
+            kategori = "Kucing",
+            namaProduk = "Cat Choize (Kitten Tuna Pink 1kg)",
+            satuan = "pcs",
+            hargaJual = 24500.0,
             hargaBelumDiisi = false
         ),
-
-        // ====================================================================
-        // === Kategori: Burung 🐦 (29 Produk) ================================
-        // ====================================================================
+        Product(
+            id = "kucing_15",
+            kategori = "Kucing",
+            namaProduk = "Cat Choize (Kitten Salmon Kuning 1kg)",
+            satuan = "pcs",
+            hargaJual = 24500.0,
+            hargaBelumDiisi = false
+        ),
+        Product(
+            id = "kucing_16",
+            kategori = "Kucing",
+            namaProduk = "Chester (800gr)",
+            satuan = "pcs",
+            hargaJual = 19500.0,
+            hargaBelumDiisi = false
+        ),
+        Product(
+            id = "kucing_17",
+            kategori = "Kucing",
+            namaProduk = "Whiskas Pouch (Kitten)",
+            satuan = "pcs",
+            hargaJual = 6500.0,
+            hargaBelumDiisi = false
+        ),
+        Product(
+            id = "kucing_18",
+            kategori = "Kucing",
+            namaProduk = "Whiskas Pouch (Adult)",
+            satuan = "pcs",
+            hargaJual = 6500.0,
+            hargaBelumDiisi = false
+        ),
+        Product(
+            id = "kucing_19",
+            kategori = "Kucing",
+            namaProduk = "Life Cat (Pouch)",
+            satuan = "pcs",
+            hargaJual = 6000.0,
+            hargaBelumDiisi = false
+        ),
+        Product(
+            id = "kucing_20",
+            kategori = "Kucing",
+            namaProduk = "Life Cat (Kaleng Adult 400gr)",
+            satuan = "pcs",
+            hargaJual = 13500.0,
+            hargaBelumDiisi = false
+        ),
+        Product(
+            id = "kucing_21",
+            kategori = "Kucing",
+            namaProduk = "Life Cat (Kaleng Kitten 400gr)",
+            satuan = "pcs",
+            hargaJual = 13500.0,
+            hargaBelumDiisi = false
+        ),
         Product(
             id = "burung_1",
             kategori = "Burung",
@@ -152,7 +193,7 @@ object SampleCatalog {
             kategori = "Burung",
             namaProduk = "Leopard (Hijau Kasar)",
             satuan = "pcs",
-            hargaJual = 8500.0,
+            hargaJual = 8000.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -176,7 +217,7 @@ object SampleCatalog {
             kategori = "Burung",
             namaProduk = "SKM (SKM Halus)",
             satuan = "pcs",
-            hargaJual = 4500.0,
+            hargaJual = 4000.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -184,7 +225,7 @@ object SampleCatalog {
             kategori = "Burung",
             namaProduk = "SKM (SKM Kasar)",
             satuan = "pcs",
-            hargaJual = 4500.0,
+            hargaJual = 4000.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -262,9 +303,9 @@ object SampleCatalog {
         Product(
             id = "burung_17",
             kategori = "Burung",
-            namaProduk = "Gold Coin (Canary)",
+            namaProduk = "Gold Coin (Kenari)",
             satuan = "pcs",
-            hargaJual = 10000.0,
+            hargaJual = 9500.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -319,7 +360,7 @@ object SampleCatalog {
             id = "burung_24",
             kategori = "Burung",
             namaProduk = "Milet Putih (1kg)",
-            satuan = "kg",
+            satuan = "pcs",
             hargaJual = 14500.0,
             hargaBelumDiisi = false
         ),
@@ -335,7 +376,7 @@ object SampleCatalog {
             id = "burung_26",
             kategori = "Burung",
             namaProduk = "Kenari Seed (1kg)",
-            satuan = "kg",
+            satuan = "pcs",
             hargaJual = 15500.0,
             hargaBelumDiisi = false
         ),
@@ -344,14 +385,14 @@ object SampleCatalog {
             kategori = "Burung",
             namaProduk = "Trucuk Pisang Ijo SM",
             satuan = "pcs",
-            hargaJual = 4500.0,
+            hargaJual = 3500.0,
             hargaBelumDiisi = false
         ),
         Product(
             id = "burung_28",
             kategori = "Burung",
             namaProduk = "521 (521 Coklat)",
-            satuan = "kg",
+            satuan = "pcs",
             hargaJual = 8500.0,
             hargaBelumDiisi = false
         ),
@@ -359,14 +400,130 @@ object SampleCatalog {
             id = "burung_29",
             kategori = "Burung",
             namaProduk = "521 (521 Hijau)",
-            satuan = "kg",
-            hargaJual = 8500.0,
+            satuan = "pcs",
+            hargaJual = 9000.0,
             hargaBelumDiisi = false
         ),
-
-        // ====================================================================
-        // === Kategori: Ikan 🐟 (13 Produk) ==================================
-        // ====================================================================
+        Product(
+            id = "ayam_1",
+            kategori = "Ayam",
+            namaProduk = "511 (Zak)",
+            satuan = "kg",
+            hargaJual = 11500.0,
+            hargaBelumDiisi = false
+        ),
+        Product(
+            id = "ayam_2",
+            kategori = "Ayam",
+            namaProduk = "511 (511 K)",
+            satuan = "pcs",
+            hargaJual = 14500.0,
+            hargaBelumDiisi = false
+        ),
+        Product(
+            id = "ayam_3",
+            kategori = "Ayam",
+            namaProduk = "591 (591k)",
+            satuan = "pcs",
+            hargaJual = 14500.0,
+            hargaBelumDiisi = false
+        ),
+        Product(
+            id = "ayam_4",
+            kategori = "Ayam",
+            namaProduk = "592 (592k)",
+            satuan = "pcs",
+            hargaJual = 14500.0,
+            hargaBelumDiisi = false
+        ),
+        Product(
+            id = "ayam_5",
+            kategori = "Ayam",
+            namaProduk = "594 (594k)",
+            satuan = "pcs",
+            hargaJual = 14500.0,
+            hargaBelumDiisi = false
+        ),
+        Product(
+            id = "ayam_6",
+            kategori = "Ayam",
+            namaProduk = "EH510 (1 kg) / BR Super",
+            satuan = "pcs",
+            hargaJual = 12000.0,
+            hargaBelumDiisi = false
+        ),
+        Product(
+            id = "ayam_7",
+            kategori = "Ayam",
+            namaProduk = "BR Multifeed (BR 1kg)",
+            satuan = "pcs",
+            hargaJual = 10500.0,
+            hargaBelumDiisi = false
+        ),
+        Product(
+            id = "ayam_8",
+            kategori = "Ayam",
+            namaProduk = "Buras (Zak)",
+            satuan = "kg",
+            hargaJual = 7000.0,
+            hargaBelumDiisi = false
+        ),
+        Product(
+            id = "ayam_9",
+            kategori = "Ayam",
+            namaProduk = "EH 610 (Zak)",
+            satuan = "kg",
+            hargaJual = 9500.0,
+            hargaBelumDiisi = false
+        ),
+        Product(
+            id = "ayam_10",
+            kategori = "Ayam",
+            namaProduk = "Jagung (Zak Meniran)",
+            satuan = "kg",
+            hargaJual = 10500.0,
+            hargaBelumDiisi = false
+        ),
+        Product(
+            id = "ayam_11",
+            kategori = "Ayam",
+            namaProduk = "Jagung (Zak Kasar)",
+            satuan = "kg",
+            hargaJual = 10500.0,
+            hargaBelumDiisi = false
+        ),
+        Product(
+            id = "ayam_12",
+            kategori = "Ayam",
+            namaProduk = "Jagung (Unyil Kristal)",
+            satuan = "pcs",
+            hargaJual = 13500.0,
+            hargaBelumDiisi = false
+        ),
+        Product(
+            id = "ayam_13",
+            kategori = "Ayam",
+            namaProduk = "524 A (Zak)",
+            satuan = "kg",
+            hargaJual = 9500.0,
+            hargaBelumDiisi = false
+        ),
+        Product(
+            id = "ayam_14",
+            kategori = "Ayam",
+            namaProduk = "324KJ (Zak)",
+            satuan = "kg",
+            hargaJual = 9500.0,
+            hargaBelumDiisi = false
+        ),
+        Product(
+            id = "ayam_15",
+            kategori = "Ayam",
+            namaProduk = "CP 124 P",
+            satuan = "pcs",
+            hargaJual = 11000.0,
+            hargaBelumDiisi = false
+        ),
         Product(
             id = "ikan_1",
             kategori = "Ikan",
@@ -404,7 +561,7 @@ object SampleCatalog {
             kategori = "Ikan",
             namaProduk = "782 (-3)",
             satuan = "pcs",
-            hargaJual = 14000.0,
+            hargaJual = 14500.0,
             hargaBelumDiisi = false
         ),
         Product(
@@ -412,13 +569,13 @@ object SampleCatalog {
             kategori = "Ikan",
             namaProduk = "782 (-4)",
             satuan = "pcs",
-            hargaJual = 14000.0,
+            hargaJual = 14500.0,
             hargaBelumDiisi = false
         ),
         Product(
             id = "ikan_7",
             kategori = "Ikan",
-            namaProduk = "T78 (-2) kg",
+            namaProduk = "T78 (-2 kg)",
             satuan = "pcs",
             hargaJual = 12500.0,
             hargaBelumDiisi = false
@@ -426,7 +583,7 @@ object SampleCatalog {
         Product(
             id = "ikan_8",
             kategori = "Ikan",
-            namaProduk = "T78 (-3) kg",
+            namaProduk = "T78 (-3 kg)",
             satuan = "pcs",
             hargaJual = 12000.0,
             hargaBelumDiisi = false
@@ -434,7 +591,7 @@ object SampleCatalog {
         Product(
             id = "ikan_9",
             kategori = "Ikan",
-            namaProduk = "T78 (-4) kg",
+            namaProduk = "T78 (-4 kg)",
             satuan = "pcs",
             hargaJual = 12000.0,
             hargaBelumDiisi = false
@@ -471,277 +628,5 @@ object SampleCatalog {
             hargaJual = 4500.0,
             hargaBelumDiisi = false
         ),
-
-        // ====================================================================
-        // === Kategori: Kucing 🐱 (21 Produk) ================================
-        // ====================================================================
-        Product(
-            id = "kucing_1",
-            kategori = "Kucing",
-            namaProduk = "Bolt (Ikan Ungu 800gr)",
-            satuan = "pcs",
-            hargaJual = 19000.0,
-            hargaBelumDiisi = false
-        ),
-        Product(
-            id = "kucing_2",
-            kategori = "Kucing",
-            namaProduk = "Bolt (Donat Kuning 800gr)",
-            satuan = "pcs",
-            hargaJual = 19000.0,
-            hargaBelumDiisi = false
-        ),
-        Product(
-            id = "kucing_3",
-            kategori = "Kucing",
-            namaProduk = "Bolt (Pink Bulat 800gr)",
-            satuan = "pcs",
-            hargaJual = 19000.0,
-            hargaBelumDiisi = false
-        ),
-        Product(
-            id = "kucing_4",
-            kategori = "Kucing",
-            namaProduk = "Bolt (Kitten Bolt 500gr)",
-            satuan = "pcs",
-            hargaJual = 13000.0,
-            hargaBelumDiisi = false
-        ),
-        Product(
-            id = "kucing_5",
-            kategori = "Kucing",
-            namaProduk = "Felibite (Felibite Ikan)",
-            satuan = "pcs",
-            hargaJual = 12000.0,
-            hargaBelumDiisi = false
-        ),
-        Product(
-            id = "kucing_6",
-            kategori = "Kucing",
-            namaProduk = "Felibite (Felibite Donat)",
-            satuan = "pcs",
-            hargaJual = 12000.0,
-            hargaBelumDiisi = false
-        ),
-        Product(
-            id = "kucing_7",
-            kategori = "Kucing",
-            namaProduk = "Felibite (Felibite Kitten Donat)",
-            satuan = "pcs",
-            hargaJual = 13000.0,
-            hargaBelumDiisi = false
-        ),
-        Product(
-            id = "kucing_8",
-            kategori = "Kucing",
-            namaProduk = "Excel (Adult Ikan 500gr)",
-            satuan = "pcs",
-            hargaJual = 11500.0,
-            hargaBelumDiisi = false
-        ),
-        Product(
-            id = "kucing_9",
-            kategori = "Kucing",
-            namaProduk = "Excel (Adult Donat)",
-            satuan = "pcs",
-            hargaJual = 11500.0,
-            hargaBelumDiisi = false
-        ),
-        Product(
-            id = "kucing_10",
-            kategori = "Kucing",
-            namaProduk = "Excel (Adult Segitiga Oren)",
-            satuan = "pcs",
-            hargaJual = 11500.0,
-            hargaBelumDiisi = false
-        ),
-        Product(
-            id = "kucing_11",
-            kategori = "Kucing",
-            namaProduk = "Excel (Kitten Pink 500gr)",
-            satuan = "pcs",
-            hargaJual = 13000.0,
-            hargaBelumDiisi = false
-        ),
-        Product(
-            id = "kucing_12",
-            kategori = "Kucing",
-            namaProduk = "Cat Choize (Hijau Adult 800gr)",
-            satuan = "pcs",
-            hargaJual = 18000.0,
-            hargaBelumDiisi = false
-        ),
-        Product(
-            id = "kucing_13",
-            kategori = "Kucing",
-            namaProduk = "Cat Choize (Oren Adult 800gr)",
-            satuan = "pcs",
-            hargaJual = 18000.0,
-            hargaBelumDiisi = false
-        ),
-        Product(
-            id = "kucing_14",
-            kategori = "Kucing",
-            namaProduk = "Cat Choize (Kitten Tuna Pink 1kg)",
-            satuan = "pcs",
-            hargaJual = 24500.0,
-            hargaBelumDiisi = false
-        ),
-        Product(
-            id = "kucing_15",
-            kategori = "Kucing",
-            namaProduk = "Cat Choize (Kitten Salmon Kuning 1kg)",
-            satuan = "pcs",
-            hargaJual = 24500.0,
-            hargaBelumDiisi = false
-        ),
-        Product(
-            id = "kucing_16",
-            kategori = "Kucing",
-            namaProduk = "Chester (800gr)",
-            satuan = "pcs",
-            hargaJual = 17000.0,
-            hargaBelumDiisi = false
-        ),
-        Product(
-            id = "kucing_17",
-            kategori = "Kucing",
-            namaProduk = "Whiskas Pouch (1 Dus 28 Pcs Junior)",
-            satuan = "pcs",
-            hargaJual = 6000.0,
-            hargaBelumDiisi = false
-        ),
-        Product(
-            id = "kucing_18",
-            kategori = "Kucing",
-            namaProduk = "Whiskas Pouch (1 Dus isi 28 Pcs Adult)",
-            satuan = "pcs",
-            hargaJual = 6000.0,
-            hargaBelumDiisi = false
-        ),
-        Product(
-            id = "kucing_19",
-            kategori = "Kucing",
-            namaProduk = "Life Cat (1 Dus Pouch 24pcs)",
-            satuan = "pcs",
-            hargaJual = 5000.0,
-            hargaBelumDiisi = false
-        ),
-        Product(
-            id = "kucing_20",
-            kategori = "Kucing",
-            namaProduk = "Life Cat (Kaleng Adult 400gr)",
-            satuan = "pcs",
-            hargaJual = 13500.0,
-            hargaBelumDiisi = false
-        ),
-        Product(
-            id = "kucing_21",
-            kategori = "Kucing",
-            namaProduk = "Life Cat (Kaleng Kitten 400gr)",
-            satuan = "pcs",
-            hargaJual = 13500.0,
-            hargaBelumDiisi = false
-        ),
-
-        // ====================================================================
-        // === Kategori: Obat 💊 (12 Produk) ==================================
-        // ====================================================================
-        Product(
-            id = "obat_1",
-            kategori = "Obat",
-            namaProduk = "Vita Tetra Chlor (Kapsul isi 10)",
-            satuan = "pcs",
-            hargaJual = 6000.0,
-            hargaBelumDiisi = false
-        ),
-        Product(
-            id = "obat_2",
-            kategori = "Obat",
-            namaProduk = "Koleridin (Kapsul isi 10)",
-            satuan = "pcs",
-            hargaJual = 5500.0,
-            hargaBelumDiisi = false
-        ),
-        Product(
-            id = "obat_3",
-            kategori = "Obat",
-            namaProduk = "Vita Stress (Sachet 10gr)",
-            satuan = "pcs",
-            hargaJual = 5000.0,
-            hargaBelumDiisi = false
-        ),
-        Product(
-            id = "obat_4",
-            kategori = "Obat",
-            namaProduk = "Super N (15 ml)",
-            satuan = "pcs",
-            hargaJual = 20000.0,
-            hargaBelumDiisi = false
-        ),
-        Product(
-            id = "obat_5",
-            kategori = "Obat",
-            namaProduk = "Biodin Spray Antiseptik (100 ml)",
-            satuan = "pcs",
-            hargaJual = 28000.0,
-            hargaBelumDiisi = false
-        ),
-        Product(
-            id = "obat_6",
-            kategori = "Obat",
-            namaProduk = "Scabies Cream / Salep Jamur Kucing",
-            satuan = "pcs",
-            hargaJual = 16000.0,
-            hargaBelumDiisi = false
-        ),
-        Product(
-            id = "obat_7",
-            kategori = "Obat",
-            namaProduk = "Detick Obat Kutu Kucing (1-10kg)",
-            satuan = "pcs",
-            hargaJual = 22000.0,
-            hargaBelumDiisi = false
-        ),
-        Product(
-            id = "obat_8",
-            kategori = "Obat",
-            namaProduk = "Albenworm Obat Cacing Kucing",
-            satuan = "pcs",
-            hargaJual = 18000.0,
-            hargaBelumDiisi = false
-        ),
-        Product(
-            id = "obat_9",
-            kategori = "Obat",
-            namaProduk = "Minyak Ikan / Fish Oil (Botol 50 butir)",
-            satuan = "pcs",
-            hargaJual = 12000.0,
-            hargaBelumDiisi = false
-        ),
-        Product(
-            id = "obat_10",
-            kategori = "Obat",
-            namaProduk = "Gendol / Tetraclor Cair Ternak (100 ml)",
-            satuan = "pcs",
-            hargaJual = 14000.0,
-            hargaBelumDiisi = false
-        ),
-        Product(
-            id = "obat_11",
-            kategori = "Obat",
-            namaProduk = "Doxyvet Serbuk (Sachet 5gr)",
-            satuan = "pcs",
-            hargaJual = 6000.0,
-            hargaBelumDiisi = false
-        ),
-        Product(
-            id = "obat_12",
-            kategori = "Obat",
-            namaProduk = "Obat Kutu Serbuk Asuntol (100gr)",
-            satuan = "pcs",
-            hargaJual = 15000.0,
-            hargaBelumDiisi = false
-        )
     )
 }
