@@ -643,7 +643,8 @@ class KasirViewModel(application: Application) : AndroidViewModel(application) {
 
             result.fold(
                 onSuccess = { list ->
-                    val finalProducts = applyPriceOverrides(list)
+                    val baseList = if (list.isEmpty()) SampleCatalog.defaultProducts else list
+                    val finalProducts = applyPriceOverrides(baseList)
                     _uiState.update {
                         it.copy(
                             products = finalProducts,

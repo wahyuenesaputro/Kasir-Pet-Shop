@@ -13,11 +13,13 @@ let currentPaymentMethod = "Tunai";
 let activeReceipt = null;
 let currentMutationType = "add"; // 'add', 'withdraw', 'set'
 let currentBalance = Number(localStorage.getItem("petshop_current_balance")) || 0;
-const DEFAULT_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwo4DxmOjUj6bqrtzCwSIkOf-SImOhLTrqgtZNtC8408U3n1XHiYLgbwUAoL6arOsur/exec";
+const DEFAULT_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxsJKPwgaCtZJ0PzZ4uIFd77jneCkeqmsAlB1sXREPKr1c_4BRCVVoyb8pHFNMVgVWdIg/exec";
 
 // Otomatis migrasi browser jika masih menyimpan URL lama/placeholder
 (function migrateOldUrls() {
   const outdatedSignatures = [
+    "AKfycbwo4DxmOjUj6bqrtzCwSIkOf-SImOhLTrqgtZNtC8408U3n1XHiYLgbwUAoL6arOsur",
+    "AKfycbx1OchKmqQoYdNBArrNCF7c3uUy2BJy14gsO0lKOoji",
     "AKfycbxUA6s50T7pEQ4a3Kg8AdbcT2HlFkW-MOoJMR7gZ2OHSMjg4jzdQIcW4tLd80nDfbNh",
     "AKfycbxsIpuVeuiV36yNcBCznDLiYberyjDXdqjviFmYfvaJgbzCGhPfA2PDDXxsWUE9pXlu",
     "AKfycbxclmpSwhWxOq0KKWNwUPHd5hYtjs3Q_fo3N1gvaZOtBdQ4FPyc3adQBQ77QvfUVGXQ",
@@ -3130,7 +3132,7 @@ function buatSpreadsheetDataPakanBaru() {
       sheet.getRange(2, 3, rows.length, 1).setHorizontalAlignment("center");
       sheet.getRange(2, 4, rows.length, 1).setHorizontalAlignment("right");
       sheet.getRange(2, 5, rows.length, 1).setHorizontalAlignment("left");
-      sheet.getRange(2, 4, rows.length, 1).setNumberFormat(""Rp"#,##0");
+      sheet.getRange(2, 4, rows.length, 1).setNumberFormat('"Rp"#,##0');
       sheet.getRange(2, 3, rows.length, 1).setDataValidation(satuanRule);
 
       // Zebra striping halus
@@ -3144,7 +3146,7 @@ function buatSpreadsheetDataPakanBaru() {
       // Tab Obat kosong: tetap pasang dropdown satuan & format mata uang untuk baris masa depan
       try {
         sheet.getRange(2, 3, 50, 1).setDataValidation(satuanRule);
-        sheet.getRange(2, 4, 50, 1).setNumberFormat(""Rp"#,##0");
+        sheet.getRange(2, 4, 50, 1).setNumberFormat('"Rp"#,##0');
       } catch (e) {}
     }
   }
@@ -3190,7 +3192,7 @@ function buatSpreadsheetDataPakanBaru() {
   var tgl = Utilities.formatDate(now, tz, "yyyy-MM-dd");
   var jam = Utilities.formatDate(now, tz, "HH:mm:ss");
   salesSheet.appendRow([tgl, jam, "Saldo Awal Kasir", 0, 0, 0, "Sistem"]);
-  salesSheet.getRange(2, 4, 1, 3).setNumberFormat(""Rp"#,##0");
+  salesSheet.getRange(2, 4, 1, 3).setNumberFormat('"Rp"#,##0');
 
   return "Berhasil membuat spreadsheet data pakan baru (78 produk) dengan tema Emerald Green dan tab Obat kosong!";
 }

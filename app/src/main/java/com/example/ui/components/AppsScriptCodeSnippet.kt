@@ -1155,7 +1155,7 @@ function buatSpreadsheetDataPakanBaru() {
       sheet.getRange(2, 3, rows.length, 1).setHorizontalAlignment("center");
       sheet.getRange(2, 4, rows.length, 1).setHorizontalAlignment("right");
       sheet.getRange(2, 5, rows.length, 1).setHorizontalAlignment("left");
-      sheet.getRange(2, 4, rows.length, 1).setNumberFormat(""Rp"#,##0");
+      sheet.getRange(2, 4, rows.length, 1).setNumberFormat('"Rp"#,##0');
       sheet.getRange(2, 3, rows.length, 1).setDataValidation(satuanRule);
 
       // Zebra striping halus
@@ -1169,7 +1169,7 @@ function buatSpreadsheetDataPakanBaru() {
       // Tab Obat kosong: tetap pasang dropdown satuan & format mata uang untuk baris masa depan
       try {
         sheet.getRange(2, 3, 50, 1).setDataValidation(satuanRule);
-        sheet.getRange(2, 4, 50, 1).setNumberFormat(""Rp"#,##0");
+        sheet.getRange(2, 4, 50, 1).setNumberFormat('"Rp"#,##0');
       } catch (e) {}
     }
   }
@@ -1215,7 +1215,7 @@ function buatSpreadsheetDataPakanBaru() {
   var tgl = Utilities.formatDate(now, tz, "yyyy-MM-dd");
   var jam = Utilities.formatDate(now, tz, "HH:mm:ss");
   salesSheet.appendRow([tgl, jam, "Saldo Awal Kasir", 0, 0, 0, "Sistem"]);
-  salesSheet.getRange(2, 4, 1, 3).setNumberFormat(""Rp"#,##0");
+  salesSheet.getRange(2, 4, 1, 3).setNumberFormat('"Rp"#,##0');
 
   return "Berhasil membuat spreadsheet data pakan baru (78 produk) dengan tema Emerald Green dan tab Obat kosong!";
 }

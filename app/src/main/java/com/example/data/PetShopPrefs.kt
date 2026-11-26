@@ -19,8 +19,8 @@ class PetShopPrefs(context: Context) {
         private const val KEY_PRODUCT_OVERRIDES_JSON = "product_overrides_json"
         private const val KEY_CURRENT_BALANCE = "current_cash_balance"
         private const val KEY_CLEAN_SLATE = "is_clean_slate_enabled"
-        const val DEFAULT_PLACEHOLDER_URL = "https://script.google.com/macros/s/AKfycbwo4DxmOjUj6bqrtzCwSIkOf-SImOhLTrqgtZNtC8408U3n1XHiYLgbwUAoL6arOsur/exec"
-        const val DEFAULT_REAL_URL = "https://script.google.com/macros/s/AKfycbwo4DxmOjUj6bqrtzCwSIkOf-SImOhLTrqgtZNtC8408U3n1XHiYLgbwUAoL6arOsur/exec"
+        const val DEFAULT_PLACEHOLDER_URL = "https://script.google.com/macros/s/AKfycbxsJKPwgaCtZJ0PzZ4uIFd77jneCkeqmsAlB1sXREPKr1c_4BRCVVoyb8pHFNMVgVWdIg/exec"
+        const val DEFAULT_REAL_URL = "https://script.google.com/macros/s/AKfycbxsJKPwgaCtZJ0PzZ4uIFd77jneCkeqmsAlB1sXREPKr1c_4BRCVVoyb8pHFNMVgVWdIg/exec"
     }
 
     var isCleanSlate: Boolean
@@ -51,6 +51,8 @@ class PetShopPrefs(context: Context) {
         if (url.contains("AKfycbxclmpSwhWxOq0KKWNwUPHd5hYtjs3Q_fo3N1gvaZOtBdQ4FPyc3adQBQ77QvfUVGXQ")) return true
         if (url.contains("AKfycbxsIpuVeuiV36yNcBCznDLiYberyjDXdqjviFmYfvaJgbzCGhPfA2PDDXxsWUE9pXlu")) return true
         if (url.contains("AKfycbxUA6s50T7pEQ4a3Kg8AdbcT2HlFkW-MOoJMR7gZ2OHSMjg4jzdQIcW4tLd80nDfbNh")) return true
+        if (url.contains("AKfycbwo4DxmOjUj6bqrtzCwSIkOf-SImOhLTrqgtZNtC8408U3n1XHiYLgbwUAoL6arOsur")) return true
+        if (url.contains("AKfycbx1OchKmqQoYdNBArrNCF7c3uUy2BJy14gsO0lKOoji")) return true
         return false
     }
 
